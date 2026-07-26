@@ -79,6 +79,11 @@ public partial class MainWindow : MicaWindow
 
     internal static volatile bool ExplorerRestarting = false;
 
+    // Feature 3: tracks whether the last media key press was Play/Pause,
+    // used to suppress the flyout when the user pauses via keyboard.
+    private volatile bool _pauseKeyPressed = false;
+    private Timer? _pauseKeyResetTimer;
+
     public MainWindow()
     {
         DataContext = SettingsManager.Current;
@@ -303,6 +308,36 @@ public partial class MainWindow : MicaWindow
         return validSessions.FirstOrDefault();
     }
 
+    public bool IsWidgetSessionAllowed(MediaSession? session)
+    {
+        if (session == null) return false;
+        if (!IsSessionAllowed(session)) return false; // Must be allowed globally first
+        if (!SettingsManager.Current.WidgetAppFilteringEnabled) return true;
+
+        string appId = session.Id ?? string.Empty;
+        string appName = MediaPlayerData.GetAndCacheMediaPlayerData(appId).Item1 ?? appId;
+
+        if (SettingsManager.Current.WidgetBlockedApps != null && SettingsManager.Current.WidgetBlockedApps.Any(b =>
+                appName.Contains(b, StringComparison.OrdinalIgnoreCase) ||
+                appId.Contains(b, StringComparison.OrdinalIgnoreCase)))
+            return false;
+
+        return true;
+    }
+
+    public MediaSession? GetActiveWidgetMediaSession()
+    {
+        var validSessions = mediaManager.CurrentMediaSessions.Values.Where(IsWidgetSessionAllowed).ToList();
+
+        if (validSessions.Count == 0) return null;
+
+        var focused = mediaManager.GetFocusedSession();
+        if (focused != null && validSessions.Any(s => s.Id == focused.Id))
+            return focused;
+
+        return validSessions.FirstOrDefault();
+    }
+
     public void RefreshFilteredMedia()
     {
         UpdateTaskbar();
@@ -321,6 +356,7 @@ public partial class MainWindow : MicaWindow
             else
             {
                 HandlePlayBackState(GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed);
+                ShowMediaFlyout(toggleMode: true);
             }
         }
     }
@@ -578,7 +614,7 @@ public partial class MainWindow : MicaWindow
 
     public void UpdateTaskbar()
     {
-        var activeSession = GetActiveMediaSession();
+        var activeSession = GetActiveWidgetMediaSession();
         if (!mediaManager.IsStarted || activeSession == null)
         {
             taskbarWindow?.UpdateUi("-", "-", null, GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed);
@@ -599,7 +635,7 @@ public partial class MainWindow : MicaWindow
     {
         Process.Start(new ProcessStartInfo
         {
-            FileName = "https://github.com/unchihugo/FluentFlyout/issues/new/choose",
+            FileName = "https://github.com/KoksMen/FluentFlyout/issues/new/choose",
             UseShellExecute = true
         });
     }
@@ -608,7 +644,7 @@ public partial class MainWindow : MicaWindow
     {
         Process.Start(new ProcessStartInfo
         {
-            FileName = "https://github.com/unchihugo/FluentFlyout",
+            FileName = "https://github.com/KoksMen/FluentFlyout",
             UseShellExecute = true
         });
     }
@@ -643,27 +679,32 @@ public partial class MainWindow : MicaWindow
 #endif     
         pauseOtherMediaSessionsIfNeeded(mediaSession);
 
-        var focusedSession = GetActiveMediaSession();
-        if (focusedSession == null)
+        var focusedWidgetSession = GetActiveWidgetMediaSession();
+        if (focusedWidgetSession == null)
         {
             taskbarWindow?.UpdateUi("-", "-", null, GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed);
-            return;
         }
-
-        var tbSongInfo = TryGetMediaProperties(focusedSession.ControlSession);
-        if (tbSongInfo != null)
+        else
         {
-            var tbThumbnail = BitmapHelper.GetThumbnail(tbSongInfo.Thumbnail);
-            BitmapHelper.GetDominantColors(1);
-            var tbPlayback = focusedSession.ControlSession.GetPlaybackInfo();
+            var tbSongInfo = TryGetMediaProperties(focusedWidgetSession.ControlSession);
+            if (tbSongInfo != null)
+            {
+                var tbThumbnail = BitmapHelper.GetThumbnail(tbSongInfo.Thumbnail);
+                BitmapHelper.GetDominantColors(1);
+                var tbPlayback = focusedWidgetSession.ControlSession.GetPlaybackInfo();
 
-            taskbarWindow?.UpdateUi(tbSongInfo.Title, tbSongInfo.Artist, tbThumbnail, tbPlayback?.PlaybackStatus, tbPlayback?.Controls);
+                taskbarWindow?.UpdateUi(tbSongInfo.Title, tbSongInfo.Artist, tbThumbnail, tbPlayback?.PlaybackStatus, tbPlayback?.Controls);
+            }
         }
 
         if (IsVisible)
         {
-            UpdateUI(focusedSession);
-            HandlePlayBackState(playbackInfo?.PlaybackStatus);
+            var focusedSession = GetActiveMediaSession();
+            if (focusedSession != null)
+            {
+                UpdateUI(focusedSession);
+                HandlePlayBackState(playbackInfo?.PlaybackStatus);
+            }
         }
     }
 
@@ -708,11 +749,31 @@ public partial class MainWindow : MicaWindow
         var thumbnail = BitmapHelper.GetThumbnail(songInfo.Thumbnail);
         BitmapHelper.GetDominantColors(1);
 
-        taskbarWindow?.UpdateUi(songInfo.Title, songInfo.Artist, thumbnail, playbackInfo.PlaybackStatus, playbackInfo.Controls);
+        var currentWidgetSession = GetActiveWidgetMediaSession();
+        if (currentWidgetSession == null)
+        {
+            taskbarWindow?.UpdateUi("-", "-", null, GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed);
+        }
+        else
+        {
+            var tbSongInfo = TryGetMediaProperties(currentWidgetSession.ControlSession);
+            if (tbSongInfo != null)
+            {
+                var tbThumbnail = BitmapHelper.GetThumbnail(tbSongInfo.Thumbnail);
+                BitmapHelper.GetDominantColors(1);
+                var tbPlayback = currentWidgetSession.ControlSession.GetPlaybackInfo();
+                taskbarWindow?.UpdateUi(tbSongInfo.Title, tbSongInfo.Artist, tbThumbnail, tbPlayback?.PlaybackStatus, tbPlayback?.Controls);
+            }
+            else
+            {
+                taskbarWindow?.UpdateUi("-", "-", null, GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed);
+            }
+        }
 
         pauseOtherMediaSessionsIfNeeded(mediaSession);
 
-        if (SettingsManager.Current.NextUpEnabled && !FullscreenDetector.IsFullscreenApplicationRunning()) // show NextUpWindow if enabled in settings
+        // Feature 2: per-flyout fullscreen setting for Next Up
+        if (SettingsManager.Current.NextUpEnabled && !FullscreenDetector.ShouldSuppressForFullscreen(SettingsManager.Current.NextUpFlyoutShowInExclusiveFullscreen, SettingsManager.Current.NextUpFlyoutShowInBorderless)) // show NextUpWindow if enabled in settings
         {
             void createNewNextUpWindow()
             {
@@ -810,14 +871,27 @@ public partial class MainWindow : MicaWindow
             bool mediaKeysPressed = vkCode == 0xB3 || vkCode == 0xB0 || vkCode == 0xB1 || vkCode == 0xB2; // Play/Pause, next, previous, stop
             bool volumeKeysPressed = vkCode == 0xAD || vkCode == 0xAE || vkCode == 0xAF; // Mute, Volume Down, Volume Up
 
+            // Feature 3: record when the Play/Pause key is pressed so ShowMediaFlyout can suppress on pause
+            if (vkCode == 0xB3 && wParam == WM_KEYDOWN) // VK_MEDIA_PLAY_PAUSE
+            {
+                _pauseKeyPressed = true;
+                // Auto-reset after 1 s to avoid stale flag in edge cases
+                _pauseKeyResetTimer?.Dispose();
+                _pauseKeyResetTimer = new Timer(_ => _pauseKeyPressed = false, null, 1000, Timeout.Infinite);
+            }
+
             // MainWindow.WndProc() also handles media and volume keys
             if (mediaKeysPressed || volumeKeysPressed)
             {
+                // Feature 1: global master switch
+                if (!SettingsManager.Current.GlobalFlyoutEnabled)
+                    return CallNextHookEx(_hookId, nCode, wParam, lParam);
+
                 bool result = false;
                 if (mediaKeysPressed || (!SettingsManager.Current.MediaFlyoutVolumeKeysExcluded && volumeKeysPressed))
                     result = TryShowMediaFlyoutDebounced();
 
-                if (SettingsManager.Current.VolumeControlEnabled)
+                if (SettingsManager.Current.VolumeControlEnabled && volumeKeysPressed)
                 {
                     volumeMixerWindow?.ViewModel.SyncMasterFromDevice();
                     volumeMixerWindow?.ShowFlyout();
@@ -829,8 +903,11 @@ public partial class MainWindow : MicaWindow
                 }
             }
 
-            if (SettingsManager.Current.LockKeysEnabled
-                && !FullscreenDetector.IsFullscreenApplicationRunning()
+            // Feature 1: global master switch for lock keys
+            if (SettingsManager.Current.GlobalFlyoutEnabled
+                && SettingsManager.Current.LockKeysEnabled
+                // Feature 2: per-flyout fullscreen setting for lock keys
+                && !FullscreenDetector.ShouldSuppressForFullscreen(SettingsManager.Current.LockKeysFlyoutShowInExclusiveFullscreen, SettingsManager.Current.LockKeysFlyoutShowInBorderless)
                 && wParam == WM_KEYUP)
             {
                 if (vkCode == 0x14 && SettingsManager.Current.LockKeysCapsEnabled) // Caps Lock
@@ -874,13 +951,7 @@ public partial class MainWindow : MicaWindow
 
     public async void ShowMediaFlyout(bool toggleMode = false, bool forceShow = false)
     {
-        var activeSession = GetActiveMediaSession();
-        if (activeSession == null ||
-            (!forceShow && !SettingsManager.Current.MediaFlyoutEnabled) ||
-            FullscreenDetector.IsFullscreenApplicationRunning())
-            return;
-
-        // If in toggle mode and flyout is visible, close it
+        // If in toggle mode and flyout is visible, close it unconditionally
         if (toggleMode && Visibility == Visibility.Visible && !_isHiding)
         {
             CloseAnimation(this);
@@ -895,6 +966,33 @@ public partial class MainWindow : MicaWindow
             }
             return;
         }
+
+        var activeSession = GetActiveMediaSession();
+
+        // Feature 1: global master switch
+        if (!forceShow && !SettingsManager.Current.GlobalFlyoutEnabled)
+            return;
+
+        // Feature 3: suppress flyout when pausing via keyboard
+        if (!forceShow
+            && SettingsManager.Current.HideAudioFlyoutOnPause
+            && _pauseKeyPressed)
+        {
+            // Check if the resulting state will be paused
+            var playbackStatus = activeSession?.ControlSession?.GetPlaybackInfo()?.PlaybackStatus;
+            if (playbackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
+            {
+                // Currently playing → pressing play/pause will pause it → suppress
+                _pauseKeyPressed = false;
+                return;
+            }
+        }
+
+        if (activeSession == null ||
+            (!forceShow && !SettingsManager.Current.MediaFlyoutEnabled) ||
+            // Feature 2: per-flyout fullscreen setting for media flyout
+            FullscreenDetector.ShouldSuppressForFullscreen(SettingsManager.Current.MediaFlyoutShowInExclusiveFullscreen, SettingsManager.Current.MediaFlyoutShowInBorderless))
+            return;
 
         UpdateUI(activeSession);
         if (_seekBarEnabled)

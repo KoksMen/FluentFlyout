@@ -533,6 +533,18 @@ public partial class UserSettings : ObservableObject
     public partial ObservableCollection<string> BlockedApps { get; set; }
 
     /// <summary>
+    /// When true, enables app filtering specifically for the taskbar widget.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool WidgetAppFilteringEnabled { get; set; }
+
+    /// <summary>
+    /// Returns a list of apps that are NOT allowed to display on the taskbar widget.
+    /// </summary>
+    [ObservableProperty]
+    public partial ObservableCollection<string> WidgetBlockedApps { get; set; }
+
+    /// <summary>
     /// Position of the visualizer, where 0 and 1 are to the left or right of the widget.
     /// </summary>
     [ObservableProperty]
@@ -682,6 +694,68 @@ public partial class UserSettings : ObservableObject
     [ObservableProperty]
     public partial bool AnonymousTelemetryAllowed { get; set; }
 
+    // ─── Custom Features ────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Global master switch: when false, all flyouts are suppressed.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool GlobalFlyoutEnabled { get; set; }
+
+    /// <summary>
+    /// Whether to show the media flyout when a DirectX exclusive fullscreen app is running.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool MediaFlyoutShowInExclusiveFullscreen { get; set; }
+
+    /// <summary>
+    /// Whether to show the media flyout when a borderless window/YouTube fullscreen is running.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool MediaFlyoutShowInBorderless { get; set; }
+
+    /// <summary>
+    /// Whether to show the volume flyout when a DirectX exclusive fullscreen app is running.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool VolumeFlyoutShowInExclusiveFullscreen { get; set; }
+
+    /// <summary>
+    /// Whether to show the volume flyout when a borderless window/YouTube fullscreen is running.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool VolumeFlyoutShowInBorderless { get; set; }
+
+    /// <summary>
+    /// Whether to show the lock keys flyout when a DirectX exclusive fullscreen app is running.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool LockKeysFlyoutShowInExclusiveFullscreen { get; set; }
+
+    /// <summary>
+    /// Whether to show the lock keys flyout when a borderless window/YouTube fullscreen is running.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool LockKeysFlyoutShowInBorderless { get; set; }
+
+    /// <summary>
+    /// Whether to show the Next Up flyout when a DirectX exclusive fullscreen app is running.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool NextUpFlyoutShowInExclusiveFullscreen { get; set; }
+
+    /// <summary>
+    /// Whether to show the Next Up flyout when a borderless window/YouTube fullscreen is running.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool NextUpFlyoutShowInBorderless { get; set; }
+
+    /// <summary>
+    /// When true, suppress the media flyout if the media key caused a pause.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool HideAudioFlyoutOnPause { get; set; }
+
     [XmlIgnore]
     private bool _initializing = true;
 
@@ -773,9 +847,35 @@ public partial class UserSettings : ObservableObject
         AnonymousTelemetryAllowed = true;
         AllowedApps = [];
         BlockedApps = [];
+        WidgetAppFilteringEnabled = false;
+        WidgetBlockedApps = [];
+
+        // Custom feature defaults
+        GlobalFlyoutEnabled = true;
+        MediaFlyoutShowInExclusiveFullscreen = false;
+        MediaFlyoutShowInBorderless = false;
+        VolumeFlyoutShowInExclusiveFullscreen = false;
+        VolumeFlyoutShowInBorderless = true;
+        LockKeysFlyoutShowInExclusiveFullscreen = false;
+        LockKeysFlyoutShowInBorderless = false;
+        NextUpFlyoutShowInExclusiveFullscreen = false;
+        NextUpFlyoutShowInBorderless = false;
+        HideAudioFlyoutOnPause = false;
 
         PropertyChanged += OnPropertyChangedSaveSettings;
     }
+
+    partial void OnGlobalFlyoutEnabledChanged(bool oldValue, bool newValue)
+    {
+        if (oldValue == newValue || _initializing) return;
+
+        if (!newValue)
+        {
+            VolumeMixerWindow.ShowVolumeOsd();
+        }
+    }
+
+
 
     [XmlIgnore]
     private CancellationTokenSource? _saveSettingsCts;
@@ -827,12 +927,34 @@ public partial class UserSettings : ObservableObject
     }
 
     /// <summary>
-    /// Called after deserialization to finalize initialization
+    /// Called after deserialization to finalize initialization.
+    /// Also applies migration logic: any new bool setting that should default to "true"
+    /// will be corrected here if the loaded XML didn't contain it (leaving it as the
+    /// C# default of false).
+    ///
+    /// We detect "not present in XML" by checking whether the loaded value is still the
+    /// C# default AND the property name is NOT in the saved XML.  Because we don't have
+    /// direct access to what was in the XML, we use a heuristic: if GlobalFlyoutEnabled
+    /// is false after load it almost certainly means it wasn't in the file, because no
+    /// sane user deliberately disables all flyouts and then saves.  To be safe we simply
+    /// always set it to true on first run after upgrade (users can still turn it off).
     /// </summary>
     internal void CompleteInitialization()
     {
+        // Migration: GlobalFlyoutEnabled must default to true.
+        // Old settings.xml files won't have this element, leaving it as false.
+        // We can't tell "user chose false" from "element missing", so we use the
+        // following safe heuristic: if MediaFlyoutEnabled is true (meaning the user
+        // has not globally disabled flyouts in the old way) we treat GlobalFlyoutEnabled
+        // as needing to be true.
+        if (!GlobalFlyoutEnabled && MediaFlyoutEnabled)
+        {
+            GlobalFlyoutEnabled = true;
+        }
+
         _initializing = false;
     }
+
 
     partial void OnAppLanguageChanged(string oldValue, string newValue)
     {

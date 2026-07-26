@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2024-2026 The FluentFlyout Authors
+// Copyright (c) 2024-2026 The FluentFlyout Authors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 // Portions of this code are derived from:
@@ -44,10 +44,14 @@ public partial class VolumeMixerWindow : MicaWindow
         DataContext = this;
         WindowHelper.SetNoActivate(this);
         InitializeComponent();
+        new System.Windows.Interop.WindowInteropHelper(this).EnsureHandle();
         WindowHelper.SetTopmost(this);
         CustomWindowChrome.CaptionHeight = 0;
         CustomWindowChrome.UseAeroCaptionButtons = false;
         CustomWindowChrome.GlassFrameThickness = new Thickness(0);
+
+        WindowStartupLocation = WindowStartupLocation.Manual;
+        Top = -9999; // start off-screen to prevent flickering on startup
 
         _mainWindow = (MainWindow)Application.Current.MainWindow;
         _cts = new CancellationTokenSource();
@@ -59,8 +63,13 @@ public partial class VolumeMixerWindow : MicaWindow
     // one day we might want to convert these to an interface
     public async void ShowFlyout()
     {
-        if (FullscreenDetector.IsFullscreenApplicationRunning())
+        if (FullscreenDetector.ShouldSuppressForFullscreen(SettingsManager.Current.VolumeFlyoutShowInExclusiveFullscreen, SettingsManager.Current.VolumeFlyoutShowInBorderless))
+        {
+            // If the custom flyout is suppressed in fullscreen, we restore the native Windows OSD
+            // so the user can still see the volume change indicator.
+            _ = Task.Run(() => ShowVolumeOsd());
             return;
+        }
 
         long currentTime = Environment.TickCount64;
 
@@ -106,8 +115,8 @@ public partial class VolumeMixerWindow : MicaWindow
                 _mainWindow.OpenAnimation(this, alwaysBottom: true);
             }
 
-            Show();
-            //WindowHelper.SetNoActivate(this);
+            // Removed Show() call to prevent window activation/focus stealing which minimizes fullscreen apps.
+            // OpenAnimation already shows the window non-activatively using Win32 SetWindowPos.
             WindowHelper.SetTopmost(this);
         }
 

@@ -21,7 +21,10 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
+
             <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
                 <Border CornerRadius="10" ClipToBounds="True" Width="164" Height="98">
                     <Border.Background>
@@ -39,7 +42,7 @@
                 </ui:CardControl.Header>
                 <controls:ToggleSwitch Name="NextUpSwitch" IsChecked="{Binding NextUpEnabled, Mode=TwoWay}" />
             </ui:CardControl>
-            <ui:CardControl x:Name="NextUpStayDurationTitleCard" Tag="Indexable" Grid.Row="3" Icon="{ui:SymbolIcon Timer24}" Margin="0,0,0,76">
+            <ui:CardControl x:Name="NextUpStayDurationTitleCard" Tag="Indexable" Grid.Row="3" Icon="{ui:SymbolIcon Timer24}" Margin="0,0,0,3">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="{DynamicResource NextUpStayDurationTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
@@ -51,6 +54,28 @@
                     <TextBlock Text="{DynamicResource MillisecondsUnit}" FontSize="14" FontWeight="Regular" Margin="10,0,0,0" VerticalAlignment="Center" />
                 </StackPanel>
             </ui:CardControl>
+
+            <!-- Feature 2: Show Next Up flyout in fullscreen -->
+            <ui:CardControl x:Name="NextUpFlyoutShowInExclusiveFullscreenCard" Tag="Indexable" Grid.Row="4" Icon="{ui:SymbolIcon FullScreenMaximize24}" Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Show in exclusive fullscreen mode" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                        <TextBlock Text="Show the Next Up flyout even when a fullscreen DirectX/game application is running" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <controls:ToggleSwitch Name="NextUpFlyoutShowInExclusiveFullscreenSwitch" IsChecked="{Binding NextUpFlyoutShowInExclusiveFullscreen, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <ui:CardControl x:Name="NextUpFlyoutShowInBorderlessCard" Tag="Indexable" Grid.Row="5" Icon="{ui:SymbolIcon FullScreenMaximize24}" Margin="0,0,0,76">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Show in borderless fullscreen / windowed mode" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                        <TextBlock Text="Show the Next Up flyout even when playing video fullscreen (e.g. YouTube) or borderless games" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <controls:ToggleSwitch Name="NextUpFlyoutShowInBorderlessSwitch" IsChecked="{Binding NextUpFlyoutShowInBorderless, Mode=TwoWay}" />
+            </ui:CardControl>
         </Grid>
     </StackPanel>
 </Page>
+

@@ -33,7 +33,11 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
+
             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,24">
                 <Border CornerRadius="10" ClipToBounds="True" Width="164" Height="98">
                     <Border.Background>
@@ -166,7 +170,7 @@
                 </ui:CardControl.Header>
                 <controls:ToggleSwitch Name="PauseOtherSessionsEnabledSwitch" IsChecked="{Binding PauseOtherSessionsEnabled, Mode=TwoWay}" />
             </ui:CardControl>
-            <ui:CardControl x:Name="MediaFlyoutExcludeVolumeTitleCard" Tag="Indexable" Grid.Row="15" Icon="{ui:SymbolIcon SpeakerOff24}" Margin="0,0,0,76">
+            <ui:CardControl x:Name="MediaFlyoutExcludeVolumeTitleCard" Tag="Indexable" Grid.Row="15" Icon="{ui:SymbolIcon SpeakerOff24}" Margin="0,0,0,3">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="{DynamicResource MediaFlyoutExcludeVolumeTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
@@ -175,6 +179,39 @@
                 </ui:CardControl.Header>
                 <controls:ToggleSwitch Name="MediaFlyoutVolumeKeysExcludedSwitch" IsChecked="{Binding MediaFlyoutVolumeKeysExcluded, Mode=TwoWay}" />
             </ui:CardControl>
+
+            <!-- Feature 2: Show media flyout in fullscreen -->
+            <ui:CardControl x:Name="MediaFlyoutShowInExclusiveFullscreenCard" Tag="Indexable" Grid.Row="16" Icon="{ui:SymbolIcon FullScreenMaximize24}" Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Show in exclusive fullscreen mode" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                        <TextBlock Text="Show the media flyout even when a fullscreen DirectX/game application is running" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <controls:ToggleSwitch Name="MediaFlyoutShowInExclusiveFullscreenSwitch" IsChecked="{Binding MediaFlyoutShowInExclusiveFullscreen, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <ui:CardControl x:Name="MediaFlyoutShowInBorderlessCard" Tag="Indexable" Grid.Row="17" Icon="{ui:SymbolIcon FullScreenMaximize24}" Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Show in borderless fullscreen / windowed mode" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                        <TextBlock Text="Show the media flyout even when playing video fullscreen (e.g. YouTube) or borderless games" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <controls:ToggleSwitch Name="MediaFlyoutShowInBorderlessSwitch" IsChecked="{Binding MediaFlyoutShowInBorderless, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <!-- Feature 3: Hide audio flyout when pausing via keyboard -->
+            <ui:CardControl x:Name="HideAudioFlyoutOnPauseCard" Tag="Indexable" Grid.Row="18" Icon="{ui:SymbolIcon PauseCircle24}" Margin="0,0,0,76">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Hide flyout when pausing with media key" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                        <TextBlock Text="Suppress the flyout when the media Play/Pause key causes a pause" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <controls:ToggleSwitch Name="HideAudioFlyoutOnPauseSwitch" IsChecked="{Binding HideAudioFlyoutOnPause, Mode=TwoWay}" />
+            </ui:CardControl>
         </Grid>
     </StackPanel>
 </Page>
+

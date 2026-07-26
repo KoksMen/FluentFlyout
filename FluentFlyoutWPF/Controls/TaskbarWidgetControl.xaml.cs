@@ -625,7 +625,7 @@ public partial class TaskbarWidgetControl : UserControl
     {
         if (_mainWindow == null) return;
 
-        var focusedSession = _mainWindow.GetActiveMediaSession();
+        var focusedSession = _mainWindow.GetActiveWidgetMediaSession();
         if (focusedSession == null) return;
 
         await focusedSession.ControlSession.TrySkipPreviousAsync();
@@ -635,7 +635,7 @@ public partial class TaskbarWidgetControl : UserControl
     {
         if (_mainWindow == null) return;
 
-        var focusedSession = _mainWindow.GetActiveMediaSession();
+        var focusedSession = _mainWindow.GetActiveWidgetMediaSession();
         if (focusedSession == null) return;
 
         await focusedSession.ControlSession.TryTogglePlayPauseAsync();
@@ -645,7 +645,7 @@ public partial class TaskbarWidgetControl : UserControl
     {
         if (_mainWindow == null) return;
 
-        var focusedSession = _mainWindow.GetActiveMediaSession();
+        var focusedSession = _mainWindow.GetActiveWidgetMediaSession();
         if (focusedSession == null) return;
 
         await focusedSession.ControlSession.TrySkipNextAsync();

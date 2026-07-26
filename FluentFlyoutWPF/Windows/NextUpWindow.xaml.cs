@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2024-2026 The FluentFlyout Authors
+// Copyright (c) 2024-2026 The FluentFlyout Authors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using FluentFlyout.Classes;
@@ -25,6 +25,7 @@ public partial class NextUpWindow : MicaWindow
         Top = 9999;
         WindowHelper.SetNoActivate(this);
         InitializeComponent();
+        new System.Windows.Interop.WindowInteropHelper(this).EnsureHandle();
         WindowHelper.SetTopmost(this);
         CustomWindowChrome.CaptionHeight = 0;
 
@@ -47,7 +48,6 @@ public partial class NextUpWindow : MicaWindow
         SongTitle.Text = title;
         SongArtist.Text = artist;
         UpdateThumbnail(thumbnail);
-        Show();
 
         mainWindow.OpenAnimation(this);
 

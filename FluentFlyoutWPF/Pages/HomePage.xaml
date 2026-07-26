@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:controls="clr-namespace:MicaWPF.Controls;assembly=MicaWPF"
       xmlns:viewModels="clr-namespace:FluentFlyoutWPF.ViewModels"
       xmlns:fluentflyoutcontrols="clr-namespace:FluentFlyout.Controls"
       mc:Ignorable="d"
@@ -103,6 +104,20 @@
         </StackPanel>
 
         <TextBlock Grid.Row="6" Text="{DynamicResource HomeDashboardTitle}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6" />
+
+        <!-- Feature 1: Global Enable / Disable All Flyouts -->
+        <ui:CardControl x:Name="GlobalFlyoutEnabledCard" Tag="Indexable" Margin="0,0,0,12" Icon="{ui:SymbolIcon Power28}">
+            <ui:CardControl.Header>
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Text="All Flyouts" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <TextBlock FontSize="12" Opacity="0.55"
+                               Text="Master switch — disable all flyouts at once without losing individual settings" />
+                </StackPanel>
+            </ui:CardControl.Header>
+            <controls:ToggleSwitch x:Name="GlobalFlyoutEnabledSwitch"
+                                           IsChecked="{Binding GlobalFlyoutEnabled, Mode=TwoWay}" />
+        </ui:CardControl>
+
         <Grid Margin="-4" RowDefinitions="Auto, Auto, Auto, Auto" ColumnDefinitions="*, *">
             <ui:CardAction Grid.Row="0" Grid.Column="0" Margin="4" Padding="12,20" IsChevronVisible="True" Click="MediaFlyout_Click">
                 <ui:CardAction.Icon>
@@ -371,7 +386,7 @@
                 <StackPanel Orientation="Vertical" VerticalAlignment="Center">
                     <TextBlock Text="{DynamicResource EnjoyingAppText}" HorizontalAlignment="Center" FontSize="12" Opacity="0.5" VerticalAlignment="Center" Margin="4,0,12,0" />
                 </StackPanel>
-                <ui:Anchor Appearance="Transparent" Content="{DynamicResource GitHubRepoLink}" Icon="{ui:SymbolIcon Open24}" NavigateUri="https://github.com/unchihugo/FluentFlyout" />
+                <ui:Anchor Appearance="Transparent" Content="{DynamicResource GitHubRepoLink}" Icon="{ui:SymbolIcon Open24}" NavigateUri="https://github.com/KoksMen/FluentFlyout" />
             </StackPanel>
         </DockPanel>
     </StackPanel>

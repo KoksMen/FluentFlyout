@@ -84,6 +84,27 @@
                 </StackPanel>
             </ui:CardControl>
 
+            <!-- Feature 2: Show volume flyout in fullscreen -->
+            <ui:CardControl x:Name="VolumeFlyoutShowInExclusiveFullscreenCard" Tag="Indexable" Icon="{ui:SymbolIcon FullScreenMaximize24}" Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Show in exclusive fullscreen mode" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                        <TextBlock Text="Show the volume flyout even when a fullscreen DirectX/game application is running" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <controls:ToggleSwitch IsChecked="{Binding VolumeFlyoutShowInExclusiveFullscreen, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <ui:CardControl x:Name="VolumeFlyoutShowInBorderlessCard" Tag="Indexable" Icon="{ui:SymbolIcon FullScreenMaximize24}" Margin="0,0,0,12">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="Show in borderless fullscreen / windowed mode" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                        <TextBlock Text="Show the volume flyout even when playing video fullscreen (e.g. YouTube) or borderless games" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <controls:ToggleSwitch IsChecked="{Binding VolumeFlyoutShowInBorderless, Mode=TwoWay}" />
+            </ui:CardControl>
+
             <TextBlock Text="{DynamicResource VolumeMixerSectionTitle}" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,6" />
             <ui:CardControl x:Name="EnableVolumeMixerTitleCard" Tag="Indexable" Icon="{ui:SymbolIcon SpeakerSettings24}" Margin="0,0,0,3">
                 <ui:CardControl.Header>

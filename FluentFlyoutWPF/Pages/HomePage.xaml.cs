@@ -206,7 +206,7 @@ public partial class HomePage : Page
         {
             Process.Start(new ProcessStartInfo
             {
-                FileName = "https://github.com/unchihugo/FluentFlyout/issues/new/choose",
+                FileName = "https://github.com/KoksMen/FluentFlyout/issues/new/choose",
                 UseShellExecute = true
             });
         }

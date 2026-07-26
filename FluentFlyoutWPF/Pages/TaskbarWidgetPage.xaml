@@ -298,6 +298,84 @@
                 </StackPanel>
             </ui:CardExpander>
 
+            <ui:CardExpander x:Name="TaskbarWidgetAppFilteringCard" Tag="Indexable" Icon="{ui:SymbolIcon Filter24}" ContentPadding="16" Margin="0,0,0,3">
+                <ui:CardExpander.Header>
+                    <Grid ColumnDefinitions="*, Auto">
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Widget App Filtering" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                                <ui:InfoBadge Value=" NEW " FontWeight="Medium" FontSize="10" Margin="6,-2,0,-2" Severity="Success" />
+                            </StackPanel>
+                            <TextBlock Text="Exclude specific applications from being displayed on the taskbar widget" FontSize="12" Opacity="0.5" />
+                        </StackPanel>
+                        <controls:ToggleSwitch Grid.Column="1" IsChecked="{Binding WidgetAppFilteringEnabled, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" Margin="0,0,16,0" />
+                    </Grid>
+                </ui:CardExpander.Header>
+                <StackPanel Opacity="{Binding WidgetAppFilteringEnabled, Converter={StaticResource BoolToFullHalfOpacityConverter}}" IsEnabled="{Binding WidgetAppFilteringEnabled}">
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0" Margin="0,0,8,0">
+                            <ComboBox IsEditable="False" x:Name="WidgetBlockComboBox" HorizontalAlignment="Stretch" DropDownOpened="WidgetBlockComboBox_DropDownOpened" MinHeight="36" Padding="16,8,16,8">
+                                <ComboBox.ItemContainerStyle>
+                                    <Style TargetType="ComboBoxItem" BasedOn="{StaticResource {x:Type ComboBoxItem}}">
+                                        <Setter Property="Padding" Value="16,8,16,8" />
+                                    </Style>
+                                </ComboBox.ItemContainerStyle>
+                            </ComboBox>
+                            <TextBlock Text="{DynamicResource AppFilteringComboBoxHint}" Margin="16,0,32,0" VerticalAlignment="Center" IsHitTestVisible="False" Opacity="0.5">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedItem, ElementName=WidgetBlockComboBox}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                        <ui:Button Grid.Column="1" Content="{DynamicResource AddButton}" Click="AddWidgetBlock_Click" Appearance="Primary" />
+                    </Grid>
+
+                    <ListBox ItemsSource="{Binding WidgetBlockedApps}" MinHeight="100" MaxHeight="200" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                <Setter Property="Focusable" Value="False" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid HorizontalAlignment="Stretch">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    <ui:Button Grid.Column="1" Content="{DynamicResource RemoveButton}" Click="RemoveWidgetBlock_Click" Tag="{Binding}" Margin="8,0,0,0" Padding="8,4" Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <StackPanel Margin="0,16,0,0">
+                        <Border Height="1" Background="{DynamicResource CardStrokeColorDefaultBrush}" Margin="0,0,0,12" />
+                        <TextBlock Text="{DynamicResource AddAppManuallyText}" FontSize="12" Opacity="0.65" Margin="0,0,0,8" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ui:TextBox Grid.Column="0" x:Name="WidgetBlockTextBox" PlaceholderText="{DynamicResource AppFilteringPlaceholderChrome}" HorizontalAlignment="Stretch" Margin="0,0,8,0" ClearButtonEnabled="False" />
+                            <ui:Button Grid.Column="1" Content="{DynamicResource AddButton}" Click="AddWidgetBlockManual_Click" Appearance="Secondary" />
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </ui:CardExpander>
+
             <ui:CardControl x:Name="TaskbarWidgetShowPauseOverlayTitleCard" Tag="Indexable" Grid.Row="15" Icon="{ui:SymbolIcon Pause24}" Margin="0,0,0,76">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
