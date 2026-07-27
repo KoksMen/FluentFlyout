@@ -21,6 +21,24 @@
 		d:DataContext="{d:DesignInstance viewModels:UserSettings}">
     <Canvas Name="WidgetCanvas" Background="Transparent">
 		<controls:TaskbarVisualizerControl x:Name="TaskbarVisualizer" Margin="0,1,0,0" />
+        <StackPanel x:Name="QuickActionsPanel" Orientation="Horizontal">
+            <ui:Button x:Name="MixerButton"
+                       Width="36" Height="36" Padding="0" Margin="0,0,5,0"
+                       Appearance="Transparent"
+                       Visibility="{Binding TaskbarMixerButtonEnabled, Converter={StaticResource BoolToVisibleCollapsedConverter}}"
+                       ToolTip="{DynamicResource TaskbarMixerButtonTitle}"
+                       Click="MixerButton_Click">
+                <ui:SymbolIcon Symbol="SpeakerSettings24" FontSize="18" />
+            </ui:Button>
+            <ui:Button x:Name="ClipboardButton"
+                       Width="36" Height="36" Padding="0"
+                       Appearance="Transparent"
+                       Visibility="{Binding TaskbarClipboardButtonEnabled, Converter={StaticResource BoolToVisibleCollapsedConverter}}"
+                       ToolTip="{DynamicResource TaskbarClipboardButtonTitle}"
+                       Click="ClipboardButton_Click">
+                <ui:SymbolIcon Symbol="ClipboardClock24" FontSize="18" />
+            </ui:Button>
+        </StackPanel>
         <controls:TaskbarWidgetControl x:Name="Widget" />
     </Canvas>
 </Window>

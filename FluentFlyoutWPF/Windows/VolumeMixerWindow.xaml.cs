@@ -10,6 +10,7 @@
 using FluentFlyout.Classes;
 using FluentFlyout.Classes.Settings;
 using FluentFlyoutWPF.Classes;
+using FluentFlyoutWPF.Classes.Utils;
 using FluentFlyoutWPF.ViewModels;
 using MicaWPF.Controls;
 using NLog;
@@ -35,6 +36,10 @@ public partial class VolumeMixerWindow : MicaWindow
     private readonly double _collapsedHeight = 50;
     private readonly double _normalWidth;
     private bool _isHiding = true;
+    private bool _isTaskbarAnchored;
+    private bool _taskbarExpandDownward;
+    private bool _suppressExpandCollapseAnimation;
+    private int _taskbarAnimationGeneration;
 
     private long _lastFlyoutTime = 0;
     private readonly TimeSpan _flyoutCooldown = TimeSpan.FromMilliseconds(500);
@@ -63,6 +68,11 @@ public partial class VolumeMixerWindow : MicaWindow
     // one day we might want to convert these to an interface
     public async void ShowFlyout()
     {
+        if (_isTaskbarAnchored)
+        {
+            ExitTaskbarMode();
+        }
+
         if (FullscreenDetector.ShouldSuppressForFullscreen(SettingsManager.Current.VolumeFlyoutShowInExclusiveFullscreen, SettingsManager.Current.VolumeFlyoutShowInBorderless))
         {
             // If the custom flyout is suppressed in fullscreen, we restore the native Windows OSD
@@ -166,10 +176,245 @@ public partial class VolumeMixerWindow : MicaWindow
         }
     }
 
+    public async void ShowFromTaskbar(Rect anchorRect, Rect taskbarRect)
+    {
+        if (_isTaskbarAnchored && !_isHiding)
+        {
+            HideTaskbarFlyout();
+            return;
+        }
+
+        _cts.Cancel();
+        WindowHelper.SetVisibility(this, false);
+        _isHiding = false;
+        _isTaskbarAnchored = true;
+
+        if (SettingsManager.Current.VolumeMixerAcrylicWindowEnabled)
+        {
+            WindowBlurHelper.EnableBlur(this);
+        }
+        else
+        {
+            WindowBlurHelper.DisableBlur(this);
+        }
+
+        Width = _normalWidth;
+        ViewModel.OnPollTick(null, EventArgs.Empty);
+        SetExpandedImmediately(true);
+        PositionAtTaskbarAnchor(anchorRect, taskbarRect);
+
+        AnimateTaskbarOpen();
+        SetTaskbarActivation(true);
+        IntPtr mixerHandle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+        SetForegroundWindow(mixerHandle);
+
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                await Task.Delay(100, token);
+                ViewModel.SyncMasterFromDevice();
+
+                if (GetForegroundWindow() != mixerHandle)
+                {
+                    HideTaskbarFlyout();
+                    break;
+                }
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            // A standard volume event or another taskbar click replaced this display mode.
+        }
+    }
+
+    private void PositionAtTaskbarAnchor(Rect anchorRect, Rect taskbarRect)
+    {
+        var monitor = MonitorUtil.GetSelectedMonitor(SettingsManager.Current.TaskbarWidgetSelectedMonitor);
+        Rect workArea = monitor.workArea;
+        Rect monitorArea = monitor.monitorArea;
+
+        WindowHelper.SetPosition(this, workArea.Left, workArea.Top);
+        UpdateLayout();
+        Rect windowRect = WindowHelper.GetPlacement(this);
+
+        const double gap = 8;
+        const double edgeMargin = 8;
+        bool horizontalTaskbar = taskbarRect.Width >= taskbarRect.Height;
+        double left;
+        double top;
+
+        if (horizontalTaskbar)
+        {
+            bool taskbarAtBottom = taskbarRect.Top + taskbarRect.Height / 2
+                >= monitorArea.Top + monitorArea.Height / 2;
+            _taskbarExpandDownward = !taskbarAtBottom;
+
+            left = anchorRect.Left + anchorRect.Width / 2 - windowRect.Width / 2;
+            top = taskbarAtBottom
+                ? taskbarRect.Top - windowRect.Height - gap
+                : taskbarRect.Bottom + gap;
+        }
+        else
+        {
+            bool taskbarAtRight = taskbarRect.Left + taskbarRect.Width / 2
+                >= monitorArea.Left + monitorArea.Width / 2;
+            _taskbarExpandDownward = anchorRect.Top + anchorRect.Height / 2
+                < monitorArea.Top + monitorArea.Height / 2;
+
+            left = taskbarAtRight
+                ? taskbarRect.Left - windowRect.Width - gap
+                : taskbarRect.Right + gap;
+            top = anchorRect.Top + anchorRect.Height / 2 - windowRect.Height / 2;
+        }
+
+        left = Math.Clamp(left, monitorArea.Left + edgeMargin, monitorArea.Right - windowRect.Width - edgeMargin);
+        top = Math.Clamp(top, monitorArea.Top + edgeMargin, monitorArea.Bottom - windowRect.Height - edgeMargin);
+        WindowHelper.SetPosition(this, left, top);
+    }
+
+    private void ExitTaskbarMode()
+    {
+        _cts.Cancel();
+        SetTaskbarActivation(false);
+        _taskbarAnimationGeneration++;
+        BeginAnimation(TopProperty, null);
+        BeginAnimation(OpacityProperty, null);
+        WindowHelper.SetVisibility(this, false);
+        _isTaskbarAnchored = false;
+        _isHiding = true;
+        _lastFlyoutTime = 0;
+        SetExpandedImmediately(false);
+    }
+
+    private async void HideTaskbarFlyout()
+    {
+        _cts.Cancel();
+        SetTaskbarActivation(false);
+        _isTaskbarAnchored = false;
+        _isHiding = true;
+        int generation = ++_taskbarAnimationGeneration;
+
+        int duration = MainWindow.getDuration();
+        if (duration > 0)
+        {
+            double dpiScale = MonitorUtil.GetSelectedMonitor(SettingsManager.Current.TaskbarWidgetSelectedMonitor).dpiY / 96.0;
+            double offset = (_taskbarExpandDownward ? -20 : 20) / dpiScale;
+            EasingFunctionBase? easing = SettingsManager.Current.FlyoutAnimationEasingStyle == 0
+                ? null
+                : _mainWindow.getEasingStyle(false);
+
+            BeginAnimation(TopProperty, new DoubleAnimation(Top, Top + offset, TimeSpan.FromMilliseconds(duration))
+            {
+                EasingFunction = easing
+            });
+            BeginAnimation(OpacityProperty, new DoubleAnimation(Opacity, 0, TimeSpan.FromMilliseconds(duration))
+            {
+                EasingFunction = easing
+            });
+
+            await Task.Delay(duration);
+            if (generation != _taskbarAnimationGeneration)
+                return;
+        }
+
+        WindowHelper.SetVisibility(this, false);
+        BeginAnimation(TopProperty, null);
+        BeginAnimation(OpacityProperty, null);
+        Opacity = 1;
+        SetExpandedImmediately(false);
+    }
+
+    private void SetTaskbarActivation(bool allowActivation)
+    {
+        IntPtr handle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+        int exStyle = GetWindowLong(handle, GWL_EXSTYLE);
+        exStyle = allowActivation
+            ? exStyle & ~WS_EX_NOACTIVATE
+            : exStyle | WS_EX_NOACTIVATE;
+        SetWindowLong(handle, GWL_EXSTYLE, exStyle);
+    }
+
+    private void AnimateTaskbarOpen()
+    {
+        int generation = ++_taskbarAnimationGeneration;
+        int duration = MainWindow.getDuration();
+        double dpiScale = MonitorUtil.GetSelectedMonitor(SettingsManager.Current.TaskbarWidgetSelectedMonitor).dpiY / 96.0;
+        Rect placement = WindowHelper.GetPlacement(this);
+        double targetTop = placement.Top / dpiScale;
+        double offset = (_taskbarExpandDownward ? -20 : 20) / dpiScale;
+
+        BeginAnimation(TopProperty, null);
+        BeginAnimation(OpacityProperty, null);
+        Top = targetTop;
+        Opacity = duration == 0 ? 1 : 0;
+        WindowHelper.SetVisibility(this, true);
+        WindowHelper.SetTopmost(this);
+
+        if (duration == 0)
+            return;
+
+        EasingFunctionBase? easing = SettingsManager.Current.FlyoutAnimationEasingStyle == 0
+            ? null
+            : _mainWindow.getEasingStyle(true);
+        DoubleAnimation move = new(targetTop + offset, targetTop, TimeSpan.FromMilliseconds(duration))
+        {
+            EasingFunction = easing
+        };
+        DoubleAnimation fade = new(0, 1, TimeSpan.FromMilliseconds(duration))
+        {
+            EasingFunction = easing
+        };
+        fade.Completed += (_, _) =>
+        {
+            if (generation != _taskbarAnimationGeneration)
+                return;
+
+            BeginAnimation(TopProperty, null);
+            BeginAnimation(OpacityProperty, null);
+            Top = targetTop;
+            Opacity = 1;
+        };
+        BeginAnimation(TopProperty, move);
+        BeginAnimation(OpacityProperty, fade);
+    }
+
+    private void SetExpandedImmediately(bool expand)
+    {
+        _suppressExpandCollapseAnimation = true;
+        ViewModel.IsExpanded = expand;
+        _suppressExpandCollapseAnimation = false;
+
+        BeginAnimation(TopProperty, null);
+        BeginAnimation(HeightProperty, null);
+
+        if (expand)
+        {
+            SessionsExpanded.Visibility = Visibility.Visible;
+            SessionsSeparator.Visibility = Visibility.Visible;
+            SessionsExpanded.Measure(new Size(ActualWidth, double.PositiveInfinity));
+            Height = _collapsedHeight + Math.Min(SessionsExpanded.DesiredSize.Height, 220);
+        }
+        else
+        {
+            SessionsExpanded.Visibility = Visibility.Collapsed;
+            SessionsSeparator.Visibility = Visibility.Collapsed;
+            Height = _collapsedHeight;
+        }
+
+        UpdateLayout();
+    }
+
     private void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(VolumeMixerViewModel.IsExpanded))
         {
+            if (_suppressExpandCollapseAnimation)
+                return;
+
             AnimateExpandCollapse(ViewModel.IsExpanded);
         }
     }
@@ -250,10 +495,10 @@ public partial class VolumeMixerWindow : MicaWindow
         var easing = msDuration > 0 ? _mainWindow.getEasingStyle(true) : null;
         var duration = new Duration(TimeSpan.FromMilliseconds(msDuration > 0 ? msDuration / 1.4 : 1));
 
-        bool isTop = false;
+        bool isTop = _isTaskbarAnchored && _taskbarExpandDownward;
 
         // check if the media flyout is at the top or bottom of the screen if applicable
-        if (SettingsManager.Current.VolumeControlAboveMediaFlyout)
+        if (!_isTaskbarAnchored && SettingsManager.Current.VolumeControlAboveMediaFlyout)
         {
             isTop = SettingsManager.Current.Position switch
             {

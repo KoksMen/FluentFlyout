@@ -2036,6 +2036,12 @@ public partial class MainWindow : MicaWindow
         }
     }
 
+    public void ShowVolumeMixerFromTaskbar(Rect anchorRect, Rect taskbarRect)
+    {
+        volumeMixerWindow ??= new VolumeMixerWindow();
+        volumeMixerWindow.ShowFromTaskbar(anchorRect, taskbarRect);
+    }
+
     private void nIcon_LeftClick(Wpf.Ui.Tray.Controls.NotifyIcon sender, RoutedEventArgs e) // change the behavior of the tray icon
     {
         if (SettingsManager.Current.NIconLeftClick == 0)

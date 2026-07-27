@@ -360,6 +360,25 @@ public partial class UserSettings : ObservableObject
     public partial bool TaskbarWidgetEnabled { get; set; }
 
     /// <summary>
+    /// Gets or sets whether a dedicated volume mixer button is shown before the taskbar media widget.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool TaskbarMixerButtonEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether a dedicated Windows clipboard history button is shown before the taskbar media widget.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool TaskbarClipboardButtonEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets which clipboard history window the taskbar button opens.
+    /// 0: FluentFlyout window, 1: native Windows Win+V panel.
+    /// </summary>
+    [ObservableProperty]
+    public partial int TaskbarClipboardMode { get; set; }
+
+    /// <summary>
     /// Widget Target Display
     /// </summary>
     [ObservableProperty]
@@ -832,6 +851,9 @@ public partial class UserSettings : ObservableObject
         LockKeysAcrylicWindowEnabled = true;
         VolumeMixerAcrylicWindowEnabled = true;
         TaskbarWidgetEnabled = false;
+        TaskbarMixerButtonEnabled = false;
+        TaskbarClipboardButtonEnabled = false;
+        TaskbarClipboardMode = 0;
         TaskbarWidgetSelectedMonitor = 0;
         TaskbarWidgetPosition = 0;
         TaskbarWidgetPadding = true;
@@ -1030,6 +1052,18 @@ public partial class UserSettings : ObservableObject
             return;
         }
 
+        UpdateTaskbar();
+    }
+
+    partial void OnTaskbarMixerButtonEnabledChanged(bool oldValue, bool newValue)
+    {
+        if (oldValue == newValue || _initializing) return;
+        UpdateTaskbar();
+    }
+
+    partial void OnTaskbarClipboardButtonEnabledChanged(bool oldValue, bool newValue)
+    {
+        if (oldValue == newValue || _initializing) return;
         UpdateTaskbar();
     }
 
