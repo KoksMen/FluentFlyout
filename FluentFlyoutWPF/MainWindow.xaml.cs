@@ -187,6 +187,8 @@ public partial class MainWindow : MicaWindow
             UpdateSeekbarCurrentDuration(session.ControlSession.GetTimelineProperties().Position);
         }
 
+        StartLanguageMonitoring();
+
         string previousVersion = SettingsManager.Current.LastKnownVersion;
         _ = CheckForExperimentsOnStartupAsync(previousVersion);
 
@@ -930,6 +932,12 @@ public partial class MainWindow : MicaWindow
                     lockWindow ??= new LockWindow();
                     lockWindow.ShowLockFlyout("Insert", Keyboard.IsKeyToggled(Key.Insert));
                 }
+
+                // Also check language layout change on modifier key releases (Alt, Shift, Ctrl, Win, Space, Caps)
+                if (vkCode == 0x12 || vkCode == 0x10 || vkCode == 0x11 || vkCode == 0x5B || vkCode == 0x5C || vkCode == 0x20 || vkCode == 0x14)
+                {
+                    CheckKeyboardLayoutChange(triggeredByKey: true);
+                }
             }
         }
         return CallNextHookEx(_hookId, nCode, wParam, lParam);
@@ -947,6 +955,99 @@ public partial class MainWindow : MicaWindow
         _lastFlyoutTime = currentTime;
         ShowMediaFlyout();
         return true;
+    }
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetKeyboardLayout(uint idThread);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
+    private IntPtr _lastKeyboardLayout = IntPtr.Zero;
+    private IntPtr _lastForegroundHwnd = IntPtr.Zero;
+    private DispatcherTimer? _langCheckTimer;
+
+    private void StartLanguageMonitoring()
+    {
+        _langCheckTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(150)
+        };
+        _langCheckTimer.Tick += (s, e) => CheckKeyboardLayoutChange(triggeredByKey: false);
+        _langCheckTimer.Start();
+    }
+
+    public void CheckKeyboardLayoutChange(bool triggeredByKey = false)
+    {
+        if (!SettingsManager.Current.GlobalFlyoutEnabled) return;
+        if (!SettingsManager.Current.LockKeysEnabled) return;
+        if (!SettingsManager.Current.LockKeysLanguageFlyoutEnabled) return;
+        if (FullscreenDetector.ShouldSuppressForFullscreen(
+            SettingsManager.Current.LockKeysFlyoutShowInExclusiveFullscreen,
+            SettingsManager.Current.LockKeysFlyoutShowInBorderless)) return;
+
+        IntPtr hwnd = GetForegroundWindow();
+        if (hwnd == IntPtr.Zero) return;
+
+        uint threadId = GetWindowThreadProcessId(hwnd, out _);
+        IntPtr currentHkl = GetKeyboardLayout(threadId);
+        if (currentHkl == IntPtr.Zero) return;
+
+        if (_lastKeyboardLayout == IntPtr.Zero)
+        {
+            _lastKeyboardLayout = currentHkl;
+            _lastForegroundHwnd = hwnd;
+            return;
+        }
+
+        if (currentHkl != _lastKeyboardLayout)
+        {
+            bool isSameWindow = (hwnd == _lastForegroundHwnd);
+            _lastKeyboardLayout = currentHkl;
+            _lastForegroundHwnd = hwnd;
+
+            if (isSameWindow || triggeredByKey)
+            {
+                string langText = GetLanguageDisplayName(currentHkl);
+                Dispatcher.Invoke(() =>
+                {
+                    lockWindow ??= new LockWindow();
+                    lockWindow.ShowLanguageFlyout(langText);
+                });
+            }
+        }
+        else
+        {
+            _lastForegroundHwnd = hwnd;
+        }
+    }
+
+    private string GetLanguageDisplayName(IntPtr hkl)
+    {
+        ushort langId = (ushort)((long)hkl & 0xFFFF);
+        try
+        {
+            var culture = new System.Globalization.CultureInfo(langId);
+            string shortName = culture.TwoLetterISOLanguageName.ToUpper();
+
+            string mainName = culture.Parent != null && !string.IsNullOrEmpty(culture.Parent.NativeName)
+                ? culture.Parent.NativeName
+                : culture.NativeName;
+
+            if (!string.IsNullOrEmpty(mainName))
+            {
+                mainName = char.ToUpper(mainName[0]) + mainName.Substring(1);
+            }
+
+            return $"{mainName} ({shortName})";
+        }
+        catch
+        {
+            return "Language Changed";
+        }
     }
 
     public async void ShowMediaFlyout(bool toggleMode = false, bool forceShow = false)

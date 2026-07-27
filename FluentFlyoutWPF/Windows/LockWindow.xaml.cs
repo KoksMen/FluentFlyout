@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2024-2026 The FluentFlyout Authors
+// Copyright (c) 2024-2026 The FluentFlyout Authors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using FluentFlyout.Classes;
@@ -40,6 +40,8 @@ public partial class LockWindow : MicaWindow
     {
         Dispatcher.Invoke(() =>
         {
+            LockSymbol.Visibility = Visibility.Visible;
+            LangSymbol.Visibility = Visibility.Collapsed;
             if (key == "Insert")
             {
                 // not sure how to properly check if overwrite or insert as every program has different behavior
@@ -140,6 +142,61 @@ public partial class LockWindow : MicaWindow
         }
 
         setStatus(key, isOn);
+
+        if (_isHiding)
+        {
+            _isHiding = false;
+            _openedMonitor = GetPreferredTargetDisplay();
+            _mainWindow.OpenAnimation(window: this, alwaysBottom: true, selectedMonitor: _openedMonitor);
+        }
+        cts.Cancel();
+        cts = new CancellationTokenSource();
+        var token = cts.Token;
+
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                await Task.Delay(SettingsManager.Current.LockKeysDuration, token);
+                _mainWindow.CloseAnimation(window: this, selectedMonitor: _openedMonitor);
+                _isHiding = true;
+                await Task.Delay(MainWindow.getDuration());
+                if (_isHiding == false) return;
+
+                WindowHelper.SetVisibility(this, false);
+                break;
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            // do nothing
+        }
+    }
+
+    public async void ShowLanguageFlyout(string langText)
+    {
+        if (string.IsNullOrEmpty(langText)) return;
+
+        if (SettingsManager.Current.LockKeysAcrylicWindowEnabled)
+        {
+            WindowBlurHelper.EnableBlur(this);
+        }
+        else
+        {
+            WindowBlurHelper.DisableBlur(this);
+        }
+
+        Width = Math.Max(180, langText.Length * 9 + 60);
+
+        Dispatcher.Invoke(() =>
+        {
+            LockSymbol.Visibility = Visibility.Collapsed;
+            LangSymbol.Visibility = Visibility.Visible;
+            LockTextBlock.Text = langText;
+            LockTextBlock.FontWeight = SettingsManager.Current.LockKeysBoldUi ? FontWeights.Medium : FontWeights.Normal;
+            LockIndicatorRectangle.Opacity = 1.0;
+            LockIndicatorRectangle.Width = 60.0;
+        });
 
         if (_isHiding)
         {

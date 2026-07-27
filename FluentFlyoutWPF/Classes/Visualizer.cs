@@ -492,6 +492,27 @@ namespace FluentFlyoutWPF.Classes
             const float aa = 1.25f;
             float invAA = 1f / aa;
 
+            bool outlineEnabled = SettingsManager.Current.TaskbarVisualizerOutlineEnabled;
+            int outlineThickness = Math.Clamp(SettingsManager.Current.TaskbarVisualizerOutlineThickness, 1, 5);
+            byte ob = 0, og = 0, or = 0, oa = 255;
+            if (outlineEnabled)
+            {
+                try
+                {
+                    string hex = SettingsManager.Current.TaskbarVisualizerOutlineColor ?? "#000000";
+                    if (!hex.StartsWith("#") && hex.Length >= 6) hex = "#" + hex;
+                    var parsedColor = (Color)ColorConverter.ConvertFromString(hex);
+                    ob = parsedColor.B;
+                    og = parsedColor.G;
+                    or = parsedColor.R;
+                    oa = parsedColor.A;
+                }
+                catch
+                {
+                    ob = 0; og = 0; or = 0; oa = 255;
+                }
+            }
+
             for (int i = 0; i < BarCount; i++)
             {
                 int barX = offsetX + i * (barWidth + BarSpacing);
@@ -513,7 +534,8 @@ namespace FluentFlyoutWPF.Classes
                     barY, barEndY,
                     centeredBars,
                     radius, radiusSq, invAA,
-                    b, g, r);
+                    b, g, r,
+                    outlineEnabled, outlineThickness, ob, og, or, oa);
             }
         }
 
@@ -577,67 +599,163 @@ namespace FluentFlyoutWPF.Classes
             float radius,
             float radiusSq,
             float invAA,
-            byte b, byte g, byte r)
+            byte b, byte g, byte r,
+            bool outlineEnabled, int outlineThickness,
+            byte ob, byte og, byte or, byte oa)
         {
-            float left = barX;
-            float right = barX + barWidth;
-            float top = barY;
-            float bottom = barEndY;
+            float rectX = barX;
+            float rectW = barWidth;
+            float rectY = barY;
+            float rectH = barEndY - barY;
 
-            float innerLeft = left + radius;
-            float innerRight = right - radius;
-            float innerTop = top + radius;
-            float innerBottom = bottom - radius;
+            if (!outlineEnabled || outlineThickness <= 0)
+            {
+                // Fast path: standard bar without outline
+                for (int y = barY; y < barEndY && y < ImageHeight && y >= 0; y++)
+                {
+                    int row = y * stride;
+                    for (int x = barX; x < barX + barWidth && x < ImageWidth; x++)
+                    {
+                        int index = row + (x << 2);
+                        if (index + 3 >= buffer.Length) continue;
+
+                        float innerLeft = rectX + radius;
+                        float innerRight = (rectX + rectW) - radius;
+                        float innerTop = rectY + radius;
+                        float innerBottom = (rectY + rectH) - (centeredBars ? radius : 0f);
+
+                        if (x >= innerLeft && x <= innerRight) { WritePixel(buffer, index, b, g, r, 255); continue; }
+                        if (y >= innerTop && y <= innerBottom) { WritePixel(buffer, index, b, g, r, 255); continue; }
+                        if (!centeredBars && y >= innerBottom) { WritePixel(buffer, index, b, g, r, 255); continue; }
+
+                        float cx = x < innerLeft ? innerLeft : (x > innerRight ? innerRight : x);
+                        float cy = y < innerTop ? innerTop : (y > innerBottom ? innerBottom : y);
+                        float dx = x - cx; float dy = y - cy;
+                        float distSq = dx * dx + dy * dy;
+                        float sdf = (distSq - radiusSq) / (2f * radius);
+                        float alpha = 0.5f - sdf * invAA;
+                        if (alpha <= 0f) continue;
+                        if (alpha > 1f) alpha = 1f;
+                        WritePixel(buffer, index, b, g, r, (byte)(255 * alpha));
+                    }
+                }
+                return;
+            }
+
+            float stroke = MathF.Min((float)outlineThickness, MathF.Min(rectW, rectH) * 0.35f);
+
+            // Outer rect parameters
+            float outerR = MathF.Min(radius, MathF.Min(rectW, rectH) * 0.5f);
+            if (outerR < 0.5f) outerR = 0.5f;
+            float outerRSq = outerR * outerR;
+            float inv2OuterR = 1f / (2f * outerR);
+            float outerInnerLeft = rectX + outerR;
+            float outerInnerRight = (rectX + rectW) - outerR;
+            float outerInnerTop = rectY + outerR;
+            float outerInnerBottom = (rectY + rectH) - (centeredBars ? outerR : 0f);
+
+            // Inner rect parameters
+            float innerX = rectX + stroke;
+            float innerW = rectW - 2f * stroke;
+            float innerY = rectY + stroke;
+            float innerH = rectH - (centeredBars ? 2f * stroke : stroke);
+            float innerR = MathF.Max(0.5f, outerR - stroke);
+            float innerRSq = innerR * innerR;
+            float inv2InnerR = 1f / (2f * innerR);
+            float innerInnerLeft = innerX + innerR;
+            float innerInnerRight = (innerX + innerW) - innerR;
+            float innerInnerTop = innerY + innerR;
+            float innerInnerBottom = (innerY + innerH) - (centeredBars ? innerR : 0f);
+
+            float borderAlphaFactor = oa / 255f;
+
+            // Fast inner bounds for 100% solid fill core
+            float fastFillMinX = innerX + 1.5f;
+            float fastFillMaxX = (innerX + innerW) - 1.5f;
+            float fastFillMinY = innerY + 1.5f;
+            float fastFillMaxY = (innerY + innerH) - 1.5f;
+            bool hasFastFillCore = fastFillMaxX > fastFillMinX && fastFillMaxY > fastFillMinY;
 
             for (int y = barY; y < barEndY && y < ImageHeight && y >= 0; y++)
             {
                 int row = y * stride;
+                float pixelY = y + 0.5f;
 
                 for (int x = barX; x < barX + barWidth && x < ImageWidth; x++)
                 {
-                    int index = row + (x << 2); // x * 4 (bitshift faster)
+                    int index = row + (x << 2);
                     if (index + 3 >= buffer.Length)
                         continue;
 
-                    // CENTER
-                    if (x >= innerLeft && x <= innerRight)
+                    float pixelX = x + 0.5f;
+
+                    // FAST-PATH: 100% Solid Fill Core (instant 1-cycle write!)
+                    if (hasFastFillCore && pixelX >= fastFillMinX && pixelX <= fastFillMaxX && pixelY >= fastFillMinY && pixelY <= fastFillMaxY)
                     {
                         WritePixel(buffer, index, b, g, r, 255);
                         continue;
                     }
 
-                    // SIDES
-                    if (y >= innerTop && y <= innerBottom)
+                    // Outer Alpha
+                    float outerAlpha;
+                    if (!centeredBars && pixelY >= outerInnerBottom && pixelY <= (rectY + rectH) && pixelX >= rectX && pixelX <= (rectX + rectW))
                     {
-                        WritePixel(buffer, index, b, g, r, 255);
-                        continue;
+                        outerAlpha = 1.0f;
+                    }
+                    else
+                    {
+                        float cx = pixelX < outerInnerLeft ? outerInnerLeft : (pixelX > outerInnerRight ? outerInnerRight : pixelX);
+                        float cy = pixelY < outerInnerTop ? outerInnerTop : (pixelY > outerInnerBottom ? outerInnerBottom : pixelY);
+                        float dx = pixelX - cx;
+                        float dy = pixelY - cy;
+                        float distSq = dx * dx + dy * dy;
+                        float sdf = (distSq - outerRSq) * inv2OuterR;
+                        outerAlpha = Math.Clamp(0.5f - sdf * invAA, 0f, 1f);
                     }
 
-                    // FLAT BOTTOM
-                    if (!centeredBars && y >= innerBottom)
-                    {
-                        WritePixel(buffer, index, b, g, r, 255);
+                    if (outerAlpha <= 0f)
                         continue;
+
+                    // Inner Alpha
+                    float innerAlpha;
+                    if (innerW <= 0f || innerH <= 0f)
+                    {
+                        innerAlpha = 0f;
+                    }
+                    else if (!centeredBars && pixelY >= innerInnerBottom && pixelY <= (innerY + innerH) && pixelX >= innerX && pixelX <= (innerX + innerW))
+                    {
+                        innerAlpha = 1.0f;
+                    }
+                    else
+                    {
+                        float cx = pixelX < innerInnerLeft ? innerInnerLeft : (pixelX > innerInnerRight ? innerInnerRight : pixelX);
+                        float cy = pixelY < innerInnerTop ? innerInnerTop : (pixelY > innerInnerBottom ? innerInnerBottom : pixelY);
+                        float dx = pixelX - cx;
+                        float dy = pixelY - cy;
+                        float distSq = dx * dx + dy * dy;
+                        float sdf = (distSq - innerRSq) * inv2InnerR;
+                        innerAlpha = Math.Clamp(0.5f - sdf * invAA, 0f, 1f);
                     }
 
-                    // CORNERS
-                    float cx = x < innerLeft ? innerLeft : (x > innerRight ? innerRight : x);
-                    float cy = y < innerTop ? innerTop : (y > innerBottom ? innerBottom : y);
+                    // Composite
+                    float borderCoverage = MathF.Max(0f, outerAlpha - innerAlpha);
+                    float fillCoverage = innerAlpha;
+                    float borderEffectiveA = borderCoverage * borderAlphaFactor;
+                    float totalA = borderEffectiveA + fillCoverage;
 
-                    float dx = x - cx;
-                    float dy = y - cy;
-
-                    float distSq = dx * dx + dy * dy;
-                    float sdf = (distSq - radiusSq) / (2f * radius);
-
-                    float alpha = 0.5f - sdf * invAA;
-
-                    if (alpha <= 0f)
+                    if (totalA <= 0f)
                         continue;
 
-                    if (alpha > 1f) alpha = 1f;
+                    float resR = (or * borderEffectiveA + r * fillCoverage) / totalA;
+                    float resG = (og * borderEffectiveA + g * fillCoverage) / totalA;
+                    float resB = (ob * borderEffectiveA + b * fillCoverage) / totalA;
 
-                    WritePixel(buffer, index, b, g, r, (byte)(255 * alpha));
+                    byte finalR = (byte)Math.Clamp(resR, 0f, 255f);
+                    byte finalG = (byte)Math.Clamp(resG, 0f, 255f);
+                    byte finalB = (byte)Math.Clamp(resB, 0f, 255f);
+                    byte finalA = (byte)Math.Clamp(totalA * outerAlpha * 255f, 0f, 255f);
+
+                    WritePixel(buffer, index, finalB, finalG, finalR, finalA);
                 }
             }
         }

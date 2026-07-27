@@ -161,6 +161,41 @@
                 </StackPanel>
             </ui:CardExpander>
 
+            <ui:CardExpander x:Name="TaskbarVisualizerOutlineTitleCard" Tag="Indexable" Icon="{ui:SymbolIcon LineHorizontal120}" ContentPadding="0" Margin="0,0,0,12">
+                <ui:CardExpander.Header>
+                    <Grid ColumnDefinitions="*, Auto">
+                        <StackPanel Orientation="Vertical" Grid.Column="0">
+                            <TextBlock Text="Обводка столбцов" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <TextBlock Text="Добавить цветную контурную обводку вокруг столбцов визуализатора" FontSize="12" Opacity="0.5" />
+                        </StackPanel>
+                        <controls:ToggleSwitch Grid.Column="1" IsChecked="{Binding TaskbarVisualizerOutlineEnabled, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" Margin="0,0,16,0" />
+                    </Grid>
+                </ui:CardExpander.Header>
+                <StackPanel Opacity="{Binding TaskbarVisualizerOutlineEnabled, Converter={StaticResource BoolToFullHalfOpacityConverter}}">
+                    <ui:CardControl Background="Transparent" BorderBrush="{ui:ThemeResource CardStrokeColorDefaultSolidBrush}" BorderThickness="0,0,0,1" CornerRadius="0" Padding="52,12,16,12">
+                        <ui:CardControl.Header>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="Толщина обводки (px)" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                                <TextBlock Text="Ширина контура обводки в пикселях" FontSize="12" Opacity="0.5" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <Slider Minimum="1" Maximum="5" Value="{Binding TaskbarVisualizerOutlineThickness, Mode=TwoWay}" IsEnabled="{Binding TaskbarVisualizerOutlineEnabled}" TickFrequency="1" IsSnapToTickEnabled="True" Width="150" />
+                            <ui:TextBlock Text="{Binding TaskbarVisualizerOutlineThickness}" Width="24" TextAlignment="Center" Margin="12,0,0,0" />
+                        </StackPanel>
+                    </ui:CardControl>
+                    <ui:CardControl Background="Transparent" BorderBrush="{ui:ThemeResource CardStrokeColorDefaultSolidBrush}" BorderThickness="0" CornerRadius="0" Padding="52,12,16,12">
+                        <ui:CardControl.Header>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="Цвет обводки (HEX)" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                                <TextBlock Text="HEX-код цвета (например, #000000 для черного, #FFFFFF для белого)" FontSize="12" Opacity="0.5" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:TextBox Text="{Binding TaskbarVisualizerOutlineColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding TaskbarVisualizerOutlineEnabled}" Width="120" HorizontalAlignment="Right" />
+                    </ui:CardControl>
+                </StackPanel>
+            </ui:CardExpander>
+
             <ui:CardControl x:Name="TaskbarVisualizerAudioSensitivityTitleCard" Tag="Indexable" Icon="{ui:SymbolIcon BezierCurveSquare20, Filled=False}" Margin="0,0,0,3">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">

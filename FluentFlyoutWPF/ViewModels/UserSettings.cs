@@ -545,6 +545,30 @@ public partial class UserSettings : ObservableObject
     public partial ObservableCollection<string> WidgetBlockedApps { get; set; }
 
     /// <summary>
+    /// When true, displays a flyout showing the active keyboard layout when input language changes.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool LockKeysLanguageFlyoutEnabled { get; set; }
+
+    /// <summary>
+    /// When true, draws an outline border around each visualizer bar.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool TaskbarVisualizerOutlineEnabled { get; set; }
+
+    /// <summary>
+    /// Thickness of the visualizer bar outline in pixels (1..5).
+    /// </summary>
+    [ObservableProperty]
+    public partial int TaskbarVisualizerOutlineThickness { get; set; }
+
+    /// <summary>
+    /// Color of the visualizer bar outline in HEX format.
+    /// </summary>
+    [ObservableProperty]
+    public partial string TaskbarVisualizerOutlineColor { get; set; }
+
+    /// <summary>
     /// Position of the visualizer, where 0 and 1 are to the left or right of the widget.
     /// </summary>
     [ObservableProperty]
@@ -861,6 +885,10 @@ public partial class UserSettings : ObservableObject
         NextUpFlyoutShowInExclusiveFullscreen = false;
         NextUpFlyoutShowInBorderless = false;
         HideAudioFlyoutOnPause = false;
+        LockKeysLanguageFlyoutEnabled = true;
+        TaskbarVisualizerOutlineEnabled = false;
+        TaskbarVisualizerOutlineThickness = 1;
+        TaskbarVisualizerOutlineColor = "#000000";
 
         PropertyChanged += OnPropertyChangedSaveSettings;
     }
