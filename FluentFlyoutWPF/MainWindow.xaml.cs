@@ -175,6 +175,7 @@ public partial class MainWindow : MicaWindow
         mediaManager.OnAnyMediaPropertyChanged += MediaManager_OnAnyMediaPropertyChanged;
         mediaManager.OnAnyPlaybackStateChanged += CurrentSession_OnPlaybackStateChanged;
         mediaManager.OnAnyTimelinePropertyChanged += MediaManager_OnAnyTimelinePropertyChanged;
+        mediaManager.OnAnySessionOpened += MediaManager_OnAnySessionOpened;
         mediaManager.OnAnySessionClosed += MediaManager_OnAnySessionClosed;
 
         WM_TASKBARCREATED = RegisterWindowMessage("TaskbarCreated");
@@ -614,9 +615,14 @@ public partial class MainWindow : MicaWindow
         storyboard.Begin(window);
     }
 
-    public void UpdateTaskbar()
+    public void UpdateTaskbar(MediaSession? preferredSession = null)
     {
-        var activeSession = GetActiveWidgetMediaSession();
+        // Event callbacks can arrive before MediaManager has exposed the new
+        // session through CurrentMediaSessions. Prefer the session carried by
+        // the event so playback restart can show the widget immediately.
+        var activeSession = preferredSession != null && IsWidgetSessionAllowed(preferredSession)
+            ? preferredSession
+            : GetActiveWidgetMediaSession();
         if (!mediaManager.IsStarted || activeSession == null)
         {
             taskbarWindow?.UpdateUi("-", "-", null, GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed);
@@ -681,7 +687,11 @@ public partial class MainWindow : MicaWindow
 #endif     
         pauseOtherMediaSessionsIfNeeded(mediaSession);
 
-        var focusedWidgetSession = GetActiveWidgetMediaSession();
+        var changedPlaybackInfo = playbackInfo ?? mediaSession.ControlSession.GetPlaybackInfo();
+        var focusedWidgetSession = changedPlaybackInfo?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing
+            && IsWidgetSessionAllowed(mediaSession)
+                ? mediaSession
+                : GetActiveWidgetMediaSession();
         if (focusedWidgetSession == null)
         {
             taskbarWindow?.UpdateUi("-", "-", null, GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed);
@@ -842,6 +852,11 @@ public partial class MainWindow : MicaWindow
                 HandlePlayBackState(session.ControlSession.GetPlaybackInfo().PlaybackStatus);
             });
         }
+    }
+
+    private void MediaManager_OnAnySessionOpened(MediaSession mediaSession)
+    {
+        UpdateTaskbar(mediaSession);
     }
 
     private void MediaManager_OnAnySessionClosed(MediaSession mediaSession)
@@ -1614,6 +1629,7 @@ public partial class MainWindow : MicaWindow
             mediaManager.OnAnyMediaPropertyChanged -= MediaManager_OnAnyMediaPropertyChanged;
             mediaManager.OnAnyPlaybackStateChanged -= CurrentSession_OnPlaybackStateChanged;
             mediaManager.OnAnyTimelinePropertyChanged -= MediaManager_OnAnyTimelinePropertyChanged;
+            mediaManager.OnAnySessionOpened -= MediaManager_OnAnySessionOpened;
             mediaManager.OnAnySessionClosed -= MediaManager_OnAnySessionClosed;
 
             // dispose managed resources
