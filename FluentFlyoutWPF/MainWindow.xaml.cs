@@ -807,7 +807,12 @@ public partial class MainWindow : MicaWindow
             {
                 var tbThumbnail = BitmapHelper.GetThumbnail(tbSongInfo.Thumbnail);
                 BitmapHelper.GetDominantColors(1);
-                var tbPlayback = focusedWidgetSession.ControlSession.GetPlaybackInfo();
+                // PlaybackInfoChanged already carries the new state. Querying the
+                // session again here can briefly return the previous value, leaving
+                // the taskbar play/pause icon stuck until another media event.
+                var tbPlayback = focusedWidgetSession.Id == mediaSession.Id && changedPlaybackInfo != null
+                    ? changedPlaybackInfo
+                    : focusedWidgetSession.ControlSession.GetPlaybackInfo();
 
                 taskbarWindow?.UpdateUi(tbSongInfo.Title, tbSongInfo.Artist, tbThumbnail, tbPlayback?.PlaybackStatus, tbPlayback?.Controls);
             }

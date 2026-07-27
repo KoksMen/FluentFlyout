@@ -688,7 +688,38 @@ public partial class TaskbarWidgetControl : UserControl
         var focusedSession = _mainWindow.GetActiveWidgetMediaSession();
         if (focusedSession == null) return;
 
-        await focusedSession.ControlSession.TryTogglePlayPauseAsync();
+        var playbackInfo = focusedSession.ControlSession.GetPlaybackInfo();
+        bool toggled = await focusedSession.ControlSession.TryTogglePlayPauseAsync();
+        if (!toggled) return;
+
+        // Update immediately instead of waiting for the player to raise its
+        // PlaybackInfoChanged event. The event will later confirm the real state.
+        var expectedStatus = playbackInfo?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing
+            ? GlobalSystemMediaTransportControlsSessionPlaybackStatus.Paused
+            : GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
+        UpdatePlaybackState(expectedStatus);
+    }
+
+    private void UpdatePlaybackState(GlobalSystemMediaTransportControlsSessionPlaybackStatus playbackStatus)
+    {
+        _isPaused = playbackStatus != GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
+
+        Dispatcher.Invoke(() =>
+        {
+            if (SettingsManager.Current.TaskbarWidgetControlsEnabled)
+            {
+                PlayPauseButton.Icon = _isPaused
+                    ? new SymbolIcon(SymbolRegular.Play24, filled: true)
+                    : new SymbolIcon(SymbolRegular.Pause24, filled: true);
+            }
+
+            if (SongImage.ImageSource != null && SettingsManager.Current.TaskbarWidgetShowPauseOverlay)
+            {
+                SongImagePlaceholder.Symbol = SymbolRegular.Pause24;
+                SongImagePlaceholder.Visibility = _isPaused ? Visibility.Visible : Visibility.Collapsed;
+                SongImage.Opacity = _isPaused ? 0.4 : 1;
+            }
+        });
     }
 
     private async void Next_Click(object sender, RoutedEventArgs e)
