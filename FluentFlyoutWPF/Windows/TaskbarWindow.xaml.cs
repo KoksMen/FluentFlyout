@@ -25,6 +25,7 @@ namespace FluentFlyout.Windows;
 public partial class TaskbarWindow : Window
 {
     private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+    private const double TaskbarBlockGap = 8;
 
     private readonly DispatcherTimer _timer;
     private readonly int _nativeWidgetsPadding = 216;
@@ -452,7 +453,9 @@ on_error:
         int quickActionsPhysicalWidth = hasQuickActions
             ? (int)Math.Ceiling(QuickActionsPanel.DesiredSize.Width * dpiScale)
             : 0;
-        int quickActionsGap = hasQuickActions && widgetEnabled ? (int)Math.Ceiling(4 * dpiScale) : 0;
+        int quickActionsGap = hasQuickActions && widgetEnabled
+            ? (int)Math.Ceiling(TaskbarBlockGap * dpiScale)
+            : 0;
         int physicalWidth = widgetPhysicalWidth + quickActionsPhysicalWidth + quickActionsGap;
 
         int taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
@@ -483,7 +486,7 @@ on_error:
                 primaryPos = 20;
 
                 if (SettingsManager.Current.TaskbarVisualizerEnabled && SettingsManager.Current.TaskbarVisualizerPosition == 0)
-                    primaryPos += (int)(TaskbarVisualizer.Width * dpiScale) + 4;
+                    primaryPos += (int)Math.Ceiling((TaskbarVisualizer.Width + TaskbarBlockGap) * dpiScale);
 
                 if (!SettingsManager.Current.TaskbarWidgetPadding)
                     break;
@@ -520,16 +523,16 @@ on_error:
 
                 if (SettingsManager.Current.TaskbarVisualizerEnabled)
                     if (SettingsManager.Current.TaskbarVisualizerPosition == 0)
-                        primaryPos += (int)(TaskbarVisualizer.Width * dpiScale) / 2 + 4;
+                        primaryPos += (int)Math.Ceiling((TaskbarVisualizer.Width + TaskbarBlockGap) * dpiScale / 2);
                     else
-                        primaryPos -= (int)(TaskbarVisualizer.Width * dpiScale) / 2 - 4;
+                        primaryPos -= (int)Math.Ceiling((TaskbarVisualizer.Width + TaskbarBlockGap) * dpiScale / 2);
                 break;
 
             case 2: // near end (right for horizontal, bottom for vertical)
                 try
                 {
                     if (SettingsManager.Current.TaskbarVisualizerEnabled && SettingsManager.Current.TaskbarVisualizerPosition == 1)
-                        primaryPos -= (int)(TaskbarVisualizer.Width * dpiScale) - 4;
+                        primaryPos -= (int)Math.Ceiling((TaskbarVisualizer.Width + TaskbarBlockGap) * dpiScale);
 
                     // Horizontal only: try to position next to native Widgets button on the end side
                     if (!isVertical && SettingsManager.Current.TaskbarWidgetPadding)
@@ -690,11 +693,12 @@ on_error:
         switch (SettingsManager.Current.TaskbarVisualizerPosition)
         {
             case 0: // before widget (left for horizontal, above for vertical)
-                primaryPos = (int)(_taskbarGroupPrimaryStart * dpiScale) - (int)(TaskbarVisualizer.Width * dpiScale);
+                primaryPos = (int)(_taskbarGroupPrimaryStart * dpiScale)
+                    - (int)Math.Ceiling((TaskbarVisualizer.Width + TaskbarBlockGap) * dpiScale);
                 break;
 
             case 1: // after widget (right for horizontal, below for vertical)
-                primaryPos = (int)(_taskbarGroupPrimaryEnd * dpiScale);
+                primaryPos = (int)Math.Ceiling((_taskbarGroupPrimaryEnd + TaskbarBlockGap) * dpiScale);
                 break;
 
             default:
@@ -723,6 +727,22 @@ on_error:
             Math.Min(first.Y, second.Y),
             Math.Abs(second.X - first.X),
             Math.Abs(second.Y - first.Y));
+    }
+
+    public bool TryGetMediaWidgetScreenRect(out Rect rect)
+    {
+        rect = Rect.Empty;
+        if (!SettingsManager.Current.TaskbarWidgetEnabled
+            || _mediaWidgetAutoHidden
+            || Widget.Visibility != Visibility.Visible
+            || Widget.ActualWidth <= 0
+            || Widget.ActualHeight <= 0)
+        {
+            return false;
+        }
+
+        rect = GetElementScreenRect(Widget);
+        return rect.Width > 0 && rect.Height > 0;
     }
 
     private void MixerButton_Click(object sender, RoutedEventArgs e)

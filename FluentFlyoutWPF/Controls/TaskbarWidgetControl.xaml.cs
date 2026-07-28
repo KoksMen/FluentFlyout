@@ -208,7 +208,7 @@ public partial class TaskbarWidgetControl : UserControl
         if (_mainWindow == null) return;
 
         // toggle main flyout when clicked
-        _mainWindow.ShowMediaFlyout(toggleMode: true, forceShow: true);
+        _mainWindow.ShowMediaFlyout(toggleMode: true, forceShow: true, anchorToTaskbarWidget: true);
     }
 
     private void Grid_MouseRightButtonUp(object sender, MouseButtonEventArgs e)

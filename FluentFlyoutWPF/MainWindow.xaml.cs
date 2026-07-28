@@ -536,7 +536,7 @@ public partial class MainWindow : MicaWindow
         return (left, top);
     }
 
-    public void OpenAnimation(MicaWindow window, bool alwaysBottom = false, MonitorInfo? selectedMonitor = null, MicaWindow? aboveReference = null)
+    public void OpenAnimation(MicaWindow window, bool alwaysBottom = false, MonitorInfo? selectedMonitor = null, MicaWindow? aboveReference = null, Rect? anchorRect = null)
     {
         var eventTriggers = window.Triggers[0] as EventTrigger;
         var beginStoryboard = eventTriggers.Actions[0] as BeginStoryboard;
@@ -544,6 +544,16 @@ public partial class MainWindow : MicaWindow
 
         DoubleAnimation moveAnimation = (DoubleAnimation)storyboard.Children[0];
         var monitor = selectedMonitor != null ? selectedMonitor.Value : getSelectedMonitor();
+        if (anchorRect is { Width: > 0, Height: > 0 } monitorAnchor)
+        {
+            Point anchorCenter = new(
+                monitorAnchor.Left + monitorAnchor.Width / 2,
+                monitorAnchor.Top + monitorAnchor.Height / 2);
+            MonitorInfo anchorMonitor = MonitorUtil.GetMonitors()
+                .FirstOrDefault(item => item.monitorArea.Contains(anchorCenter));
+            if (anchorMonitor.monitorArea.Width > 0 && anchorMonitor.monitorArea.Height > 0)
+                monitor = anchorMonitor;
+        }
         var workArea = monitor.workArea;
 
         // prevent flickering
@@ -555,8 +565,36 @@ public partial class MainWindow : MicaWindow
 
         double window_left = 0;
 
+        // Use the taskbar element's actual screen rectangle when available.
+        // This stays correct when neighbouring taskbar blocks move the widget.
+        if (anchorRect is { Width: > 0, Height: > 0 } anchor)
+        {
+            const double gap = 8;
+            const double edgePadding = 8;
+
+            window_left = anchor.Left + anchor.Width / 2 - windowRect.Width / 2;
+            window_left = Math.Clamp(
+                window_left,
+                workArea.Left + edgePadding,
+                Math.Max(workArea.Left + edgePadding, workArea.Right - windowRect.Width - edgePadding));
+
+            bool placeAbove = anchor.Top > workArea.Top + workArea.Height / 2;
+            double targetTop = placeAbove
+                ? anchor.Top - windowRect.Height - gap
+                : anchor.Bottom + gap;
+            targetTop = Math.Clamp(
+                targetTop,
+                workArea.Top + edgePadding,
+                Math.Max(workArea.Top + edgePadding, workArea.Bottom - windowRect.Height - edgePadding));
+
+            moveAnimation.To = targetTop;
+            if (SettingsManager.Current.FlyoutAnimationSpeed == 0)
+                moveAnimation.From = targetTop;
+            else
+                moveAnimation.From = targetTop + (placeAbove ? 20 : -20);
+        }
         // If a reference window is provided and visible, position the window next to it
-        if (aboveReference != null && aboveReference.IsVisible)
+        else if (aboveReference != null && aboveReference.IsVisible)
         {
             // Here we work with raw monitor coordinates, without taking DPI into account.
             double refWidth = aboveReference.Width * monitor.dpiX / 96.0;
@@ -1177,7 +1215,7 @@ public partial class MainWindow : MicaWindow
         }
     }
 
-    public async void ShowMediaFlyout(bool toggleMode = false, bool forceShow = false)
+    public async void ShowMediaFlyout(bool toggleMode = false, bool forceShow = false, bool anchorToTaskbarWidget = true)
     {
         // If in toggle mode and flyout is visible, close it unconditionally
         if (toggleMode && Visibility == Visibility.Visible && !_isHiding)
@@ -1232,10 +1270,17 @@ public partial class MainWindow : MicaWindow
             nextUpWindow = null;
         }
 
+        Rect? widgetAnchor = null;
+        if (anchorToTaskbarWidget
+            && taskbarWindow?.TryGetMediaWidgetScreenRect(out Rect actualWidgetRect) == true)
+        {
+            widgetAnchor = actualWidgetRect;
+        }
+
         if (_isHiding == true)
         {
             _isHiding = false;
-            OpenAnimation(this);
+            OpenAnimation(this, anchorRect: widgetAnchor);
         }
         cts.Cancel();
         cts = new CancellationTokenSource();
