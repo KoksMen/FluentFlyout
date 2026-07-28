@@ -636,6 +636,12 @@ public partial class UserSettings : ObservableObject
     [ObservableProperty]
     public partial bool TaskbarVisualizerBaselineAutoHide { get; set; }
 
+    /// <summary>
+    /// Play/animate visualizer only when media playback is actively playing.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool TaskbarVisualizerOnlyWhenPlaying { get; set; }
+
     [ObservableProperty]
     public partial bool VolumeControlEnabled { get; set; }
 

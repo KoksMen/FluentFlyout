@@ -328,6 +328,31 @@ namespace FluentFlyoutWPF.Classes
                     continue;
 
                 _lastUpdateTime = now;
+
+                if (SettingsManager.Current.TaskbarVisualizerOnlyWhenPlaying && !MainWindow.IsMediaPlaying)
+                {
+                    SettingsManager.Current.TaskbarVisualizerHasContent = false;
+                    bool hasActiveBars = false;
+                    if (_barValues != null)
+                    {
+                        for (int j = 0; j < BarCount; j++)
+                        {
+                            if (_barValues[j] > 0.001f)
+                            {
+                                hasActiveBars = true;
+                                break;
+                            }
+                        }
+
+                        if (hasActiveBars)
+                        {
+                            Array.Clear(_barValues, 0, _barValues.Length);
+                            UpdateBitmap();
+                        }
+                    }
+                    continue;
+                }
+
                 SettingsManager.Current.TaskbarVisualizerHasContent = true;
 
                 if (SettingsManager.Current.TaskbarVisualizerBaseline && !SettingsManager.Current.TaskbarVisualizerBaselineAutoHide)

@@ -305,6 +305,11 @@ public partial class MainWindow : MicaWindow
     public string? ActiveSessionId => _manuallySelectedSessionId;
 
     /// <summary>
+    /// Indicates whether active media session is currently playing audio.
+    /// </summary>
+    public static bool IsMediaPlaying { get; internal set; }
+
+    /// <summary>
     /// Returns sessions list with NO playback status checks (no COM calls). Safe to call from UI thread.
     /// </summary>
     public List<MediaSession> GetValidMediaSessions()
@@ -785,6 +790,7 @@ public partial class MainWindow : MicaWindow
 
             if (!mediaManager.IsStarted || activeSession?.ControlSession == null)
             {
+                IsMediaPlaying = false;
                 taskbarWindow?.UpdateUi("-", "-", null, GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed);
                 return;
             }
@@ -798,6 +804,9 @@ public partial class MainWindow : MicaWindow
                 var pbInfo = controlSession.GetPlaybackInfo();
                 return (props, pbInfo);
             });
+
+            IsMediaPlaying = playbackInfo?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
+
 
             // BitmapHelper creates WPF objects - must run back on UI thread (already here after await)
             var thumbnail = songInfo != null ? BitmapHelper.GetThumbnail(songInfo.Thumbnail) : null;
@@ -882,6 +891,7 @@ public partial class MainWindow : MicaWindow
             try
             {
                 var status = playbackInfo?.PlaybackStatus ?? mediaSession.ControlSession.GetPlaybackInfo()?.PlaybackStatus;
+                IsMediaPlaying = status == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
                 if (status == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
                 {
                     // Auto-switch to the session that just started playing
