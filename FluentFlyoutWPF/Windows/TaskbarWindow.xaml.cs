@@ -5,7 +5,6 @@ using FluentFlyout.Classes.Settings;
 using FluentFlyoutWPF;
 using FluentFlyoutWPF.Classes;
 using FluentFlyoutWPF.Classes.Utils;
-using FluentFlyoutWPF.Windows;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
@@ -25,7 +24,6 @@ namespace FluentFlyout.Windows;
 public partial class TaskbarWindow : Window
 {
     private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-    private const double TaskbarBlockGap = 8;
 
     private readonly DispatcherTimer _timer;
     private readonly int _nativeWidgetsPadding = 216;
@@ -40,13 +38,9 @@ public partial class TaskbarWindow : Window
     private int _lastSelectedMonitor = -1;
     private bool _positionUpdateInProgress;
     private readonly Dictionary<string, Task> _pendingAutomationTasks = [];
-    private double _taskbarGroupPrimaryStart;
-    private double _taskbarGroupPrimaryEnd;
 
     private GlobalSystemMediaTransportControlsSessionPlaybackStatus? _lastPlaybackStatus;
     private DispatcherTimer? _autoHideTimer;
-    private bool _mediaWidgetAutoHidden;
-    private ClipboardHistoryWindow? _clipboardHistoryWindow;
 
     public TaskbarWindow()
     {
@@ -70,13 +64,6 @@ public partial class TaskbarWindow : Window
         base.OnSourceInitialized(e);
         HwndSource source = (HwndSource)PresentationSource.FromDependencyObject(this);
         source.AddHook(WindowProc);
-    }
-
-    protected override void OnClosed(EventArgs e)
-    {
-        _clipboardHistoryWindow?.Close();
-        _clipboardHistoryWindow = null;
-        base.OnClosed(e);
     }
 
     private static IntPtr WindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -116,6 +103,15 @@ public partial class TaskbarWindow : Window
         SetupWindow();
         _mainWindow = (MainWindow)Application.Current.MainWindow;
         Widget.SetMainWindow(_mainWindow);
+
+        SettingsManager.Current.PropertyChanged += (s, args) =>
+        {
+            Dispatcher.Invoke(() =>
+            {
+                UpdatePosition();
+                _mainWindow?.UpdateTaskbar();
+            });
+        };
     }
 
     private IntPtr GetSelectedTaskbarHandle(out bool isMainTaskbarSelected)
@@ -292,10 +288,7 @@ on_error:
         }
 
         // Check premium status before allowing widget to be displayed
-        bool taskbarSurfaceEnabled = SettingsManager.Current.TaskbarWidgetEnabled
-            || SettingsManager.Current.TaskbarMixerButtonEnabled
-            || SettingsManager.Current.TaskbarClipboardButtonEnabled;
-        if (!taskbarSurfaceEnabled || !SettingsManager.Current.IsPremiumUnlocked)
+        if (!SettingsManager.Current.TaskbarWidgetEnabled || !SettingsManager.Current.IsPremiumUnlocked)
             return;
 
         try
@@ -414,10 +407,11 @@ on_error:
                      containerPos.X, containerPos.Y,
                      containerWidth, containerHeight,
                      SWP_NOZORDER | SWP_NOACTIVATE | SWP_ASYNCWINDOWPOS | SWP_SHOWWINDOW);
-            var (wRect, quickActionsRect) = PositionWidget(taskbarHandle, taskbarRect, dpiScale, isMainTaskbarSelected, isVertical);
+            var qRect = PositionQuickActions(taskbarHandle, taskbarRect, dpiScale, isMainTaskbarSelected, isVertical);
+            var wRect = PositionWidget(taskbarHandle, taskbarRect, dpiScale, isMainTaskbarSelected, isVertical);
             var vRect = PositionVisualizer(taskbarHandle, taskbarRect, dpiScale, isMainTaskbarSelected, isVertical);
 
-            UpdateWindowRegion(taskbarWindowHandle, quickActionsRect, wRect, vRect);
+            UpdateWindowRegion(taskbarWindowHandle, qRect, wRect, vRect);
 
             _lastSelectedMonitor = SettingsManager.Current.TaskbarWidgetSelectedMonitor;
         }
@@ -427,36 +421,16 @@ on_error:
         }
     }
 
-    private (Rect widgetRect, Rect quickActionsRect) PositionWidget(IntPtr taskbarHandle, RECT taskbarRect, double dpiScale, bool isMainTaskbarSelected, bool isVertical)
+    private Rect PositionWidget(IntPtr taskbarHandle, RECT taskbarRect, double dpiScale, bool isMainTaskbarSelected, bool isVertical)
     {
-        bool widgetEnabled = SettingsManager.Current.TaskbarWidgetEnabled;
-        bool hasQuickActions = SettingsManager.Current.TaskbarMixerButtonEnabled
-            || SettingsManager.Current.TaskbarClipboardButtonEnabled;
-        if (!widgetEnabled && !hasQuickActions)
-            return (Rect.Empty, Rect.Empty);
+        if (!SettingsManager.Current.TaskbarWidgetEnabled)
+            return Rect.Empty;
 
         // Calculate widget size
-        double logicalWidth = 0;
-        double logicalHeight = 36;
-        if (widgetEnabled)
-        {
-            (logicalWidth, logicalHeight) = Widget.CalculateSize(dpiScale);
-        }
+        var (logicalWidth, logicalHeight) = Widget.CalculateSize(dpiScale);
 
-        int widgetPhysicalWidth = (int)(logicalWidth * dpiScale * _scale);
+        int physicalWidth = (int)(logicalWidth * dpiScale * _scale);
         int physicalHeight = (int)(logicalHeight * dpiScale);
-
-        QuickActionsPanel.Visibility = hasQuickActions ? Visibility.Visible : Visibility.Collapsed;
-        QuickActionsPanel.LayoutTransform = isVertical ? new System.Windows.Media.RotateTransform(90) : null;
-        QuickActionsPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-
-        int quickActionsPhysicalWidth = hasQuickActions
-            ? (int)Math.Ceiling(QuickActionsPanel.DesiredSize.Width * dpiScale)
-            : 0;
-        int quickActionsGap = hasQuickActions && widgetEnabled
-            ? (int)Math.Ceiling(TaskbarBlockGap * dpiScale)
-            : 0;
-        int physicalWidth = widgetPhysicalWidth + quickActionsPhysicalWidth + quickActionsGap;
 
         int taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
         int taskbarWidth = taskbarRect.Right - taskbarRect.Left;
@@ -466,18 +440,10 @@ on_error:
         Widget.RenderTransform = System.Windows.Media.Transform.Identity;
         Widget.SetVerticalMode(isVertical);
 
-        // On a vertical taskbar the widget is rotated 90°, so the axes flip:
-        //   primarySize = taskbarHeight, positioning runs along Y
-        //   crossSize   = taskbarWidth,  widget is centered along X
-        //   physicalWidth  = visual extent along primary axis (logical width = visual height after rotation)
-        //   physicalHeight = visual extent along cross axis   (logical height = visual width after rotation)
         int primarySize = isVertical ? taskbarHeight : taskbarWidth;
         int crossSize = isVertical ? taskbarWidth : taskbarHeight;
 
-        // Center on the cross axis; both orientations use physicalHeight for the cross dimension
         int crossPos = (crossSize - physicalHeight) / 2;
-
-        // Primary axis position (calculated per-case below)
         int primaryPos = 0;
 
         switch (SettingsManager.Current.TaskbarWidgetPosition)
@@ -485,11 +451,17 @@ on_error:
             case 0: // near start (left for horizontal, top for vertical)
                 primaryPos = 20;
 
+                int quickActionsWidth = (SettingsManager.Current.TaskbarMixerButtonEnabled ? 40 : 0) + (SettingsManager.Current.TaskbarClipboardButtonEnabled ? 40 : 0);
+                if (quickActionsWidth > 0)
+                {
+                    primaryPos += quickActionsWidth + 4;
+                }
+
                 if (SettingsManager.Current.TaskbarVisualizerEnabled && SettingsManager.Current.TaskbarVisualizerPosition == 0)
-                    primaryPos += (int)Math.Ceiling((TaskbarVisualizer.Width + TaskbarBlockGap) * dpiScale);
+                    primaryPos += (int)(TaskbarVisualizer.Width * dpiScale) + 4;
 
                 if (!SettingsManager.Current.TaskbarWidgetPadding)
-                    break;
+                    break;;
 
                 // automatic widget padding to the start
                 try
@@ -523,16 +495,16 @@ on_error:
 
                 if (SettingsManager.Current.TaskbarVisualizerEnabled)
                     if (SettingsManager.Current.TaskbarVisualizerPosition == 0)
-                        primaryPos += (int)Math.Ceiling((TaskbarVisualizer.Width + TaskbarBlockGap) * dpiScale / 2);
+                        primaryPos += (int)(TaskbarVisualizer.Width * dpiScale) / 2 + 4;
                     else
-                        primaryPos -= (int)Math.Ceiling((TaskbarVisualizer.Width + TaskbarBlockGap) * dpiScale / 2);
+                        primaryPos -= (int)(TaskbarVisualizer.Width * dpiScale) / 2 - 4;
                 break;
 
             case 2: // near end (right for horizontal, bottom for vertical)
                 try
                 {
                     if (SettingsManager.Current.TaskbarVisualizerEnabled && SettingsManager.Current.TaskbarVisualizerPosition == 1)
-                        primaryPos -= (int)Math.Ceiling((TaskbarVisualizer.Width + TaskbarBlockGap) * dpiScale);
+                        primaryPos -= (int)(TaskbarVisualizer.Width * dpiScale) - 4;
 
                     // Horizontal only: try to position next to native Widgets button on the end side
                     if (!isVertical && SettingsManager.Current.TaskbarWidgetPadding)
@@ -629,41 +601,15 @@ on_error:
 
         // Set widget position within canvas
         // primaryPos → left (horizontal) or top (vertical); crossPos → top (horizontal) or left (vertical)
-        int widgetPrimaryPos = primaryPos + quickActionsPhysicalWidth + quickActionsGap;
-        Widget.Visibility = widgetEnabled && !_mediaWidgetAutoHidden ? Visibility.Visible : Visibility.Hidden;
-        Canvas.SetLeft(Widget, (isVertical ? crossPos : widgetPrimaryPos) / dpiScale);
-        Canvas.SetTop(Widget, (isVertical ? widgetPrimaryPos : crossPos) / dpiScale);
-        Widget.Width = widgetPhysicalWidth / dpiScale;
+        Canvas.SetLeft(Widget, (isVertical ? crossPos : primaryPos) / dpiScale);
+        Canvas.SetTop(Widget, (isVertical ? primaryPos : crossPos) / dpiScale);
+        Widget.Width = physicalWidth / dpiScale;
         Widget.Height = physicalHeight / dpiScale;
 
-        Rect quickActionsRect = Rect.Empty;
-        if (hasQuickActions)
-        {
-            int quickActionsPhysicalHeight = (int)Math.Ceiling(QuickActionsPanel.DesiredSize.Height * dpiScale);
-            int quickActionsCrossPos = (crossSize - quickActionsPhysicalHeight) / 2;
-
-            Canvas.SetLeft(QuickActionsPanel, (isVertical ? quickActionsCrossPos : primaryPos) / dpiScale);
-            Canvas.SetTop(QuickActionsPanel, (isVertical ? primaryPos : quickActionsCrossPos) / dpiScale);
-
-            double quickRectWidth = isVertical ? quickActionsPhysicalHeight : quickActionsPhysicalWidth;
-            double quickRectHeight = isVertical ? quickActionsPhysicalWidth : quickActionsPhysicalHeight;
-            quickActionsRect = new Rect(
-                Canvas.GetLeft(QuickActionsPanel) * dpiScale,
-                Canvas.GetTop(QuickActionsPanel) * dpiScale,
-                quickRectWidth,
-                quickRectHeight);
-        }
-
         // After 90° LayoutTransform the visual bounding rect has swapped dimensions
-        double rectW = isVertical ? physicalHeight : widgetPhysicalWidth;
-        double rectH = isVertical ? widgetPhysicalWidth : physicalHeight;
-        var widgetRect = !widgetEnabled || _mediaWidgetAutoHidden
-            ? Rect.Empty
-            : new Rect(Canvas.GetLeft(Widget) * dpiScale, Canvas.GetTop(Widget) * dpiScale, rectW, rectH);
-
-        _taskbarGroupPrimaryStart = primaryPos / dpiScale;
-        _taskbarGroupPrimaryEnd = (primaryPos + physicalWidth) / dpiScale;
-        return (widgetRect, quickActionsRect);
+        double rectW = isVertical ? physicalHeight : physicalWidth;
+        double rectH = isVertical ? physicalWidth : physicalHeight;
+        return new Rect(Canvas.GetLeft(Widget) * dpiScale, Canvas.GetTop(Widget) * dpiScale, rectW, rectH);
     }
 
     private Rect PositionVisualizer(IntPtr taskbarHandle, RECT taskbarRect, double dpiScale, bool isMainTaskbarSelected, bool isVertical)
@@ -671,34 +617,32 @@ on_error:
         if (!SettingsManager.Current.TaskbarVisualizerEnabled)
             return Rect.Empty;
 
+        double visualizerWidth = 84;
+
+        TaskbarVisualizer.Visibility = Visibility.Visible;
+        TaskbarVisualizer.Width = visualizerWidth;
+
         // Rotate visualizer 90° on vertical taskbar so it fits the slim width
         TaskbarVisualizer.LayoutTransform = isVertical ? new System.Windows.Media.RotateTransform(90) : null;
 
         int taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
         int taskbarWidth = taskbarRect.Right - taskbarRect.Left;
 
-        // TaskbarVisualizer.Height (40) is the cross-axis extent for both orientations:
-        //   horizontal: actual height = 40, centered vertically (-1 to match native element alignment)
-        //   vertical:   visual width after rotation = 40, centered horizontally
         int crossSize = isVertical ? taskbarWidth : taskbarHeight;
-        int crossOffset = isVertical ? 0 : -1; // -1 aligns with native taskbar elements on horizontal
+        int crossOffset = isVertical ? 0 : -1;
         int crossPos = (crossSize - (int)(TaskbarVisualizer.Height * dpiScale)) / 2 + crossOffset;
 
-        // TaskbarVisualizer.Width (84) is the primary-axis extent for both orientations:
-        //   horizontal: actual width = 84
-        //   vertical:   visual height after rotation = 84
-        // Position adjacent to the widget along the primary axis
+        double widgetPrimaryStart = isVertical ? Canvas.GetTop(Widget) : Canvas.GetLeft(Widget);
         int primaryPos;
 
         switch (SettingsManager.Current.TaskbarVisualizerPosition)
         {
             case 0: // before widget (left for horizontal, above for vertical)
-                primaryPos = (int)(_taskbarGroupPrimaryStart * dpiScale)
-                    - (int)Math.Ceiling((TaskbarVisualizer.Width + TaskbarBlockGap) * dpiScale);
+                primaryPos = (int)(widgetPrimaryStart * dpiScale) - (int)(visualizerWidth * dpiScale);
                 break;
 
             case 1: // after widget (right for horizontal, below for vertical)
-                primaryPos = (int)Math.Ceiling((_taskbarGroupPrimaryEnd + TaskbarBlockGap) * dpiScale);
+                primaryPos = (int)(widgetPrimaryStart * dpiScale) + (int)(Widget.Width * dpiScale);
                 break;
 
             default:
@@ -707,60 +651,95 @@ on_error:
         }
 
         // Set visualizer position within canvas
-        // primaryPos → left (horizontal) or top (vertical); crossPos → top (horizontal) or left (vertical)
         Canvas.SetLeft(TaskbarVisualizer, (isVertical ? crossPos : primaryPos) / dpiScale);
         Canvas.SetTop(TaskbarVisualizer, (isVertical ? primaryPos : crossPos) / dpiScale);
 
-        // After 90° LayoutTransform the visual bounding rect has swapped dimensions
-        double rectW = isVertical ? TaskbarVisualizer.Height * dpiScale : TaskbarVisualizer.Width * dpiScale;
-        double rectH = isVertical ? TaskbarVisualizer.Width * dpiScale : TaskbarVisualizer.Height * dpiScale;
+        double rectW = isVertical ? TaskbarVisualizer.Height * dpiScale : visualizerWidth * dpiScale;
+        double rectH = isVertical ? visualizerWidth * dpiScale : TaskbarVisualizer.Height * dpiScale;
         return new Rect(Canvas.GetLeft(TaskbarVisualizer) * dpiScale, Canvas.GetTop(TaskbarVisualizer) * dpiScale, rectW, rectH);
     }
 
-    private static Rect GetElementScreenRect(FrameworkElement element)
+    private Rect PositionQuickActions(IntPtr taskbarHandle, RECT taskbarRect, double dpiScale, bool isMainTaskbarSelected, bool isVertical)
     {
-        Point first = element.PointToScreen(new Point(0, 0));
-        Point second = element.PointToScreen(new Point(element.ActualWidth, element.ActualHeight));
-
-        return new Rect(
-            Math.Min(first.X, second.X),
-            Math.Min(first.Y, second.Y),
-            Math.Abs(second.X - first.X),
-            Math.Abs(second.Y - first.Y));
-    }
-
-    public bool TryGetMediaWidgetScreenRect(out Rect rect)
-    {
-        rect = Rect.Empty;
-        if (!SettingsManager.Current.TaskbarWidgetEnabled
-            || _mediaWidgetAutoHidden
-            || Widget.Visibility != Visibility.Visible
-            || Widget.ActualWidth <= 0
-            || Widget.ActualHeight <= 0)
+        bool hasQuickActions = SettingsManager.Current.TaskbarMixerButtonEnabled || SettingsManager.Current.TaskbarClipboardButtonEnabled;
+        if (!hasQuickActions)
         {
-            return false;
+            QuickActionsPanel.Visibility = Visibility.Collapsed;
+            return Rect.Empty;
         }
 
-        rect = GetElementScreenRect(Widget);
-        return rect.Width > 0 && rect.Height > 0;
+        QuickActionsPanel.Visibility = Visibility.Visible;
+
+        int taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
+        int taskbarWidth = taskbarRect.Right - taskbarRect.Left;
+        int crossSize = isVertical ? taskbarWidth : taskbarHeight;
+        int crossPos = (crossSize - (int)(36 * dpiScale)) / 2;
+
+        int quickActionsWidth = (SettingsManager.Current.TaskbarMixerButtonEnabled ? 40 : 0) + (SettingsManager.Current.TaskbarClipboardButtonEnabled ? 40 : 0);
+        int primaryPos = 20;
+
+        if (SettingsManager.Current.TaskbarWidgetPadding)
+        {
+            try
+            {
+                (bool found, Rect nativeWidgetRect) = GetTaskbarWidgetRect(taskbarHandle);
+                bool inStartHalf = isVertical
+                    ? nativeWidgetRect.Bottom < (taskbarRect.Top + taskbarRect.Bottom) / 2.0
+                    : nativeWidgetRect.Right < (taskbarRect.Left + taskbarRect.Right) / 2.0;
+
+                if (found && inStartHalf)
+                {
+                    primaryPos = isVertical
+                        ? (int)(nativeWidgetRect.Bottom - taskbarRect.Top) + 2
+                        : (int)(nativeWidgetRect.Right - taskbarRect.Left) + 2;
+                }
+            }
+            catch { }
+        }
+
+        Canvas.SetLeft(QuickActionsPanel, (isVertical ? crossPos : primaryPos) / dpiScale);
+        Canvas.SetTop(QuickActionsPanel, (isVertical ? primaryPos : crossPos) / dpiScale);
+
+        double width = quickActionsWidth * dpiScale;
+        double height = 40 * dpiScale;
+
+        return new Rect(Canvas.GetLeft(QuickActionsPanel) * dpiScale, Canvas.GetTop(QuickActionsPanel) * dpiScale, width, height);
+    }
+
+    private static Rect GetElementLogicalScreenRect(FrameworkElement element)
+    {
+        try
+        {
+            Point first = element.PointToScreen(new Point(0, 0));
+            Point second = element.PointToScreen(new Point(element.ActualWidth, element.ActualHeight));
+
+            PresentationSource source = PresentationSource.FromVisual(element);
+            double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+            double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+
+            return new Rect(
+                Math.Min(first.X, second.X) / dpiX,
+                Math.Min(first.Y, second.Y) / dpiY,
+                Math.Abs(second.X - first.X) / dpiX,
+                Math.Abs(second.Y - first.Y) / dpiY);
+        }
+        catch
+        {
+            return Rect.Empty;
+        }
     }
 
     private void MixerButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_mainWindow == null)
-            return;
+        (bool foundTaskbar, Rect taskbarRect) = GetTaskbarFrameRect(GetSelectedTaskbarHandle(out _));
+        if (!foundTaskbar)
+        {
+            taskbarRect = new Rect(0, SystemParameters.PrimaryScreenHeight - 40, SystemParameters.PrimaryScreenWidth, 40);
+        }
 
-        IntPtr taskbarHandle = GetSelectedTaskbarHandle(out _);
-        if (!GetWindowRect(taskbarHandle, out RECT taskbarRect))
-            return;
-
-        _mainWindow.ShowVolumeMixerFromTaskbar(
-            GetElementScreenRect(MixerButton),
-            new Rect(
-                taskbarRect.Left,
-                taskbarRect.Top,
-                taskbarRect.Right - taskbarRect.Left,
-                taskbarRect.Bottom - taskbarRect.Top));
+        _mainWindow?.ShowVolumeMixerFromTaskbar(
+            GetElementLogicalScreenRect(MixerButton),
+            taskbarRect);
     }
 
     private void ClipboardButton_Click(object sender, RoutedEventArgs e)
@@ -778,35 +757,30 @@ on_error:
             return;
         }
 
-        if (_mainWindow == null)
-            return;
+        (bool foundTaskbar, Rect taskbarRect) = GetTaskbarFrameRect(GetSelectedTaskbarHandle(out _));
+        if (!foundTaskbar)
+        {
+            taskbarRect = new Rect(0, SystemParameters.PrimaryScreenHeight - 40, SystemParameters.PrimaryScreenWidth, 40);
+        }
 
         IntPtr returnFocusWindow = GetForegroundWindow();
-        IntPtr taskbarHandle = GetSelectedTaskbarHandle(out _);
-        if (!GetWindowRect(taskbarHandle, out RECT taskbarRect))
-            return;
-
-        _clipboardHistoryWindow ??= new ClipboardHistoryWindow(_mainWindow);
-        _clipboardHistoryWindow.ToggleFromTaskbar(
-            GetElementScreenRect(ClipboardButton),
-            new Rect(
-                taskbarRect.Left,
-                taskbarRect.Top,
-                taskbarRect.Right - taskbarRect.Left,
-                taskbarRect.Bottom - taskbarRect.Top),
+        var clipboardWindow = new FluentFlyoutWPF.Windows.ClipboardHistoryWindow(_mainWindow!);
+        clipboardWindow.ToggleFromTaskbar(
+            GetElementLogicalScreenRect(ClipboardButton),
+            taskbarRect,
             returnFocusWindow);
     }
 
     public void UpdateUi(string title, string artist, BitmapImage? icon, GlobalSystemMediaTransportControlsSessionPlaybackStatus? playbackStatus, GlobalSystemMediaTransportControlsSessionPlaybackControls? playbackControls = null)
     {
-        bool taskbarSurfaceEnabled = SettingsManager.Current.TaskbarWidgetEnabled
-            || SettingsManager.Current.TaskbarMixerButtonEnabled
-            || SettingsManager.Current.TaskbarClipboardButtonEnabled;
+        bool hasQuickActions = SettingsManager.Current.TaskbarMixerButtonEnabled || SettingsManager.Current.TaskbarClipboardButtonEnabled;
+        bool hasVisualizer = SettingsManager.Current.TaskbarVisualizerEnabled;
+        bool hasWidget = SettingsManager.Current.TaskbarWidgetEnabled;
 
-        // Check premium status - hide the complete taskbar surface if it is unavailable
-        if (!taskbarSurfaceEnabled || !SettingsManager.Current.IsPremiumUnlocked)
+        // Check premium status - hide window if nothing is enabled or not unlocked
+        if ((!hasWidget && !hasVisualizer && !hasQuickActions) || !SettingsManager.Current.IsPremiumUnlocked)
         {
-            if (_timer.IsEnabled) // pause timer to save resources
+            if (_timer.IsEnabled)
                 _timer.Stop();
 
             Dispatcher.Invoke(() =>
@@ -816,16 +790,15 @@ on_error:
             return;
         }
 
-        // Autohide - Widget hides when playback is paused
         _lastPlaybackStatus = playbackStatus;
 
-        if (SettingsManager.Current.TaskbarWidgetEnabled && SettingsManager.Current.TaskbarWidgetAutoHide)
+        // Autohide Widget independently when media is paused
+        if (hasWidget && SettingsManager.Current.TaskbarWidgetAutoHide)
         {
             if (playbackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing)
             {
                 _autoHideTimer?.Stop();
                 _autoHideTimer = null;
-                _mediaWidgetAutoHidden = false;
 
                 Dispatcher.Invoke(() =>
                 {
@@ -835,7 +808,6 @@ on_error:
             }
             else
             {
-                // Start delayed hide
                 if (_autoHideTimer == null)
                 {
                     _autoHideTimer = new DispatcherTimer
@@ -852,19 +824,14 @@ on_error:
                         {
                             Dispatcher.Invoke(() =>
                             {
-                                bool hasQuickActions = SettingsManager.Current.TaskbarMixerButtonEnabled
-                                    || SettingsManager.Current.TaskbarClipboardButtonEnabled;
-
-                                if (hasQuickActions)
+                                Widget.Visibility = Visibility.Collapsed;
+                                if (!hasVisualizer && !hasQuickActions)
                                 {
-                                    _mediaWidgetAutoHidden = true;
-                                    Widget.Visibility = Visibility.Hidden;
-                                    Visibility = Visibility.Visible;
-                                    UpdatePosition();
+                                    Visibility = Visibility.Collapsed;
                                 }
                                 else
                                 {
-                                    Visibility = Visibility.Collapsed;
+                                    UpdatePosition();
                                 }
                             });
                         }
@@ -876,24 +843,21 @@ on_error:
         }
         else
         {
-            _mediaWidgetAutoHidden = false;
-            Widget.Visibility = SettingsManager.Current.TaskbarWidgetEnabled
-                ? Visibility.Visible
-                : Visibility.Hidden;
+            Widget.Visibility = hasWidget ? Visibility.Visible : Visibility.Collapsed;
         }
 
         if (!_timer.IsEnabled)
             _timer.Start();
 
-        // Delegate UI update to widget control
-        Widget.UpdateUi(title, artist, icon, playbackStatus, playbackControls);
-
-        // Update position after UI change
-        Dispatcher.BeginInvoke(() => UpdatePosition(), DispatcherPriority.Background);
+        if (hasWidget)
+        {
+            Widget.UpdateUi(title, artist, icon, playbackStatus, playbackControls);
+        }
 
         Dispatcher.Invoke(() =>
         {
             Visibility = Visibility.Visible;
+            UpdatePosition();
         });
     }
 
@@ -1013,5 +977,32 @@ on_error:
     private (bool, Rect) GetTaskbarFrameRect(IntPtr taskbarHandle)
     {
         return GetTaskbarXamlElementRect(taskbarHandle, ref _taskbarFrameElement, "TaskbarFrame");
+    }
+
+    private static Rect GetElementScreenRect(FrameworkElement element)
+    {
+        Point first = element.PointToScreen(new Point(0, 0));
+        Point second = element.PointToScreen(new Point(element.ActualWidth, element.ActualHeight));
+
+        return new Rect(
+            Math.Min(first.X, second.X),
+            Math.Min(first.Y, second.Y),
+            Math.Abs(second.X - first.X),
+            Math.Abs(second.Y - first.Y));
+    }
+
+    public bool TryGetMediaWidgetScreenRect(out Rect rect)
+    {
+        rect = Rect.Empty;
+        if (!SettingsManager.Current.TaskbarWidgetEnabled
+            || Widget.Visibility != Visibility.Visible
+            || Widget.ActualWidth <= 0
+            || Widget.ActualHeight <= 0)
+        {
+            return false;
+        }
+
+        rect = GetElementScreenRect(Widget);
+        return rect.Width > 0 && rect.Height > 0;
     }
 }

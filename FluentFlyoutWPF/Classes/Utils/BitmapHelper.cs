@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2024-2026 The FluentFlyout Authors
+// Copyright (c) 2024-2026 The FluentFlyout Authors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using FluentFlyout.Classes.Settings;
@@ -105,23 +105,38 @@ internal static class BitmapHelper
         get => _currentDominantColors ??= [];
     }
 
-    public static int GetStableThumbnailHash(IRandomAccessStreamReference thumbnail)
+    private static byte[]? ReadThumbnailBytes(IRandomAccessStreamReference? thumbnail)
+    {
+        if (thumbnail == null) return null;
+        try
+        {
+            using var ras = thumbnail.OpenReadAsync().GetAwaiter().GetResult();
+            if (ras == null) return null;
+            using var stream = ras.AsStreamForRead();
+            using var ms = new MemoryStream();
+            stream.CopyTo(ms);
+            byte[] bytes = ms.ToArray();
+            return bytes.Length > 0 ? bytes : null;
+        }
+        catch (Exception ex)
+        {
+            Logger.Warn(ex, "Failed to read thumbnail bytes");
+            return null;
+        }
+    }
+
+    public static int GetStableThumbnailHash(IRandomAccessStreamReference? thumbnail)
     {
         if (thumbnail == null)
             return 0;
 
-        try
-        {
-            using Stream stream = thumbnail.OpenReadAsync().GetAwaiter().GetResult().AsStreamForRead();
-            using SHA256 sha256 = SHA256.Create();
-            byte[] hashBytes = sha256.ComputeHash(stream);
-            return BitConverter.ToInt32(hashBytes, 0);
-        }
-        catch (Exception ex)
-        {
-            Logger.Info(ex, "Failed to compute thumbnail hash; falling back to object hash");
-            return thumbnail.GetHashCode();
-        }
+        byte[]? bytes = ReadThumbnailBytes(thumbnail);
+        if (bytes == null || bytes.Length == 0)
+            return 0;
+
+        using SHA256 sha256 = SHA256.Create();
+        byte[] hashBytes = sha256.ComputeHash(bytes);
+        return BitConverter.ToInt32(hashBytes, 0);
     }
 
     internal static BitmapImage? GetThumbnail(IRandomAccessStreamReference? thumbnail, int maxThumbnailSize = _maxThumbnailSize)
@@ -129,7 +144,16 @@ internal static class BitmapHelper
         if (thumbnail == null)
             return null;
 
-        int hashCode = GetStableThumbnailHash(thumbnail);
+        byte[]? bytes = ReadThumbnailBytes(thumbnail);
+        if (bytes == null || bytes.Length == 0)
+            return null;
+
+        int hashCode;
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            byte[] hashBytes = sha256.ComputeHash(bytes);
+            hashCode = BitConverter.ToInt32(hashBytes, 0);
+        }
 
         if (hashCode == 0)
             return null;
@@ -141,24 +165,29 @@ internal static class BitmapHelper
             return cachedImage;
         }
 
-        BitmapImage image = new();
-        using (var imageStream = thumbnail.OpenReadAsync().GetAwaiter().GetResult().AsStreamForRead())
+        try
         {
-            // initialize the BitmapImage
-            image.BeginInit();
-            image.CacheOption = BitmapCacheOption.OnLoad;
-            image.DecodePixelWidth = maxThumbnailSize;
-            image.StreamSource = imageStream;
-            image.EndInit();
+            BitmapImage image = new();
+            using (var ms = new MemoryStream(bytes))
+            {
+                image.BeginInit();
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.DecodePixelWidth = maxThumbnailSize;
+                image.StreamSource = ms;
+                image.EndInit();
+            }
+            image.Freeze();
+
+            _thumbnailCache.Set(hashCode, image);
+            _currentHashCode = hashCode;
+            _currentHashCodeContext.Value = hashCode;
+            return image;
         }
-        image.Freeze();
-
-        // add bitmap to thumbnail cache with empty brush
-        _thumbnailCache.Set(hashCode, image);
-
-        _currentHashCode = hashCode;
-        _currentHashCodeContext.Value = hashCode;
-        return image;
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Failed to decode thumbnail image from bytes");
+            return null;
+        }
     }
 
     internal static CroppedBitmap? CropToSquare(BitmapImage? sourceImage)

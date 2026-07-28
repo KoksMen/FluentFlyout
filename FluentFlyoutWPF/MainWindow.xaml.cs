@@ -313,31 +313,12 @@ public partial class MainWindow : MicaWindow
     public bool IsWidgetSessionAllowed(MediaSession? session)
     {
         if (session == null) return false;
-        if (!IsSessionAllowed(session)) return false; // Must be allowed globally first
-        if (!SettingsManager.Current.WidgetAppFilteringEnabled) return true;
-
-        string appId = session.Id ?? string.Empty;
-        string appName = MediaPlayerData.GetAndCacheMediaPlayerData(appId).Item1 ?? appId;
-
-        if (SettingsManager.Current.WidgetBlockedApps != null && SettingsManager.Current.WidgetBlockedApps.Any(b =>
-                appName.Contains(b, StringComparison.OrdinalIgnoreCase) ||
-                appId.Contains(b, StringComparison.OrdinalIgnoreCase)))
-            return false;
-
-        return true;
+        return IsSessionAllowed(session);
     }
 
     public MediaSession? GetActiveWidgetMediaSession()
     {
-        var validSessions = mediaManager.CurrentMediaSessions.Values.Where(IsWidgetSessionAllowed).ToList();
-
-        if (validSessions.Count == 0) return null;
-
-        var focused = mediaManager.GetFocusedSession();
-        if (focused != null && validSessions.Any(s => s.Id == focused.Id))
-            return focused;
-
-        return validSessions.FirstOrDefault();
+        return GetActiveMediaSession();
     }
 
     public void RefreshFilteredMedia()
@@ -719,32 +700,27 @@ public partial class MainWindow : MicaWindow
 #endif     
         pauseOtherMediaSessionsIfNeeded(mediaSession);
 
-        var focusedWidgetSession = GetActiveWidgetMediaSession();
-        if (focusedWidgetSession == null)
+        var focusedSession = GetActiveMediaSession();
+        if (focusedSession == null)
         {
             taskbarWindow?.UpdateUi("-", "-", null, GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed);
+            return;
         }
-        else
-        {
-            var tbSongInfo = TryGetMediaProperties(focusedWidgetSession.ControlSession);
-            if (tbSongInfo != null)
-            {
-                var tbThumbnail = BitmapHelper.GetThumbnail(tbSongInfo.Thumbnail);
-                BitmapHelper.GetDominantColors(1);
-                var tbPlayback = focusedWidgetSession.ControlSession.GetPlaybackInfo();
 
-                taskbarWindow?.UpdateUi(tbSongInfo.Title, tbSongInfo.Artist, tbThumbnail, tbPlayback?.PlaybackStatus, tbPlayback?.Controls);
-            }
+        var tbSongInfo = TryGetMediaProperties(focusedSession.ControlSession);
+        if (tbSongInfo != null)
+        {
+            var tbThumbnail = BitmapHelper.GetThumbnail(tbSongInfo.Thumbnail);
+            BitmapHelper.GetDominantColors(1);
+            var tbPlayback = focusedSession.ControlSession.GetPlaybackInfo();
+
+            taskbarWindow?.UpdateUi(tbSongInfo.Title, tbSongInfo.Artist, tbThumbnail, tbPlayback?.PlaybackStatus, tbPlayback?.Controls);
         }
 
         if (IsVisible)
         {
-            var focusedSession = GetActiveMediaSession();
-            if (focusedSession != null)
-            {
-                UpdateUI(focusedSession);
-                HandlePlayBackState(playbackInfo?.PlaybackStatus);
-            }
+            UpdateUI(focusedSession);
+            HandlePlayBackState(playbackInfo?.PlaybackStatus);
         }
     }
 
@@ -789,26 +765,7 @@ public partial class MainWindow : MicaWindow
         var thumbnail = BitmapHelper.GetThumbnail(songInfo.Thumbnail);
         BitmapHelper.GetDominantColors(1);
 
-        var currentWidgetSession = GetActiveWidgetMediaSession();
-        if (currentWidgetSession == null)
-        {
-            taskbarWindow?.UpdateUi("-", "-", null, GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed);
-        }
-        else
-        {
-            var tbSongInfo = TryGetMediaProperties(currentWidgetSession.ControlSession);
-            if (tbSongInfo != null)
-            {
-                var tbThumbnail = BitmapHelper.GetThumbnail(tbSongInfo.Thumbnail);
-                BitmapHelper.GetDominantColors(1);
-                var tbPlayback = currentWidgetSession.ControlSession.GetPlaybackInfo();
-                taskbarWindow?.UpdateUi(tbSongInfo.Title, tbSongInfo.Artist, tbThumbnail, tbPlayback?.PlaybackStatus, tbPlayback?.Controls);
-            }
-            else
-            {
-                taskbarWindow?.UpdateUi("-", "-", null, GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed);
-            }
-        }
+        taskbarWindow?.UpdateUi(songInfo.Title, songInfo.Artist, thumbnail, playbackInfo.PlaybackStatus, playbackInfo.Controls);
 
         pauseOtherMediaSessionsIfNeeded(mediaSession);
 
@@ -819,16 +776,16 @@ public partial class MainWindow : MicaWindow
             {
                 Dispatcher.Invoke(() =>
                 {
-                    if (nextUpWindow == null && playbackInfo.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing) // double-check within the Dispatcher to prevent race conditions
+                    if (nextUpWindow == null && playbackInfo?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing) // double-check within the Dispatcher to prevent race conditions
                     {
-                        nextUpWindow = new NextUpWindow(songInfo.Title, songInfo.Artist, thumbnail);
-                        currentTitle = songInfo.Title;
+                        nextUpWindow = new NextUpWindow(mediaProperties.Title, mediaProperties.Artist, thumbnail);
+                        currentTitle = mediaProperties.Title;
                         nextUpWindow.Closed += (s, e) => nextUpWindow = null; // set nextUpWindow to null when closed
                     }
                 });
             }
 
-            if (nextUpWindow == null && IsVisible == false && songInfo.Thumbnail != null && currentTitle != songInfo.Title)
+            if (nextUpWindow == null && IsVisible == false && mediaProperties.Thumbnail != null && currentTitle != mediaProperties.Title)
             {
                 createNewNextUpWindow();
             }
@@ -844,7 +801,7 @@ public partial class MainWindow : MicaWindow
                 });
                 createNewNextUpWindow();
             }
-            else if (nextUpWindow != null && songInfo.Thumbnail != null)
+            else if (nextUpWindow != null && mediaProperties.Thumbnail != null)
             {
                 Dispatcher.Invoke(() =>
                 {

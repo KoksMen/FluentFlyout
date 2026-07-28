@@ -558,18 +558,6 @@ public partial class UserSettings : ObservableObject
     public partial ObservableCollection<string> BlockedApps { get; set; }
 
     /// <summary>
-    /// When true, enables app filtering specifically for the taskbar widget.
-    /// </summary>
-    [ObservableProperty]
-    public partial bool WidgetAppFilteringEnabled { get; set; }
-
-    /// <summary>
-    /// Returns a list of apps that are NOT allowed to display on the taskbar widget.
-    /// </summary>
-    [ObservableProperty]
-    public partial ObservableCollection<string> WidgetBlockedApps { get; set; }
-
-    /// <summary>
     /// When true, displays a flyout showing the active keyboard layout when input language changes.
     /// </summary>
     [ObservableProperty]
@@ -906,9 +894,6 @@ public partial class UserSettings : ObservableObject
         AnonymousTelemetryAllowed = true;
         AllowedApps = [];
         BlockedApps = [];
-        WidgetAppFilteringEnabled = false;
-        WidgetBlockedApps = [];
-
         // Custom feature defaults
         GlobalFlyoutEnabled = true;
         MediaFlyoutShowInExclusiveFullscreen = false;
