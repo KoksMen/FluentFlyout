@@ -8,7 +8,7 @@
     xmlns:controls="clr-namespace:MicaWPF.Controls;assembly=MicaWPF"
     Height="150" Width="310" Top="-9999"
     WindowStyle="None" mc:Ignorable="d" ShowInTaskbar="False"
-    ResizeMode="NoResize" MouseEnter="MicaWindow_MouseEnter" PreviewMouseWheel="MainWindow_PreviewMouseWheel"
+    ResizeMode="NoResize" MouseEnter="MicaWindow_MouseEnter" PreviewMouseWheel="MainWindow_PreviewMouseWheel" Deactivated="MainWindow_Deactivated"
     ChangeTitleColorWhenInactive="False"
     TextOptions.TextRenderingMode="ClearType" TextOptions.TextFormattingMode="Ideal" 
     FontFamily="{Binding FontFamily}"

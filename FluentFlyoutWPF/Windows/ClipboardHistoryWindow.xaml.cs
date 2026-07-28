@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage.Streams;
 using WindowsClipboard = Windows.ApplicationModel.DataTransfer.Clipboard;
 using static FluentFlyout.Classes.NativeMethods;
 
@@ -38,22 +39,37 @@ public partial class ClipboardHistoryWindow : MicaWindow
         WindowHelper.SetTopmost(this);
     }
 
+    private DateTime _lastCloseTime = DateTime.MinValue;
+
     public async void ToggleFromTaskbar(Rect anchorRect, Rect taskbarRect, IntPtr returnFocusWindow)
     {
         try
         {
-            if (_isOpen || _isAnimating)
+            if ((DateTime.UtcNow - _lastCloseTime).TotalMilliseconds < 350)
+            {
+                return;
+            }
+
+            if (_isOpen && !_isAnimating)
             {
                 await HideAnimatedAsync();
+                return;
+            }
+
+            if (_isAnimating)
+            {
+                _isOpen = false;
+                _isAnimating = false;
+                Hide();
                 return;
             }
 
             _returnFocusWindow = returnFocusWindow;
             _isOpen = true;
             _animationGeneration++;
-            await LoadHistoryAsync();
             PositionAtTaskbarAnchor(anchorRect, taskbarRect);
             AnimateOpen();
+            _ = LoadHistoryAsync();
         }
         catch (Exception ex)
         {
@@ -66,10 +82,7 @@ public partial class ClipboardHistoryWindow : MicaWindow
 
     private async Task LoadHistoryAsync()
     {
-        StatusText.Visibility = Visibility.Visible;
-        StatusText.SetResourceReference(TextBlock.TextProperty, "ClipboardHistoryLoadingText");
-        HistoryScrollViewer.Visibility = Visibility.Collapsed;
-        ClearHistoryButton.Visibility = Visibility.Collapsed;
+        int generation = _animationGeneration;
 
         try
         {
@@ -83,34 +96,73 @@ public partial class ClipboardHistoryWindow : MicaWindow
                 return;
             }
 
-            List<ClipboardEntry> entries = [];
-            foreach (ClipboardHistoryItem item in result.Items)
+            var itemsData = await Task.Run(async () =>
             {
-                string preview;
-                ImageSource? image = null;
-                if (item.Content.Contains(StandardDataFormats.Text))
+                List<(ClipboardHistoryItem Item, string Preview, string Timestamp, RandomAccessStreamReference? BitmapRef)> list = [];
+                foreach (ClipboardHistoryItem item in result.Items)
                 {
-                    string text = await item.Content.GetTextAsync();
-                    preview = string.Join(" ", text.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)).Trim();
-                    if (preview.Length > 240)
-                        preview = preview[..240] + "…";
+                    string preview = "";
+                    RandomAccessStreamReference? bitmapRef = null;
+                    try
+                    {
+                        if (item.Content.Contains(StandardDataFormats.Text))
+                        {
+                            string text = await item.Content.GetTextAsync().AsTask();
+                            preview = string.Join(" ", text.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)).Trim();
+                            if (preview.Length > 240)
+                                preview = preview[..240] + "…";
+                        }
+                        else if (item.Content.Contains(StandardDataFormats.Bitmap))
+                        {
+                            bitmapRef = await item.Content.GetBitmapAsync().AsTask();
+                        }
+                    }
+                    catch { }
+
+                    list.Add((item, preview, item.Timestamp.LocalDateTime.ToString("g"), bitmapRef));
                 }
-                else if (item.Content.Contains(StandardDataFormats.Bitmap))
+                return list;
+            });
+
+            if (generation != _animationGeneration) return;
+
+            List<ClipboardEntry> entries = [];
+            foreach (var data in itemsData)
+            {
+                string preview = data.Preview;
+                ImageSource? image = null;
+
+                if (data.BitmapRef != null)
                 {
                     preview = GetResourceString("ClipboardHistoryImageText");
-                    image = await LoadBitmapPreviewAsync(item);
+                    try
+                    {
+                        using var randomAccessStream = await data.BitmapRef.OpenReadAsync();
+                        using Stream stream = randomAccessStream.AsStreamForRead();
+                        BitmapImage bitmap = new();
+                        bitmap.BeginInit();
+                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmap.DecodePixelWidth = 320;
+                        bitmap.StreamSource = stream;
+                        bitmap.EndInit();
+                        bitmap.Freeze();
+                        image = bitmap;
+                    }
+                    catch { }
                 }
-                else
+                else if (string.IsNullOrEmpty(preview))
                 {
                     preview = GetResourceString("ClipboardHistoryOtherContentText");
                 }
 
                 entries.Add(new ClipboardEntry(
-                    item,
+                    data.Item,
                     string.IsNullOrWhiteSpace(preview) ? GetResourceString("ClipboardHistoryEmptyText") : preview,
-                    item.Timestamp.LocalDateTime.ToString("g"),
+                    data.Timestamp,
                     image));
             }
+
+            if (generation != _animationGeneration) return;
 
             HistoryItems.ItemsSource = entries;
             StatusText.Visibility = entries.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -242,6 +294,7 @@ public partial class ClipboardHistoryWindow : MicaWindow
 
     private async Task HideAnimatedAsync()
     {
+        _lastCloseTime = DateTime.UtcNow;
         if (!_isOpen && !_isAnimating)
             return;
 

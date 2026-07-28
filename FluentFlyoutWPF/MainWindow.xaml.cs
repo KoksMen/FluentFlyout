@@ -1137,6 +1137,9 @@ public partial class MainWindow : MicaWindow
     [DllImport("user32.dll")]
     private static extern IntPtr GetForegroundWindow();
 
+    [DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int vKey);
+
     private IntPtr _lastKeyboardLayout = IntPtr.Zero;
     private IntPtr _lastForegroundHwnd = IntPtr.Zero;
     private DispatcherTimer? _langCheckTimer;
@@ -1221,6 +1224,23 @@ public partial class MainWindow : MicaWindow
         }
     }
 
+    private async void MainWindow_Deactivated(object? sender, EventArgs e)
+    {
+        if (Visibility == Visibility.Visible && !_isHiding)
+        {
+            CloseAnimation(this);
+            _isHiding = true;
+            cts.Cancel();
+            await Task.Delay(getDuration());
+            if (_isHiding)
+            {
+                Hide();
+                if (_seekBarEnabled)
+                    HandlePlayBackState(GlobalSystemMediaTransportControlsSessionPlaybackStatus.Paused);
+            }
+        }
+    }
+
     public async void ShowMediaFlyout(bool toggleMode = false, bool forceShow = false, bool anchorToTaskbarWidget = true)
     {
         // If in toggle mode and flyout is visible, close it unconditionally
@@ -1293,19 +1313,44 @@ public partial class MainWindow : MicaWindow
         var token = cts.Token;
         Visibility = Visibility.Visible;
         WindowHelper.SetTopmost(this);
+        Activate();
+
+        DateTime flyoutOpenTime = DateTime.UtcNow;
 
         try
         {
             while (!token.IsCancellationRequested)
             {
-                await Task.Delay(100, token); // check if mouse is over every 100ms
+                await Task.Delay(30, token);
 
                 bool mouseOverMedia = WindowHelper.IsMouseOverWindow(this);
                 bool mouseOverVolume = SettingsManager.Current.VolumeControlAboveMediaFlyout
                     && SettingsManager.Current.VolumeControlEnabled
                     && volumeMixerWindow != null
                     && volumeMixerWindow.IsVisible
-                    && WindowHelper.IsMouseOverWindow(volumeMixerWindow); // sync with VolumeMixerWindow
+                    && WindowHelper.IsMouseOverWindow(volumeMixerWindow);
+
+                bool mouseOverWidget = taskbarWindow != null
+                    && taskbarWindow.IsVisible
+                    && taskbarWindow.TryGetMediaWidgetScreenRect(out Rect widgetRect)
+                    && widgetRect.Contains(System.Windows.Forms.Control.MousePosition.X, System.Windows.Forms.Control.MousePosition.Y);
+
+                if ((DateTime.UtcNow - flyoutOpenTime).TotalMilliseconds > 300)
+                {
+                    bool isLClick = (GetAsyncKeyState(0x01) & 0x8000) != 0;
+                    bool isRClick = (GetAsyncKeyState(0x02) & 0x8000) != 0;
+                    if ((isLClick || isRClick) && !mouseOverMedia && !mouseOverVolume && !mouseOverWidget)
+                    {
+                        CloseAnimation(this);
+                        _isHiding = true;
+                        await Task.Delay(getDuration());
+                        if (_isHiding == false) return;
+                        Hide();
+                        if (_seekBarEnabled)
+                            HandlePlayBackState(GlobalSystemMediaTransportControlsSessionPlaybackStatus.Paused);
+                        break;
+                    }
+                }
 
                 if (!mouseOverMedia && !mouseOverVolume && !SettingsManager.Current.MediaFlyoutAlwaysDisplay)
                 {
@@ -1340,8 +1385,10 @@ public partial class MainWindow : MicaWindow
 
     private void UpdateMediaFlyoutCloseButtonVisibility()
     {
-        MediaFlyoutCloseButton.Visibility = SettingsManager.Current.MediaFlyoutAlwaysDisplay && !SettingsManager.Current.CompactLayout ? Visibility.Visible : Visibility.Collapsed;
+        bool closeVisible = SettingsManager.Current.MediaFlyoutAlwaysDisplay && !SettingsManager.Current.CompactLayout;
+        MediaFlyoutCloseButton.Visibility = closeVisible ? Visibility.Visible : Visibility.Collapsed;
         ControlClose.Visibility = SettingsManager.Current.MediaFlyoutAlwaysDisplay && SettingsManager.Current.CompactLayout ? Visibility.Visible : Visibility.Collapsed;
+        PlayerSwitcherPanel.Margin = closeVisible ? new Thickness(0, 0, 24, 2) : new Thickness(0, 0, 0, 2);
     }
 
     private void UpdateUI(MediaSession mediaSession)
@@ -2139,10 +2186,18 @@ public partial class MainWindow : MicaWindow
         }
     }
 
+    private ClipboardHistoryWindow? clipboardHistoryWindow;
+
     public void ShowVolumeMixerFromTaskbar(Rect anchorRect, Rect taskbarRect)
     {
         volumeMixerWindow ??= new VolumeMixerWindow();
         volumeMixerWindow.ShowFromTaskbar(anchorRect, taskbarRect);
+    }
+
+    public void ToggleClipboardHistoryFromTaskbar(Rect anchorRect, Rect taskbarRect, IntPtr returnFocusWindow)
+    {
+        clipboardHistoryWindow ??= new ClipboardHistoryWindow(this);
+        clipboardHistoryWindow.ToggleFromTaskbar(anchorRect, taskbarRect, returnFocusWindow);
     }
 
     private void nIcon_LeftClick(Wpf.Ui.Tray.Controls.NotifyIcon sender, RoutedEventArgs e) // change the behavior of the tray icon

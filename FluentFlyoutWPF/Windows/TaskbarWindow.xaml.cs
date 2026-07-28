@@ -11,6 +11,8 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Windows.Media.Control;
@@ -696,14 +698,16 @@ on_error:
             }
             catch { }
         }
+        double left = (isVertical ? crossPos : primaryPos) / dpiScale;
+        double top = (isVertical ? primaryPos : crossPos) / dpiScale;
 
-        Canvas.SetLeft(QuickActionsPanel, (isVertical ? crossPos : primaryPos) / dpiScale);
-        Canvas.SetTop(QuickActionsPanel, (isVertical ? primaryPos : crossPos) / dpiScale);
+        Canvas.SetLeft(QuickActionsPanel, left);
+        Canvas.SetTop(QuickActionsPanel, top);
 
-        double width = quickActionsWidth * dpiScale;
-        double height = 40 * dpiScale;
+        double width = (quickActionsWidth + 16) * dpiScale;
+        double height = crossSize * dpiScale;
 
-        return new Rect(Canvas.GetLeft(QuickActionsPanel) * dpiScale, Canvas.GetTop(QuickActionsPanel) * dpiScale, width, height);
+        return new Rect((left - 4) * dpiScale, (isVertical ? primaryPos : 0) * dpiScale, width, (isVertical ? width : crossSize) * dpiScale);
     }
 
     private static Rect GetElementLogicalScreenRect(FrameworkElement element)
@@ -713,15 +717,7 @@ on_error:
             Point first = element.PointToScreen(new Point(0, 0));
             Point second = element.PointToScreen(new Point(element.ActualWidth, element.ActualHeight));
 
-            PresentationSource source = PresentationSource.FromVisual(element);
-            double dpiX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
-            double dpiY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
-
-            return new Rect(
-                Math.Min(first.X, second.X) / dpiX,
-                Math.Min(first.Y, second.Y) / dpiY,
-                Math.Abs(second.X - first.X) / dpiX,
-                Math.Abs(second.Y - first.Y) / dpiY);
+            return new Rect(first.X, first.Y, second.X - first.X, second.Y - first.Y);
         }
         catch
         {
@@ -729,7 +725,72 @@ on_error:
         }
     }
 
+    private static readonly System.Windows.Media.Color QuickActionIdleColor = System.Windows.Media.Color.FromArgb(1, 255, 255, 255);
+
+    private void QuickAction_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (sender is Border border)
+        {
+            WindowsThemeDetector.GetWindowsTheme(out _, out var systemTheme);
+            bool isDark = systemTheme == WindowsThemeDetector.ThemeMode.Dark;
+            SolidColorBrush targetBackgroundBrush = isDark
+                ? new SolidColorBrush(System.Windows.Media.Color.FromArgb(197, 255, 255, 255)) { Opacity = 0.075 }
+                : new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 255, 255, 255)) { Opacity = 0.6 };
+
+            var backgroundAnimation = new ColorAnimation
+            {
+                To = targetBackgroundBrush.Color,
+                Duration = TimeSpan.FromMilliseconds(200),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            var backgroundOpacityAnimation = new DoubleAnimation
+            {
+                To = targetBackgroundBrush.Opacity,
+                Duration = TimeSpan.FromMilliseconds(200),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            if (border.Background is not SolidColorBrush scb || scb.IsFrozen)
+            {
+                border.Background = new SolidColorBrush(QuickActionIdleColor);
+            }
+
+            border.Background.BeginAnimation(SolidColorBrush.ColorProperty, backgroundAnimation);
+            border.Background.BeginAnimation(SolidColorBrush.OpacityProperty, backgroundOpacityAnimation);
+        }
+    }
+
+    private void QuickAction_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+    {
+        if (sender is Border border)
+        {
+            var backgroundAnimation = new ColorAnimation
+            {
+                To = QuickActionIdleColor,
+                Duration = TimeSpan.FromMilliseconds(200),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+            };
+
+            var backgroundOpacityAnimation = new DoubleAnimation
+            {
+                To = 1,
+                Duration = TimeSpan.FromMilliseconds(200),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+            };
+
+            if (border.Background is not SolidColorBrush scb || scb.IsFrozen)
+            {
+                border.Background = new SolidColorBrush(QuickActionIdleColor);
+            }
+
+            border.Background.BeginAnimation(SolidColorBrush.ColorProperty, backgroundAnimation);
+            border.Background.BeginAnimation(SolidColorBrush.OpacityProperty, backgroundOpacityAnimation);
+        }
+    }
+
     private void MixerButton_Click(object sender, RoutedEventArgs e)
+
     {
         (bool foundTaskbar, Rect taskbarRect) = GetTaskbarFrameRect(GetSelectedTaskbarHandle(out _));
         if (!foundTaskbar)
@@ -764,8 +825,7 @@ on_error:
         }
 
         IntPtr returnFocusWindow = GetForegroundWindow();
-        var clipboardWindow = new FluentFlyoutWPF.Windows.ClipboardHistoryWindow(_mainWindow!);
-        clipboardWindow.ToggleFromTaskbar(
+        _mainWindow?.ToggleClipboardHistoryFromTaskbar(
             GetElementLogicalScreenRect(ClipboardButton),
             taskbarRect,
             returnFocusWindow);

@@ -7,7 +7,7 @@
         xmlns:controls="clr-namespace:FluentFlyout.Controls"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         mc:Ignorable="d"
-        Title="TaskbarWindow" Height="40" Width="100"
+        Title="TaskbarWindow" Height="200" Width="4000"
         WindowStyle="None"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
@@ -21,14 +21,20 @@
 		d:DataContext="{d:DesignInstance viewModels:UserSettings}">
     <Canvas Name="WidgetCanvas" Background="Transparent">
         <StackPanel x:Name="QuickActionsPanel" Orientation="Horizontal" VerticalAlignment="Center">
-            <ui:Button x:Name="MixerButton"
-                       Width="36" Height="36" Padding="0" Margin="0,0,4,0"
-                       Appearance="Transparent"
-                       Visibility="{Binding TaskbarMixerButtonEnabled, Converter={StaticResource BoolToVisibleCollapsedConverter}}"
-                       ToolTip="{DynamicResource TaskbarMixerButtonTitle}"
-                       Click="MixerButton_Click">
-                <ui:Button.Style>
-                    <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource {x:Type ui:Button}}">
+            <Border x:Name="MixerButton"
+                    Width="36" Height="36" Margin="0,0,4,0"
+                    CornerRadius="6"
+                    Cursor="Hand"
+                    Visibility="{Binding TaskbarMixerButtonEnabled, Converter={StaticResource BoolToVisibleCollapsedConverter}}"
+                    ToolTip="{DynamicResource TaskbarMixerButtonTitle}"
+                    MouseEnter="QuickAction_MouseEnter"
+                    MouseLeave="QuickAction_MouseLeave"
+                    PreviewMouseLeftButtonUp="MixerButton_Click">
+                <Border.Background>
+                    <SolidColorBrush Color="#01FFFFFF" />
+                </Border.Background>
+                <Border.Style>
+                    <Style TargetType="{x:Type Border}">
                         <Setter Property="BorderThickness" Value="0" />
                         <Setter Property="BorderBrush" Value="Transparent" />
                         <Style.Triggers>
@@ -38,17 +44,23 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </ui:Button.Style>
-                <ui:SymbolIcon Symbol="SpeakerSettings24" FontSize="18" />
-            </ui:Button>
-            <ui:Button x:Name="ClipboardButton"
-                       Width="36" Height="36" Padding="0" Margin="0,0,4,0"
-                       Appearance="Transparent"
-                       Visibility="{Binding TaskbarClipboardButtonEnabled, Converter={StaticResource BoolToVisibleCollapsedConverter}}"
-                       ToolTip="{DynamicResource TaskbarClipboardButtonTitle}"
-                       Click="ClipboardButton_Click">
-                <ui:Button.Style>
-                    <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource {x:Type ui:Button}}">
+                </Border.Style>
+                <ui:SymbolIcon Symbol="SpeakerSettings24" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+            </Border>
+            <Border x:Name="ClipboardButton"
+                    Width="36" Height="36" Margin="0,0,4,0"
+                    CornerRadius="6"
+                    Cursor="Hand"
+                    Visibility="{Binding TaskbarClipboardButtonEnabled, Converter={StaticResource BoolToVisibleCollapsedConverter}}"
+                    ToolTip="{DynamicResource TaskbarClipboardButtonTitle}"
+                    MouseEnter="QuickAction_MouseEnter"
+                    MouseLeave="QuickAction_MouseLeave"
+                    PreviewMouseLeftButtonUp="ClipboardButton_Click">
+                <Border.Background>
+                    <SolidColorBrush Color="#01FFFFFF" />
+                </Border.Background>
+                <Border.Style>
+                    <Style TargetType="{x:Type Border}">
                         <Setter Property="BorderThickness" Value="0" />
                         <Setter Property="BorderBrush" Value="Transparent" />
                         <Style.Triggers>
@@ -58,9 +70,9 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </ui:Button.Style>
-                <ui:SymbolIcon Symbol="ClipboardClock24" FontSize="18" />
-            </ui:Button>
+                </Border.Style>
+                <ui:SymbolIcon Symbol="ClipboardClock24" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+            </Border>
         </StackPanel>
 		<controls:TaskbarVisualizerControl x:Name="TaskbarVisualizer" Margin="0,1,0,0" />
         <controls:TaskbarWidgetControl x:Name="Widget" />

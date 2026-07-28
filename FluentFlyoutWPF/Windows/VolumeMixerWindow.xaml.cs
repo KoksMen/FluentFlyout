@@ -176,8 +176,15 @@ public partial class VolumeMixerWindow : MicaWindow
         }
     }
 
+    private DateTime _lastTaskbarCloseTime = DateTime.MinValue;
+
     public async void ShowFromTaskbar(Rect anchorRect, Rect taskbarRect)
     {
+        if ((DateTime.UtcNow - _lastTaskbarCloseTime).TotalMilliseconds < 350)
+        {
+            return;
+        }
+
         if (_isTaskbarAnchored && !_isHiding)
         {
             HideTaskbarFlyout();
@@ -292,6 +299,7 @@ public partial class VolumeMixerWindow : MicaWindow
 
     private async void HideTaskbarFlyout()
     {
+        _lastTaskbarCloseTime = DateTime.UtcNow;
         _cts.Cancel();
         SetTaskbarActivation(false);
         _isTaskbarAnchored = false;

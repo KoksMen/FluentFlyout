@@ -642,6 +642,13 @@ public partial class UserSettings : ObservableObject
     [ObservableProperty]
     public partial bool TaskbarVisualizerOnlyWhenPlaying { get; set; }
 
+    /// <summary>
+    /// Auto-hide taskbar quick action flyouts (Mixer and Clipboard) when clicking outside or losing focus.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool TaskbarQuickActionsAutoHide { get; set; }
+
+
     [ObservableProperty]
     public partial bool VolumeControlEnabled { get; set; }
 
@@ -859,6 +866,7 @@ public partial class UserSettings : ObservableObject
         TaskbarWidgetEnabled = false;
         TaskbarMixerButtonEnabled = false;
         TaskbarClipboardButtonEnabled = false;
+        TaskbarQuickActionsAutoHide = true;
         TaskbarUtilityButtonsOutlineEnabled = false;
         TaskbarClipboardMode = 0;
         TaskbarWidgetSelectedMonitor = 0;
