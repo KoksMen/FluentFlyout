@@ -497,19 +497,29 @@ namespace FluentFlyoutWPF.Classes
             byte ob = 0, og = 0, or = 0, oa = 255;
             if (outlineEnabled)
             {
-                try
+                if (SettingsManager.Current.TaskbarVisualizerOutlineDynamicColor)
                 {
-                    string hex = SettingsManager.Current.TaskbarVisualizerOutlineColor ?? "#000000";
-                    if (!hex.StartsWith("#") && hex.Length >= 6) hex = "#" + hex;
-                    var parsedColor = (Color)ColorConverter.ConvertFromString(hex);
-                    ob = parsedColor.B;
-                    og = parsedColor.G;
-                    or = parsedColor.R;
-                    oa = parsedColor.A;
+                    const double darkenFactor = 0.72;
+                    ob = (byte)Math.Round(b * darkenFactor);
+                    og = (byte)Math.Round(g * darkenFactor);
+                    or = (byte)Math.Round(r * darkenFactor);
                 }
-                catch
+                else
                 {
-                    ob = 0; og = 0; or = 0; oa = 255;
+                    try
+                    {
+                        string hex = SettingsManager.Current.TaskbarVisualizerOutlineColor ?? "#000000";
+                        if (!hex.StartsWith("#") && hex.Length >= 6) hex = "#" + hex;
+                        var parsedColor = (Color)ColorConverter.ConvertFromString(hex);
+                        ob = parsedColor.B;
+                        og = parsedColor.G;
+                        or = parsedColor.R;
+                        oa = parsedColor.A;
+                    }
+                    catch
+                    {
+                        ob = 0; og = 0; or = 0; oa = 255;
+                    }
                 }
             }
 

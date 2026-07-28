@@ -59,6 +59,8 @@ hides repeat, shuffle and player info</System:String>
     <System:String x:Key="TaskbarMixerButtonDescription">Show a separate button before the media widget that opens the full volume mixer next to the taskbar</System:String>
     <System:String x:Key="TaskbarClipboardButtonTitle">Taskbar clipboard history button</System:String>
     <System:String x:Key="TaskbarClipboardButtonDescription">Show a separate button before the media widget that opens Windows clipboard history</System:String>
+    <System:String x:Key="TaskbarUtilityButtonsOutlineTitle">Utility button outlines</System:String>
+    <System:String x:Key="TaskbarUtilityButtonsOutlineDescription">Draw a separate outline around the mixer and clipboard buttons</System:String>
     <System:String x:Key="TaskbarClipboardModeTitle">Clipboard history window</System:String>
     <System:String x:Key="TaskbarClipboardModeDescription">Choose the anchored FluentFlyout window or the original Windows panel</System:String>
     <System:String x:Key="TaskbarClipboardModeFluentFlyout">FluentFlyout window</System:String>
@@ -305,4 +307,6 @@ You can help contribute translations on</System:String>
     <System:String x:Key="VolumeMixerHighlightDescription">See which apps are currently outputting audio</System:String>
     <System:String x:Key="MasterVolumeText">Master volume</System:String>
     <System:String x:Key="TaskbarWidgetAutomaticPlayerSelection">Automatic player selection</System:String>
+    <System:String x:Key="TaskbarVisualizerOutlineDynamicColorTitle">Dynamic outline color</System:String>
+    <System:String x:Key="TaskbarVisualizerOutlineDynamicColorDescription">Use a slightly darker shade of the current visualizer color</System:String>
 </ResourceDictionary>

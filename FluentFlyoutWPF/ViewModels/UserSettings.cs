@@ -372,6 +372,12 @@ public partial class UserSettings : ObservableObject
     public partial bool TaskbarClipboardButtonEnabled { get; set; }
 
     /// <summary>
+    /// Gets or sets whether each taskbar utility button has its own outline.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool TaskbarUtilityButtonsOutlineEnabled { get; set; }
+
+    /// <summary>
     /// Gets or sets which clipboard history window the taskbar button opens.
     /// 0: FluentFlyout window, 1: native Windows Win+V panel.
     /// </summary>
@@ -586,6 +592,12 @@ public partial class UserSettings : ObservableObject
     /// </summary>
     [ObservableProperty]
     public partial string TaskbarVisualizerOutlineColor { get; set; }
+
+    /// <summary>
+    /// When true, derives the outline from the current visualizer color.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool TaskbarVisualizerOutlineDynamicColor { get; set; }
 
     /// <summary>
     /// Position of the visualizer, where 0 and 1 are to the left or right of the widget.
@@ -853,6 +865,7 @@ public partial class UserSettings : ObservableObject
         TaskbarWidgetEnabled = false;
         TaskbarMixerButtonEnabled = false;
         TaskbarClipboardButtonEnabled = false;
+        TaskbarUtilityButtonsOutlineEnabled = false;
         TaskbarClipboardMode = 0;
         TaskbarWidgetSelectedMonitor = 0;
         TaskbarWidgetPosition = 0;
@@ -911,6 +924,7 @@ public partial class UserSettings : ObservableObject
         TaskbarVisualizerOutlineEnabled = false;
         TaskbarVisualizerOutlineThickness = 1;
         TaskbarVisualizerOutlineColor = "#000000";
+        TaskbarVisualizerOutlineDynamicColor = false;
 
         PropertyChanged += OnPropertyChangedSaveSettings;
     }

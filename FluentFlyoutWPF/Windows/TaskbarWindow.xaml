@@ -23,11 +23,23 @@
 		<controls:TaskbarVisualizerControl x:Name="TaskbarVisualizer" Margin="0,1,0,0" />
         <StackPanel x:Name="QuickActionsPanel" Orientation="Horizontal">
             <ui:Button x:Name="MixerButton"
-                       Width="36" Height="36" Padding="0" Margin="0,0,5,0"
+                       Width="36" Height="36" Padding="0" Margin="0,0,8,0"
                        Appearance="Transparent"
                        Visibility="{Binding TaskbarMixerButtonEnabled, Converter={StaticResource BoolToVisibleCollapsedConverter}}"
                        ToolTip="{DynamicResource TaskbarMixerButtonTitle}"
                        Click="MixerButton_Click">
+                <ui:Button.Style>
+                    <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource {x:Type ui:Button}}">
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="BorderBrush" Value="Transparent" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding TaskbarUtilityButtonsOutlineEnabled}" Value="True">
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ui:Button.Style>
                 <ui:SymbolIcon Symbol="SpeakerSettings24" FontSize="18" />
             </ui:Button>
             <ui:Button x:Name="ClipboardButton"
@@ -36,6 +48,18 @@
                        Visibility="{Binding TaskbarClipboardButtonEnabled, Converter={StaticResource BoolToVisibleCollapsedConverter}}"
                        ToolTip="{DynamicResource TaskbarClipboardButtonTitle}"
                        Click="ClipboardButton_Click">
+                <ui:Button.Style>
+                    <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource {x:Type ui:Button}}">
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="BorderBrush" Value="Transparent" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding TaskbarUtilityButtonsOutlineEnabled}" Value="True">
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ui:Button.Style>
                 <ui:SymbolIcon Symbol="ClipboardClock24" FontSize="18" />
             </ui:Button>
         </StackPanel>

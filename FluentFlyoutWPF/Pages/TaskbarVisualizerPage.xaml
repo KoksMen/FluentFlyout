@@ -184,7 +184,21 @@
                             <ui:TextBlock Text="{Binding TaskbarVisualizerOutlineThickness}" Width="24" TextAlignment="Center" Margin="12,0,0,0" />
                         </StackPanel>
                     </ui:CardControl>
-                    <ui:CardControl Background="Transparent" BorderBrush="{ui:ThemeResource CardStrokeColorDefaultSolidBrush}" BorderThickness="0" CornerRadius="0" Padding="52,12,16,12">
+                    <ui:CardControl Background="Transparent" BorderBrush="{ui:ThemeResource CardStrokeColorDefaultSolidBrush}" BorderThickness="0,0,0,1" CornerRadius="0" Padding="52,12,16,12">
+                        <ui:CardControl.Header>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Text="{DynamicResource TaskbarVisualizerOutlineDynamicColorTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                                <TextBlock Text="{DynamicResource TaskbarVisualizerOutlineDynamicColorDescription}" FontSize="12" Opacity="0.5" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <controls:ToggleSwitch IsChecked="{Binding TaskbarVisualizerOutlineDynamicColor, Mode=TwoWay}" IsEnabled="{Binding TaskbarVisualizerOutlineEnabled}" />
+                    </ui:CardControl>
+                    <ui:CardControl Background="Transparent"
+                                    BorderBrush="{ui:ThemeResource CardStrokeColorDefaultSolidBrush}"
+                                    BorderThickness="0"
+                                    CornerRadius="0"
+                                    Padding="52,12,16,12"
+                                    Visibility="{Binding TaskbarVisualizerOutlineDynamicColor, Converter={StaticResource BoolToCollapsedVisibleConverter}}">
                         <ui:CardControl.Header>
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="Цвет обводки (HEX)" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
