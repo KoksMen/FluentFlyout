@@ -105,11 +105,10 @@ public partial class TaskbarVisualizerControl : UserControl
             EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
         };
 
-        // rare case where background is not a SolidColorBrush after SetupWindow
-        if (MainBorder.Background is not SolidColorBrush)
+        // Ensure MainBorder.Background is a non-frozen SolidColorBrush
+        if (MainBorder.Background is not SolidColorBrush scb || scb.IsFrozen)
         {
-            MainBorder.Background = new SolidColorBrush(Colors.Transparent);
-            MainBorder.Background.Opacity = 0;
+            MainBorder.Background = new SolidColorBrush(Colors.Transparent) { Opacity = 0 };
         }
 
         MainBorder.Background.BeginAnimation(SolidColorBrush.ColorProperty, backgroundAnimation);
@@ -134,6 +133,11 @@ public partial class TaskbarVisualizerControl : UserControl
             Duration = TimeSpan.FromMilliseconds(200),
             EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
         };
+
+        if (MainBorder.Background is not SolidColorBrush scb2 || scb2.IsFrozen)
+        {
+            MainBorder.Background = new SolidColorBrush(Colors.Transparent) { Opacity = 0 };
+        }
 
         MainBorder.Background?.BeginAnimation(SolidColorBrush.ColorProperty, backgroundAnimation);
         MainBorder.Background?.BeginAnimation(SolidColorBrush.OpacityProperty, backgroundOpacityAnimation);

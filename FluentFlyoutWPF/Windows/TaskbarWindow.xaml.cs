@@ -857,6 +857,8 @@ on_error:
         Dispatcher.Invoke(() =>
         {
             Visibility = Visibility.Visible;
+            Widget.UpdateLayout();
+            UpdateLayout();
             UpdatePosition();
         });
     }

@@ -48,6 +48,13 @@ public partial class TaskbarWidgetControl : UserControl
     private MainWindow? _mainWindow;
     private bool _isPaused;
 
+    // Cached theme - recomputed only when needed, not on every MouseEnter
+    private bool _cachedIsDarkTheme = true;
+    private DateTime _lastThemeCheck = DateTime.MinValue;
+
+    // Wheel throttle - ignore extra ticks within 80ms window
+    private DateTime _lastWheelCycle = DateTime.MinValue;
+
     public TaskbarWidgetControl()
     {
         InitializeComponent();
@@ -132,14 +139,25 @@ public partial class TaskbarWidgetControl : UserControl
         NextButton.Foreground = foreground;
     }
 
+    private bool GetCachedIsDarkTheme()
+    {
+        // Re-check theme at most once every 5 seconds
+        if ((DateTime.UtcNow - _lastThemeCheck).TotalSeconds > 5)
+        {
+            WindowsThemeDetector.GetWindowsTheme(out _, out var systemTheme);
+            _cachedIsDarkTheme = systemTheme == WindowsThemeDetector.ThemeMode.Dark;
+            _lastThemeCheck = DateTime.UtcNow;
+        }
+        return _cachedIsDarkTheme;
+    }
+
     private void Grid_MouseEnter(object sender, MouseEventArgs e)
     {
         if (string.IsNullOrEmpty(SongTitle.Text + SongArtist.Text)) return;
 
+        // Use cached theme - no registry/WinAPI call on every hover
+        bool isDark = GetCachedIsDarkTheme();
         SolidColorBrush targetBackgroundBrush;
-        // hover effects with animations, hard-coded colors because I can't find the resource brushes
-        WindowsThemeDetector.GetWindowsTheme(out _, out var systemTheme);
-        bool isDark = systemTheme == WindowsThemeDetector.ThemeMode.Dark;
 
         if (isDark)
         { // dark mode
@@ -167,11 +185,10 @@ public partial class TaskbarWidgetControl : UserControl
             EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
         };
 
-        // rare case where background is not a SolidColorBrush after SetupWindow
-        if (MainBorder.Background is not SolidColorBrush)
+        // Ensure MainBorder.Background is a non-frozen SolidColorBrush
+        if (MainBorder.Background is not SolidColorBrush scb || scb.IsFrozen)
         {
-            MainBorder.Background = new SolidColorBrush(Colors.Transparent);
-            MainBorder.Background.Opacity = 0;
+            MainBorder.Background = new SolidColorBrush(Colors.Transparent) { Opacity = 0 };
         }
 
         MainBorder.Background.BeginAnimation(SolidColorBrush.ColorProperty, backgroundAnimation);
@@ -196,6 +213,11 @@ public partial class TaskbarWidgetControl : UserControl
             Duration = TimeSpan.FromMilliseconds(200),
             EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
         };
+
+        if (MainBorder.Background is not SolidColorBrush scb2 || scb2.IsFrozen)
+        {
+            MainBorder.Background = new SolidColorBrush(Colors.Transparent) { Opacity = 0 };
+        }
 
         MainBorder.Background?.BeginAnimation(SolidColorBrush.ColorProperty, backgroundAnimation);
         MainBorder.Background?.BeginAnimation(SolidColorBrush.OpacityProperty, backgroundOpacityAnimation);
@@ -649,5 +671,74 @@ public partial class TaskbarWidgetControl : UserControl
         if (focusedSession == null) return;
 
         await focusedSession.ControlSession.TrySkipNextAsync();
+    }
+
+    private void MainBorder_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        e.Handled = true;
+        // Disabled per user request
+    }
+
+    private void MainBorder_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        // Disabled per user request
+    }
+
+    public void ShowMediaSessionsContextMenu()
+    {
+        if (_mainWindow == null) return;
+
+        var validSessions = _mainWindow.GetValidMediaSessions();
+        // Use the cached manually-selected ID instead of GetActiveMediaSession() (avoids COM calls)
+        string? activeId = _mainWindow.ActiveSessionId;
+
+        var menu = new ContextMenu
+        {
+            PlacementTarget = MainBorder,
+            Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint
+        };
+
+        if (validSessions.Count > 0)
+        {
+            menu.Items.Add(new System.Windows.Controls.MenuItem
+            {
+                Header = "Плееры / Media Players",
+                IsEnabled = false,
+                FontWeight = FontWeights.Bold
+            });
+            menu.Items.Add(new Separator());
+
+            foreach (var session in validSessions)
+            {
+                string appId = session.Id ?? string.Empty;
+                string appName = MediaPlayerData.GetAndCacheMediaPlayerData(appId).Item1 ?? appId;
+                bool isCurrent = session.Id == activeId;
+
+                var menuItem = new Wpf.Ui.Controls.MenuItem
+                {
+                    Header = appName,
+                    IsChecked = isCurrent,
+                    Icon = isCurrent ? new Wpf.Ui.Controls.SymbolIcon { Symbol = Wpf.Ui.Controls.SymbolRegular.Checkmark24 } : null
+                };
+
+                var targetSession = session;
+                menuItem.Click += (s, args) => _mainWindow.SelectMediaSession(targetSession);
+
+                menu.Items.Add(menuItem);
+            }
+
+            menu.Items.Add(new Separator());
+        }
+
+        var settingsItem = new Wpf.Ui.Controls.MenuItem
+        {
+            Header = "Настройки виджета",
+            Icon = new Wpf.Ui.Controls.SymbolIcon { Symbol = Wpf.Ui.Controls.SymbolRegular.Settings24 }
+        };
+        settingsItem.Click += (s, args) => SettingsWindow.ShowInstance("TaskbarWidgetPage");
+        menu.Items.Add(settingsItem);
+
+        menu.IsOpen = true;
     }
 }
