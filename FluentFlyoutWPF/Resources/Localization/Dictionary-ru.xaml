@@ -310,7 +310,6 @@
     <system:String x:Key="TaskbarWidgetScrollingTextSpeedTitle">Скорость прокрутки</system:String>
     <system:String x:Key="Back">Назад</system:String>
     <system:String x:Key="OnboardingStepsCounter">Шаг {0} из {1}</system:String>
-    <system:String x:Key="TaskbarWidgetAutomaticPlayerSelection">Автоматический выбор плеера</system:String>
     <system:String x:Key="TaskbarVisualizerOutlineDynamicColorTitle">Динамический цвет обводки</system:String>
     <system:String x:Key="TaskbarVisualizerOutlineDynamicColorDescription">Использовать немного более тёмный оттенок текущего цвета визуализатора</system:String>
 </ResourceDictionary>

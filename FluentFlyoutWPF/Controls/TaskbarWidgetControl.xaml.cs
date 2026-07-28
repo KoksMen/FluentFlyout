@@ -211,56 +211,6 @@ public partial class TaskbarWidgetControl : UserControl
         _mainWindow.ShowMediaFlyout(toggleMode: true, forceShow: true, anchorToTaskbarWidget: true);
     }
 
-    private void Grid_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
-    {
-        if (_mainWindow == null) return;
-
-        var sessions = _mainWindow.GetAvailableWidgetMediaSessions();
-        if (sessions.Count == 0) return;
-
-        var menu = new System.Windows.Controls.ContextMenu
-        {
-            PlacementTarget = MainBorder,
-            Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint
-        };
-
-        var automaticItem = new System.Windows.Controls.MenuItem
-        {
-            Header = Application.Current.TryFindResource("TaskbarWidgetAutomaticPlayerSelection") as string
-                ?? "Automatic player selection",
-            IsCheckable = true,
-            IsChecked = _mainWindow.IsAutomaticMediaSessionSelection,
-            StaysOpenOnClick = false
-        };
-        automaticItem.Click += (_, _) => _mainWindow.UseAutomaticMediaSessionSelection();
-        menu.Items.Add(automaticItem);
-        menu.Items.Add(new System.Windows.Controls.Separator());
-
-        foreach (var session in sessions)
-        {
-            string sessionId = session.Id;
-            var item = new System.Windows.Controls.MenuItem
-            {
-                Header = _mainWindow.GetMediaSessionDisplayName(session),
-                IsCheckable = true,
-                IsChecked = _mainWindow.IsMediaSessionManuallySelected(session),
-                StaysOpenOnClick = false
-            };
-            item.Click += (_, _) => _mainWindow.SelectWidgetMediaSession(sessionId);
-            menu.Items.Add(item);
-        }
-
-        MainBorder.ContextMenu = menu;
-        menu.IsOpen = true;
-        e.Handled = true;
-    }
-
-    private void Grid_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
-    {
-        if (_mainWindow?.SelectAdjacentWidgetMediaSession(e.Delta < 0 ? 1 : -1) == true)
-            e.Handled = true;
-    }
-
     public (double logicalWidth, double logicalHeight) CalculateSize(double dpiScale)
     {
         // calculate widget width - use cached values if text hasn't changed
@@ -688,38 +638,7 @@ public partial class TaskbarWidgetControl : UserControl
         var focusedSession = _mainWindow.GetActiveWidgetMediaSession();
         if (focusedSession == null) return;
 
-        var playbackInfo = focusedSession.ControlSession.GetPlaybackInfo();
-        bool toggled = await focusedSession.ControlSession.TryTogglePlayPauseAsync();
-        if (!toggled) return;
-
-        // Update immediately instead of waiting for the player to raise its
-        // PlaybackInfoChanged event. The event will later confirm the real state.
-        var expectedStatus = playbackInfo?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing
-            ? GlobalSystemMediaTransportControlsSessionPlaybackStatus.Paused
-            : GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
-        UpdatePlaybackState(expectedStatus);
-    }
-
-    private void UpdatePlaybackState(GlobalSystemMediaTransportControlsSessionPlaybackStatus playbackStatus)
-    {
-        _isPaused = playbackStatus != GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
-
-        Dispatcher.Invoke(() =>
-        {
-            if (SettingsManager.Current.TaskbarWidgetControlsEnabled)
-            {
-                PlayPauseButton.Icon = _isPaused
-                    ? new SymbolIcon(SymbolRegular.Play24, filled: true)
-                    : new SymbolIcon(SymbolRegular.Pause24, filled: true);
-            }
-
-            if (SongImage.ImageSource != null && SettingsManager.Current.TaskbarWidgetShowPauseOverlay)
-            {
-                SongImagePlaceholder.Symbol = SymbolRegular.Pause24;
-                SongImagePlaceholder.Visibility = _isPaused ? Visibility.Visible : Visibility.Collapsed;
-                SongImage.Opacity = _isPaused ? 0.4 : 1;
-            }
-        });
+        await focusedSession.ControlSession.TryTogglePlayPauseAsync();
     }
 
     private async void Next_Click(object sender, RoutedEventArgs e)

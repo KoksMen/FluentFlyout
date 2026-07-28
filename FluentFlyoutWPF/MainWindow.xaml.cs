@@ -46,9 +46,6 @@ public partial class MainWindow : MicaWindow
     private long _lastFlyoutTime = 0;
 
     public readonly WindowsMediaController.MediaManager mediaManager = new();
-    private string? _selectedMediaSessionId;
-    private string? _preferredMediaSessionId;
-    private bool _isMediaSessionSelectionManual;
 
     // for detecting changes in settings (lazy way)
     private int _position = SettingsManager.Current.Position;
@@ -178,7 +175,6 @@ public partial class MainWindow : MicaWindow
         mediaManager.OnAnyMediaPropertyChanged += MediaManager_OnAnyMediaPropertyChanged;
         mediaManager.OnAnyPlaybackStateChanged += CurrentSession_OnPlaybackStateChanged;
         mediaManager.OnAnyTimelinePropertyChanged += MediaManager_OnAnyTimelinePropertyChanged;
-        mediaManager.OnAnySessionOpened += MediaManager_OnAnySessionOpened;
         mediaManager.OnAnySessionClosed += MediaManager_OnAnySessionClosed;
 
         WM_TASKBARCREATED = RegisterWindowMessage("TaskbarCreated");
@@ -304,7 +300,14 @@ public partial class MainWindow : MicaWindow
     public MediaSession? GetActiveMediaSession()
     {
         var validSessions = mediaManager.CurrentMediaSessions.Values.Where(IsSessionAllowed).ToList();
-        return GetSelectedMediaSession(validSessions);
+
+        if (validSessions.Count == 0) return null;
+
+        var focused = mediaManager.GetFocusedSession();
+        if (focused != null && validSessions.Any(s => s.Id == focused.Id))
+            return focused;
+
+        return validSessions.FirstOrDefault();
     }
 
     public bool IsWidgetSessionAllowed(MediaSession? session)
@@ -327,118 +330,14 @@ public partial class MainWindow : MicaWindow
     public MediaSession? GetActiveWidgetMediaSession()
     {
         var validSessions = mediaManager.CurrentMediaSessions.Values.Where(IsWidgetSessionAllowed).ToList();
-        return GetSelectedMediaSession(validSessions);
-    }
 
-    private MediaSession? GetSelectedMediaSession(List<MediaSession> validSessions)
-    {
-        if (validSessions.Count == 0)
-        {
-            _selectedMediaSessionId = null;
-            return null;
-        }
-
-        // A manually selected player remains preferred if its SMTC session is
-        // temporarily recreated. Automatic selection only keeps the current
-        // session until another player explicitly transitions to Playing.
-        var selected = _isMediaSessionSelectionManual
-            ? validSessions.FirstOrDefault(s => s.Id == _preferredMediaSessionId)
-            : null;
-        selected ??= validSessions.FirstOrDefault(s => s.Id == _selectedMediaSessionId);
-        if (selected != null)
-        {
-            _selectedMediaSessionId = selected.Id;
-            return selected;
-        }
+        if (validSessions.Count == 0) return null;
 
         var focused = mediaManager.GetFocusedSession();
-        selected = focused != null
-            ? validSessions.FirstOrDefault(s => s.Id == focused.Id && IsPlaying(s))
-            : null;
-        selected ??= validSessions.FirstOrDefault(IsPlaying);
-        selected ??= focused != null ? validSessions.FirstOrDefault(s => s.Id == focused.Id) : null;
-        selected ??= validSessions[0];
+        if (focused != null && validSessions.Any(s => s.Id == focused.Id))
+            return focused;
 
-        _selectedMediaSessionId = selected.Id;
-        return selected;
-    }
-
-    private static bool IsPlaying(MediaSession session)
-    {
-        return session.ControlSession.GetPlaybackInfo()?.PlaybackStatus
-            == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
-    }
-
-    public List<MediaSession> GetAvailableWidgetMediaSessions()
-    {
-        return mediaManager.CurrentMediaSessions.Values
-            .Where(IsWidgetSessionAllowed)
-            .OrderBy(GetMediaSessionDisplayName, StringComparer.CurrentCultureIgnoreCase)
-            .ToList();
-    }
-
-    public string GetMediaSessionDisplayName(MediaSession session)
-    {
-        string appName = MediaPlayerData.GetAndCacheMediaPlayerData(session.Id).Item1 ?? session.Id;
-        var properties = TryGetMediaProperties(session.ControlSession);
-        return string.IsNullOrWhiteSpace(properties?.Title)
-            ? appName
-            : $"{appName} — {properties.Title}";
-    }
-
-    public bool IsMediaSessionSelected(MediaSession session)
-    {
-        return session.Id == _selectedMediaSessionId;
-    }
-
-    public bool IsAutomaticMediaSessionSelection => !_isMediaSessionSelectionManual;
-
-    public bool IsMediaSessionManuallySelected(MediaSession session)
-    {
-        return _isMediaSessionSelectionManual && session.Id == _preferredMediaSessionId;
-    }
-
-    public bool SelectWidgetMediaSession(string sessionId)
-    {
-        var session = mediaManager.CurrentMediaSessions.Values
-            .FirstOrDefault(s => s.Id == sessionId && IsWidgetSessionAllowed(s));
-        if (session == null)
-            return false;
-
-        _selectedMediaSessionId = session.Id;
-        _preferredMediaSessionId = session.Id;
-        _isMediaSessionSelectionManual = true;
-        UpdateTaskbar(session);
-
-        if (IsVisible)
-        {
-            UpdateUI(session);
-            HandlePlayBackState(session.ControlSession.GetPlaybackInfo()?.PlaybackStatus);
-        }
-
-        return true;
-    }
-
-    public void UseAutomaticMediaSessionSelection()
-    {
-        _isMediaSessionSelectionManual = false;
-        _preferredMediaSessionId = null;
-        _selectedMediaSessionId = null;
-        UpdateTaskbar();
-    }
-
-    public bool SelectAdjacentWidgetMediaSession(int offset)
-    {
-        var sessions = GetAvailableWidgetMediaSessions();
-        if (sessions.Count < 2)
-            return false;
-
-        int currentIndex = sessions.FindIndex(s => s.Id == _selectedMediaSessionId);
-        if (currentIndex < 0)
-            currentIndex = 0;
-
-        int nextIndex = (currentIndex + offset + sessions.Count) % sessions.Count;
-        return SelectWidgetMediaSession(sessions[nextIndex].Id);
+        return validSessions.FirstOrDefault();
     }
 
     public void RefreshFilteredMedia()
@@ -753,14 +652,9 @@ public partial class MainWindow : MicaWindow
         storyboard.Begin(window);
     }
 
-    public void UpdateTaskbar(MediaSession? preferredSession = null)
+    public void UpdateTaskbar()
     {
         var activeSession = GetActiveWidgetMediaSession();
-        if (activeSession == null && preferredSession != null && IsWidgetSessionAllowed(preferredSession))
-        {
-            _selectedMediaSessionId = preferredSession.Id;
-            activeSession = preferredSession;
-        }
         if (!mediaManager.IsStarted || activeSession == null)
         {
             taskbarWindow?.UpdateUi("-", "-", null, GlobalSystemMediaTransportControlsSessionPlaybackStatus.Closed);
@@ -825,14 +719,6 @@ public partial class MainWindow : MicaWindow
 #endif     
         pauseOtherMediaSessionsIfNeeded(mediaSession);
 
-        var changedPlaybackInfo = playbackInfo ?? mediaSession.ControlSession.GetPlaybackInfo();
-        if (!_isMediaSessionSelectionManual
-            && changedPlaybackInfo?.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing
-            && IsWidgetSessionAllowed(mediaSession))
-        {
-            _selectedMediaSessionId = mediaSession.Id;
-        }
-
         var focusedWidgetSession = GetActiveWidgetMediaSession();
         if (focusedWidgetSession == null)
         {
@@ -845,12 +731,7 @@ public partial class MainWindow : MicaWindow
             {
                 var tbThumbnail = BitmapHelper.GetThumbnail(tbSongInfo.Thumbnail);
                 BitmapHelper.GetDominantColors(1);
-                // PlaybackInfoChanged already carries the new state. Querying the
-                // session again here can briefly return the previous value, leaving
-                // the taskbar play/pause icon stuck until another media event.
-                var tbPlayback = focusedWidgetSession.Id == mediaSession.Id && changedPlaybackInfo != null
-                    ? changedPlaybackInfo
-                    : focusedWidgetSession.ControlSession.GetPlaybackInfo();
+                var tbPlayback = focusedWidgetSession.ControlSession.GetPlaybackInfo();
 
                 taskbarWindow?.UpdateUi(tbSongInfo.Title, tbSongInfo.Artist, tbThumbnail, tbPlayback?.PlaybackStatus, tbPlayback?.Controls);
             }
@@ -999,14 +880,6 @@ public partial class MainWindow : MicaWindow
                 HandlePlayBackState(session.ControlSession.GetPlaybackInfo().PlaybackStatus);
             });
         }
-    }
-
-    private void MediaManager_OnAnySessionOpened(MediaSession mediaSession)
-    {
-        if (!_isMediaSessionSelectionManual && IsWidgetSessionAllowed(mediaSession) && IsPlaying(mediaSession))
-            _selectedMediaSessionId = mediaSession.Id;
-
-        UpdateTaskbar(mediaSession);
     }
 
     private void MediaManager_OnAnySessionClosed(MediaSession mediaSession)
@@ -1786,7 +1659,6 @@ public partial class MainWindow : MicaWindow
             mediaManager.OnAnyMediaPropertyChanged -= MediaManager_OnAnyMediaPropertyChanged;
             mediaManager.OnAnyPlaybackStateChanged -= CurrentSession_OnPlaybackStateChanged;
             mediaManager.OnAnyTimelinePropertyChanged -= MediaManager_OnAnyTimelinePropertyChanged;
-            mediaManager.OnAnySessionOpened -= MediaManager_OnAnySessionOpened;
             mediaManager.OnAnySessionClosed -= MediaManager_OnAnySessionClosed;
 
             // dispose managed resources
