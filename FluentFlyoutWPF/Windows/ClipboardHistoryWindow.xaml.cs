@@ -67,9 +67,9 @@ public partial class ClipboardHistoryWindow : MicaWindow
             _returnFocusWindow = returnFocusWindow;
             _isOpen = true;
             _animationGeneration++;
+            await LoadHistoryAsync();
             PositionAtTaskbarAnchor(anchorRect, taskbarRect);
             AnimateOpen();
-            _ = LoadHistoryAsync();
         }
         catch (Exception ex)
         {
