@@ -1224,10 +1224,13 @@ public partial class MainWindow : MicaWindow
         }
     }
 
+    private DateTime _lastMediaFlyoutCloseTime = DateTime.MinValue;
+
     private async void MainWindow_Deactivated(object? sender, EventArgs e)
     {
         if (Visibility == Visibility.Visible && !_isHiding)
         {
+            _lastMediaFlyoutCloseTime = DateTime.UtcNow;
             CloseAnimation(this);
             _isHiding = true;
             cts.Cancel();
@@ -1243,9 +1246,15 @@ public partial class MainWindow : MicaWindow
 
     public async void ShowMediaFlyout(bool toggleMode = false, bool forceShow = false, bool anchorToTaskbarWidget = true)
     {
+        if (toggleMode && (DateTime.UtcNow - _lastMediaFlyoutCloseTime).TotalMilliseconds < 400)
+        {
+            return;
+        }
+
         // If in toggle mode and flyout is visible, close it unconditionally
         if (toggleMode && Visibility == Visibility.Visible && !_isHiding)
         {
+            _lastMediaFlyoutCloseTime = DateTime.UtcNow;
             CloseAnimation(this);
             _isHiding = true;
             cts.Cancel();
@@ -1341,6 +1350,7 @@ public partial class MainWindow : MicaWindow
                     bool isRClick = (GetAsyncKeyState(0x02) & 0x8000) != 0;
                     if ((isLClick || isRClick) && !mouseOverMedia && !mouseOverVolume && !mouseOverWidget)
                     {
+                        _lastMediaFlyoutCloseTime = DateTime.UtcNow;
                         CloseAnimation(this);
                         _isHiding = true;
                         await Task.Delay(getDuration());
