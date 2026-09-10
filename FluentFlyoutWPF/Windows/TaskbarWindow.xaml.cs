@@ -490,19 +490,16 @@ on_error:
         switch (SettingsManager.Current.TaskbarWidgetPosition)
         {
             case 0: // near start (left for horizontal, top for vertical)
-                primaryPos = 20;
-
                 int quickActionsWidth = (SettingsManager.Current.TaskbarMixerButtonEnabled ? 40 : 0) + (SettingsManager.Current.TaskbarClipboardButtonEnabled ? 40 : 0);
-                if (quickActionsWidth > 0)
-                {
-                    primaryPos += quickActionsWidth + 4;
-                }
+                int quickActionsOffset = quickActionsWidth > 0 ? quickActionsWidth + 4 : 0;
+                int visualizerOffset = (SettingsManager.Current.TaskbarVisualizerEnabled && SettingsManager.Current.TaskbarVisualizerPosition == 0)
+                    ? (int)(TaskbarVisualizer.Width * dpiScale) + 4
+                    : 0;
 
-                if (SettingsManager.Current.TaskbarVisualizerEnabled && SettingsManager.Current.TaskbarVisualizerPosition == 0)
-                    primaryPos += (int)(TaskbarVisualizer.Width * dpiScale) + 4;
+                primaryPos = 20 + quickActionsOffset + visualizerOffset;
 
                 if (!SettingsManager.Current.TaskbarWidgetPadding)
-                    break;;
+                    break;
 
                 // automatic widget padding to the start
                 try
@@ -518,9 +515,11 @@ on_error:
                     if (found && inStartHalf)
                     {
                         // Convert absolute screen position to relative position within taskbar
-                        primaryPos = isVertical
+                        int startCoord = isVertical
                             ? (int)(nativeWidgetRect.Bottom - taskbarRect.Top) + 2
                             : (int)(nativeWidgetRect.Right - taskbarRect.Left) + 2;
+
+                        primaryPos = startCoord + quickActionsOffset + visualizerOffset;
                     }
                 }
                 catch (Exception ex)
@@ -710,6 +709,7 @@ on_error:
         }
 
         QuickActionsPanel.Visibility = Visibility.Visible;
+        QuickActionsPanel.Orientation = isVertical ? Orientation.Vertical : Orientation.Horizontal;
 
         int taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
         int taskbarWidth = taskbarRect.Right - taskbarRect.Left;
@@ -737,16 +737,18 @@ on_error:
             }
             catch { }
         }
-        double left = (isVertical ? crossPos : primaryPos) / dpiScale;
-        double top = (isVertical ? primaryPos : crossPos) / dpiScale;
+        double leftLogical = (isVertical ? crossPos : primaryPos) / dpiScale;
+        double topLogical = (isVertical ? primaryPos : crossPos) / dpiScale;
 
-        Canvas.SetLeft(QuickActionsPanel, left);
-        Canvas.SetTop(QuickActionsPanel, top);
+        Canvas.SetLeft(QuickActionsPanel, leftLogical);
+        Canvas.SetTop(QuickActionsPanel, topLogical);
 
-        double width = (quickActionsWidth + 16) * dpiScale;
-        double height = crossSize * dpiScale;
+        int rectX = isVertical ? crossPos : primaryPos;
+        int rectY = isVertical ? primaryPos : crossPos;
+        int rectW = isVertical ? (int)(36 * dpiScale) : (int)(quickActionsWidth * dpiScale);
+        int rectH = isVertical ? (int)(quickActionsWidth * dpiScale) : (int)(36 * dpiScale);
 
-        return new Rect((left - 4) * dpiScale, (isVertical ? primaryPos : 0) * dpiScale, width, (isVertical ? width : crossSize) * dpiScale);
+        return new Rect(rectX, rectY, rectW, rectH);
     }
 
     private static Rect GetElementLogicalScreenRect(FrameworkElement element)
