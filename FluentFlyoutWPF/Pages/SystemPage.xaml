@@ -26,10 +26,10 @@
                         </StackPanel>
                     </StackPanel>
                 </ui:CardControl.Header>
-                <ComboBox x:Name="FlyoutSelectedMonitorComboBox" SelectedIndex="{Binding FlyoutSelectedMonitor, Mode=TwoWay}">
+                <ComboBox x:Name="FlyoutSelectedMonitorComboBox" SelectedIndex="{Binding FlyoutSelectedMonitor, Mode=TwoWay}" Style="{StaticResource DefaultComboBoxStyle}">
                 </ComboBox>
             </ui:CardControl>
-            <ui:CardControl x:Name="AcrylicBlurOpacityCard" Tag="Indexable" Icon="{ui:SymbolIcon PaintBucket24}" Margin="0,0,0,3">
+            <ui:CardControl x:Name="AcrylicBlurOpacityCard" Tag="Indexable" Icon="{ui:SymbolIcon PaintBucket24}" Margin="0,0,0,3" Opacity="{Binding IsPremiumUnlocked, Converter={StaticResource BoolToFullHalfOpacityConverter}}">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
@@ -39,8 +39,9 @@
                         <TextBlock Text="{DynamicResource AcrylicBlurOpacityDescription}" FontSize="12" Opacity="0.5" />
                     </StackPanel>
                 </ui:CardControl.Header>
-                <StackPanel Orientation="Horizontal" Opacity="{Binding IsPremiumUnlocked, Converter={StaticResource BoolToFullHalfOpacityConverter}}" >
-                    <Slider Minimum="0" Maximum="255" Value="{Binding AcrylicBlurOpacity, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" TickFrequency="5" IsSnapToTickEnabled="True" Width="150" />
+                <StackPanel Orientation="Horizontal" >
+                    <Slider Minimum="0" Maximum="255" Value="{Binding AcrylicBlurOpacity, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" TickFrequency="5" IsSnapToTickEnabled="True" Width="150"
+                            IsMoveToPointEnabled="True" />
                     <ui:TextBlock Text="{Binding AcrylicBlurOpacity}" Width="24" TextAlignment="Center" Margin="12,0,0,0" />
                 </StackPanel>
             </ui:CardControl>
@@ -53,7 +54,7 @@
                         <TextBlock Text="{DynamicResource UseAlbumArtAccentColorDescription}" FontSize="12" Opacity="0.5" />
                     </StackPanel>
                 </ui:CardControl.Header>
-                <controls:ToggleSwitch IsChecked="{Binding UseAlbumArtAsAccentColor, Mode=TwoWay}" />
+                <ui:ToggleSwitch IsChecked="{Binding UseAlbumArtAsAccentColor, Mode=TwoWay}" />
             </ui:CardControl>
             <ui:CardControl x:Name="AppLanguageCard" Tag="Indexable" Icon="{ui:SymbolIcon Globe24}" Margin="0,0,0,3">
                 <ui:CardControl.Header>
@@ -70,9 +71,10 @@
                 </ui:CardControl.Header>
                 <StackPanel Orientation="Horizontal">
                     <ComboBox Name="AppLanguageComboBox"
-                                  ItemsSource="{Binding LanguageOptions}"
-                                  SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}"
-                                  DisplayMemberPath="DisplayName" />
+                                ItemsSource="{Binding LanguageOptions}"
+                                SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}"
+                                DisplayMemberPath="DisplayName"
+                              Style="{StaticResource DefaultComboBoxStyle}"/>
                 </StackPanel>
             </ui:CardControl>
             <ui:CardControl x:Name="AppThemeCard" Tag="Indexable" Icon="{ui:SymbolIcon Color24}" Margin="0,0,0,3">
@@ -81,7 +83,7 @@
                         <TextBlock Text="{DynamicResource AppThemeTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
                     </StackPanel>
                 </ui:CardControl.Header>
-                <ComboBox Name="AppThemeComboBox" SelectedIndex="{Binding AppTheme, Mode=TwoWay}" IsReadOnly="False">
+                <ComboBox Name="AppThemeComboBox" SelectedIndex="{Binding AppTheme, Mode=TwoWay}" IsReadOnly="False" Style="{StaticResource DefaultComboBoxStyle}">
                     <ComboBoxItem Content="{DynamicResource AppThemeDefault}" />
                     <ComboBoxItem Content="{DynamicResource AppThemeLight}" />
                     <ComboBoxItem Content="{DynamicResource AppThemeDark}" />
@@ -101,7 +103,7 @@
                         </TextBlock>
                     </StackPanel>
                 </ui:CardControl.Header>
-                <controls:ToggleSwitch x:Name="StartupSwitch" Click="StartupSwitch_Click" IsChecked="{Binding Startup, Mode=TwoWay}" />
+                <ui:ToggleSwitch x:Name="StartupSwitch" Click="StartupSwitch_Click" IsChecked="{Binding Startup, Mode=TwoWay}" />
             </ui:CardControl>
             <ui:CardControl x:Name="AnonymousUsageDataCard" Tag="Indexable" Icon="{ui:SymbolIcon Bug24}" Margin="0,0,0,3">
                 <ui:CardControl.Header>
@@ -110,7 +112,7 @@
                         <TextBlock Text="{DynamicResource AnonymousUsageDataDescription}" FontSize="12" Opacity="0.5" />
                     </StackPanel>
                 </ui:CardControl.Header>
-                <controls:ToggleSwitch IsChecked="{Binding AnonymousTelemetryAllowed, Mode=TwoWay}" />
+                <ui:ToggleSwitch IsChecked="{Binding AnonymousTelemetryAllowed, Mode=TwoWay}" />
             </ui:CardControl>
             <ui:CardControl x:Name="DisableOnFullscreenCard" Tag="Indexable" Icon="{ui:SymbolIcon ArrowMinimize24}" Margin="0,0,0,3">
                 <ui:CardControl.Header>
@@ -119,7 +121,7 @@
                         <TextBlock Text="{DynamicResource DisableOnFullscreenDescription}" FontSize="12" Opacity="0.5" />
                     </StackPanel>
                 </ui:CardControl.Header>
-                <controls:ToggleSwitch Name="DisableIfFullscreenSwitch" IsChecked="{Binding DisableIfFullscreen, Mode=TwoWay}" />
+                <ui:ToggleSwitch Name="DisableIfFullscreenSwitch" IsChecked="{Binding DisableIfFullscreen, Mode=TwoWay}" />
             </ui:CardControl>
 
             <!-- tray icon section -->
@@ -132,7 +134,7 @@
                     </StackPanel>
                 </ui:CardControl.Header>
                 <StackPanel Orientation="Horizontal">
-                    <ComboBox SelectedIndex="{Binding NIconLeftClick, Mode=TwoWay}">
+                    <ComboBox SelectedIndex="{Binding NIconLeftClick, Mode=TwoWay}" Style="{StaticResource DefaultComboBoxStyle}">
                         <ComboBoxItem Content="{DynamicResource TrayIconLeftClickOption1}" />
                         <ComboBoxItem Content="{DynamicResource TrayIconLeftClickOption2}" />
                     </ComboBox>
@@ -145,9 +147,9 @@
                         <TextBlock Text="{DynamicResource Win11TrayIconDescription}" FontSize="12" Opacity="0.5" />
                     </StackPanel>
                 </ui:CardControl.Header>
-                <controls:ToggleSwitch IsChecked="{Binding NIconSymbol, Mode=TwoWay}" />
+                <ui:ToggleSwitch IsChecked="{Binding NIconSymbol, Mode=TwoWay}" />
             </ui:CardControl>
-            <ui:CardControl x:Name="HideTrayIconCard" Tag="Indexable" Icon="{ui:SymbolIcon EyeOff24}" Margin="0,0,0,3">
+            <ui:CardControl x:Name="HideTrayIconCard" Tag="Indexable" Icon="{ui:SymbolIcon EyeOff24}" Margin="0,0,0,3" Opacity="{Binding IsPremiumUnlocked, Converter={StaticResource BoolToFullHalfOpacityConverter}}" >
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
@@ -157,7 +159,7 @@
                         <TextBlock Text="{DynamicResource HideTrayIconDescription}" FontSize="12" Opacity="0.5" />
                     </StackPanel>
                 </ui:CardControl.Header>
-                <controls:ToggleSwitch x:Name="NIconHideSwitch" IsChecked="{Binding NIconHide, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" Click="ToggleSwitch_Click" />
+                <ui:ToggleSwitch x:Name="NIconHideSwitch" IsChecked="{Binding NIconHide, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" Click="ToggleSwitch_Click" />
             </ui:CardControl>
 
             <!-- back up & restore section -->
@@ -180,7 +182,7 @@
                 <ui:CardControl.Header>
                     <TextBlock Text="{DynamicResource ShowUpdateNotificationsTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
                 </ui:CardControl.Header>
-                <controls:ToggleSwitch IsChecked="{Binding ShowUpdateNotifications, Mode=TwoWay}" />
+                <ui:ToggleSwitch IsChecked="{Binding ShowUpdateNotifications, Mode=TwoWay}" />
             </ui:CardControl>
 
             <!-- Taskbar Utility / Quick Action Buttons -->
