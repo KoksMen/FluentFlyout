@@ -66,6 +66,10 @@ hides repeat, shuffle and player info</System:String>
     <System:String x:Key="TaskbarClipboardModeDescription">Choose the anchored FluentFlyout window or the original Windows panel</System:String>
     <System:String x:Key="TaskbarClipboardModeFluentFlyout">FluentFlyout window</System:String>
     <System:String x:Key="TaskbarClipboardModeSystem">Windows system window</System:String>
+    <System:String x:Key="TaskbarQuickActionsPositionTitle">Utility buttons position</System:String>
+    <System:String x:Key="TaskbarQuickActionsPositionDescription">Choose where the mixer and clipboard buttons appear on the taskbar</System:String>
+    <System:String x:Key="TaskbarQuickActionsPositionStart">Near Start / Left</System:String>
+    <System:String x:Key="TaskbarQuickActionsPositionEnd">Near Tray / Right</System:String>
     <System:String x:Key="ClipboardHistoryWindowTitle">Clipboard history</System:String>
     <System:String x:Key="ClipboardHistoryLoadingText">Loading history…</System:String>
     <System:String x:Key="ClipboardHistoryDisabledText">Clipboard history is disabled in Windows</System:String>

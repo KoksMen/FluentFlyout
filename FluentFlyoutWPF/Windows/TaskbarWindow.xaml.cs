@@ -501,7 +501,11 @@ on_error:
         switch (SettingsManager.Current.TaskbarWidgetPosition)
         {
             case 0: // near start (left for horizontal, top for vertical)
-                int quickActionsWidth = (SettingsManager.Current.TaskbarMixerButtonEnabled ? 40 : 0) + (SettingsManager.Current.TaskbarClipboardButtonEnabled ? 40 : 0);
+                bool hasStartQuickActions = (SettingsManager.Current.TaskbarMixerButtonEnabled || SettingsManager.Current.TaskbarClipboardButtonEnabled)
+                    && SettingsManager.Current.TaskbarQuickActionsPosition == 0;
+                int quickActionsWidth = hasStartQuickActions
+                    ? (SettingsManager.Current.TaskbarMixerButtonEnabled ? 40 : 0) + (SettingsManager.Current.TaskbarClipboardButtonEnabled ? 40 : 0)
+                    : 0;
                 int visualizerOffset = (SettingsManager.Current.TaskbarVisualizerEnabled && SettingsManager.Current.TaskbarVisualizerPosition == 0)
                     ? (int)(TaskbarVisualizer.Width * dpiScale) + 4
                     : 0;
@@ -736,29 +740,81 @@ on_error:
         int crossPos = (crossSize - (int)(36 * dpiScale)) / 2;
 
         int quickActionsWidth = (SettingsManager.Current.TaskbarMixerButtonEnabled ? 40 : 0) + (SettingsManager.Current.TaskbarClipboardButtonEnabled ? 40 : 0);
-        // Use 84px baseline to avoid Windows 11 Start/edge gesture/widgets area dead zone when widgets button is not present
-        int primaryPos = 84;
+        int primaryPos;
 
-        if (SettingsManager.Current.TaskbarWidgetPadding)
+        if (SettingsManager.Current.TaskbarQuickActionsPosition == 1) // near tray / end
         {
+            int primarySize = isVertical ? taskbarHeight : taskbarWidth;
+            primaryPos = primarySize - quickActionsWidth - 10;
+
             try
             {
-                (bool found, Rect nativeWidgetRect) = GetTaskbarWidgetRect(taskbarHandle);
-                bool inStartHalf = isVertical
-                    ? nativeWidgetRect.Bottom < (taskbarRect.Top + taskbarRect.Bottom) / 2.0
-                    : nativeWidgetRect.Right < (taskbarRect.Left + taskbarRect.Right) / 2.0;
-
-                if (found && inStartHalf)
+                if (!isMainTaskbarSelected)
                 {
-                    primaryPos = isVertical
-                        ? (int)(nativeWidgetRect.Bottom - taskbarRect.Top) + 2
-                        : (int)(nativeWidgetRect.Right - taskbarRect.Left) + 2;
+                    (bool found, Rect trayRect) = GetSystemTrayRect(taskbarHandle);
+                    if (found)
+                    {
+                        double trayOffset = isVertical
+                            ? trayRect.Top - taskbarRect.Top
+                            : trayRect.Left - taskbarRect.Left;
+                        primaryPos = (int)trayOffset - quickActionsWidth - (isVertical ? 2 : 6);
+                    }
+                }
+                else
+                {
+                    if (isVertical)
+                    {
+                        (bool trayFound, Rect trayAutomationRect) = GetSystemTrayRect(taskbarHandle);
+                        if (trayFound && trayAutomationRect.Top >= taskbarRect.Top)
+                        {
+                            primaryPos = (int)(trayAutomationRect.Top - taskbarRect.Top) - quickActionsWidth - 2;
+                        }
+                    }
+                    else
+                    {
+                        if (_trayHandle == IntPtr.Zero || _lastSelectedMonitor != SettingsManager.Current.TaskbarWidgetSelectedMonitor)
+                            _trayHandle = FindWindowEx(taskbarHandle, IntPtr.Zero, "TrayNotifyWnd", null);
+
+                        if (_trayHandle != IntPtr.Zero)
+                        {
+                            GetWindowRect(_trayHandle, out RECT trayWndRect);
+                            double trayOffset = trayWndRect.Left - taskbarRect.Left;
+                            primaryPos = (int)trayOffset - quickActionsWidth - 6;
+                        }
+                    }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Logger.Warn(ex, "Failed to position quick actions near tray");
+            }
         }
+        else // 0 = near start
+        {
+            // Use 84px baseline to avoid Windows 11 Start/edge gesture/widgets area dead zone when widgets button is not present
+            primaryPos = 84;
 
-        primaryPos += SettingsManager.Current.TaskbarWidgetManualPadding;
+            if (SettingsManager.Current.TaskbarWidgetPadding)
+            {
+                try
+                {
+                    (bool found, Rect nativeWidgetRect) = GetTaskbarWidgetRect(taskbarHandle);
+                    bool inStartHalf = isVertical
+                        ? nativeWidgetRect.Bottom < (taskbarRect.Top + taskbarRect.Bottom) / 2.0
+                        : nativeWidgetRect.Right < (taskbarRect.Left + taskbarRect.Right) / 2.0;
+
+                    if (found && inStartHalf)
+                    {
+                        primaryPos = isVertical
+                            ? (int)(nativeWidgetRect.Bottom - taskbarRect.Top) + 2
+                            : (int)(nativeWidgetRect.Right - taskbarRect.Left) + 2;
+                    }
+                }
+                catch { }
+            }
+
+            primaryPos += SettingsManager.Current.TaskbarWidgetManualPadding;
+        }
 
         double leftLogical = (isVertical ? crossPos : primaryPos) / dpiScale;
         double topLogical = (isVertical ? primaryPos : crossPos) / dpiScale;

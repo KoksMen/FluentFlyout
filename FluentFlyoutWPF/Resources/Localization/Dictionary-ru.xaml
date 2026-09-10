@@ -118,6 +118,10 @@
     <system:String x:Key="TaskbarClipboardModeDescription">Выберите встроенное окно над кнопкой или оригинальную панель Windows</system:String>
     <system:String x:Key="TaskbarClipboardModeFluentFlyout">Окно FluentFlyout</system:String>
     <system:String x:Key="TaskbarClipboardModeSystem">Системное окно Windows</system:String>
+    <system:String x:Key="TaskbarQuickActionsPositionTitle">Положение служебных кнопок</system:String>
+    <system:String x:Key="TaskbarQuickActionsPositionDescription">Выберите, где отображать кнопки микшера и истории буфера обмена</system:String>
+    <system:String x:Key="TaskbarQuickActionsPositionStart">Слева / в начале</system:String>
+    <system:String x:Key="TaskbarQuickActionsPositionEnd">Справа / возле трея</system:String>
     <system:String x:Key="ClipboardHistoryWindowTitle">История буфера обмена</system:String>
     <system:String x:Key="ClipboardHistoryLoadingText">Загрузка истории…</system:String>
     <system:String x:Key="ClipboardHistoryDisabledText">История буфера обмена отключена в Windows</system:String>

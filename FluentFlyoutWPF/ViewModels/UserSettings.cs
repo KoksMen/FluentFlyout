@@ -385,6 +385,13 @@ public partial class UserSettings : ObservableObject
     public partial int TaskbarClipboardMode { get; set; }
 
     /// <summary>
+    /// Gets or sets the position of taskbar utility buttons.
+    /// 0: Near start (left/top), 1: Near end / tray (right/bottom).
+    /// </summary>
+    [ObservableProperty]
+    public partial int TaskbarQuickActionsPosition { get; set; }
+
+    /// <summary>
     /// Widget Target Display
     /// </summary>
     [ObservableProperty]
@@ -880,6 +887,7 @@ public partial class UserSettings : ObservableObject
         TaskbarQuickActionsAutoHide = true;
         TaskbarUtilityButtonsOutlineEnabled = false;
         TaskbarClipboardMode = 0;
+        TaskbarQuickActionsPosition = 0;
         TaskbarWidgetSelectedMonitor = 0;
         TaskbarWidgetPosition = 0;
         TaskbarWidgetPadding = true;
@@ -1087,6 +1095,12 @@ public partial class UserSettings : ObservableObject
     }
 
     partial void OnTaskbarClipboardButtonEnabledChanged(bool oldValue, bool newValue)
+    {
+        if (oldValue == newValue || _initializing) return;
+        UpdateTaskbar();
+    }
+
+    partial void OnTaskbarQuickActionsPositionChanged(int oldValue, int newValue)
     {
         if (oldValue == newValue || _initializing) return;
         UpdateTaskbar();
