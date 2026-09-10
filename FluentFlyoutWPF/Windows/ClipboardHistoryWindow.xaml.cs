@@ -28,11 +28,14 @@ public partial class ClipboardHistoryWindow : MicaWindow
     private bool _expandDownward;
     private int _animationGeneration;
     private IntPtr _returnFocusWindow;
+    private readonly List<ClipboardEntry> _allEntries = [];
+    private CancellationTokenSource? _cts;
 
     public ClipboardHistoryWindow(MainWindow mainWindow)
     {
         _mainWindow = mainWindow;
         DataContext = SettingsManager.Current;
+        WindowHelper.SetNoActivate(this);
         InitializeComponent();
 
         new System.Windows.Interop.WindowInteropHelper(this).EnsureHandle();
@@ -60,16 +63,20 @@ public partial class ClipboardHistoryWindow : MicaWindow
             {
                 _isOpen = false;
                 _isAnimating = false;
+                _cts?.Cancel();
                 Hide();
                 return;
             }
 
+            _cts?.Cancel();
             _returnFocusWindow = returnFocusWindow;
             _isOpen = true;
             _animationGeneration++;
+            SearchBox.Text = string.Empty;
             await LoadHistoryAsync();
             PositionAtTaskbarAnchor(anchorRect, taskbarRect);
             AnimateOpen();
+            StartDismissMonitoring();
         }
         catch (Exception ex)
         {
@@ -164,17 +171,42 @@ public partial class ClipboardHistoryWindow : MicaWindow
 
             if (generation != _animationGeneration) return;
 
-            HistoryItems.ItemsSource = entries;
-            StatusText.Visibility = entries.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-            if (entries.Count == 0)
-                StatusText.SetResourceReference(TextBlock.TextProperty, "ClipboardHistoryEmptyHistoryText");
-            HistoryScrollViewer.Visibility = entries.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-            ClearHistoryButton.Visibility = entries.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            ApplyFilter(SearchBox?.Text);
+            ClearHistoryButton.Visibility = _allEntries.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         }
         catch
         {
             StatusText.SetResourceReference(TextBlock.TextProperty, "ClipboardHistoryUnavailableText");
         }
+    }
+
+    private void ApplyFilter(string? query)
+    {
+        query = query?.Trim();
+        List<ClipboardEntry> filtered;
+        if (string.IsNullOrEmpty(query))
+        {
+            filtered = [.. _allEntries];
+        }
+        else
+        {
+            filtered = _allEntries
+                .Where(entry => entry.Preview.Contains(query, StringComparison.CurrentCultureIgnoreCase))
+                .ToList();
+        }
+
+        HistoryItems.ItemsSource = filtered;
+        StatusText.Visibility = filtered.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        if (filtered.Count == 0)
+        {
+            StatusText.SetResourceReference(TextBlock.TextProperty, "ClipboardHistoryEmptyHistoryText");
+        }
+        HistoryScrollViewer.Visibility = filtered.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        ApplyFilter(SearchBox.Text);
     }
 
     private static async Task<ImageSource?> LoadBitmapPreviewAsync(ClipboardHistoryItem item)
@@ -233,8 +265,7 @@ public partial class ClipboardHistoryWindow : MicaWindow
         {
             bool taskbarAtRight = taskbarRect.Left + taskbarRect.Width / 2
                 >= monitorArea.Left + monitorArea.Width / 2;
-            _expandDownward = anchorRect.Top + anchorRect.Height / 2
-                < monitorArea.Top + monitorArea.Height / 2;
+            _expandDownward = false;
             left = taskbarAtRight
                 ? taskbarRect.Left - physicalWidth - gap
                 : taskbarRect.Right + gap;
@@ -261,7 +292,6 @@ public partial class ClipboardHistoryWindow : MicaWindow
         Opacity = duration == 0 ? 1 : 0;
         Show();
         WindowHelper.SetTopmost(this);
-        Activate();
 
         if (duration == 0)
             return;
@@ -292,9 +322,60 @@ public partial class ClipboardHistoryWindow : MicaWindow
         BeginAnimation(OpacityProperty, fade);
     }
 
+    private void StartDismissMonitoring()
+    {
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        var token = _cts.Token;
+        DateTime openTime = DateTime.UtcNow;
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                while (!token.IsCancellationRequested)
+                {
+                    await Task.Delay(40, token);
+
+                    if ((DateTime.UtcNow - openTime).TotalMilliseconds > 300)
+                    {
+                        bool isLClick = (GetAsyncKeyState(0x01) & 0x8000) != 0;
+                        bool isRClick = (GetAsyncKeyState(0x02) & 0x8000) != 0;
+                        if (isLClick || isRClick)
+                        {
+                            bool mouseOverWindow = false;
+                            await Dispatcher.InvokeAsync(() =>
+                            {
+                                mouseOverWindow = WindowHelper.IsMouseOverWindow(this);
+                            });
+
+                            if (!mouseOverWindow)
+                            {
+                                await Dispatcher.InvokeAsync(async () =>
+                                {
+                                    await HideAnimatedAsync();
+                                });
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                // normal cancellation on hide or toggle
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "Error in ClipboardHistory dismiss monitoring");
+            }
+        }, token);
+    }
+
     private async Task HideAnimatedAsync()
     {
         _lastCloseTime = DateTime.UtcNow;
+        _cts?.Cancel();
         if (!_isOpen && !_isAnimating)
             return;
 

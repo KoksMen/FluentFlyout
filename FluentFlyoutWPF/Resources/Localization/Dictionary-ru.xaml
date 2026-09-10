@@ -128,6 +128,7 @@
     <system:String x:Key="ClipboardHistoryEmptyText">Пустой текст</system:String>
     <system:String x:Key="ClipboardHistoryClearText">Очистить</system:String>
     <system:String x:Key="ClipboardHistoryDeleteText">Удалить элемент</system:String>
+    <system:String x:Key="ClipboardHistorySearchPlaceholder">Поиск по буферу обмена…</system:String>
     <system:String x:Key="TaskbarWidgetVisualIssuesWarning">Если у вас возникают проблемы с отображением виджета, настройте параметры ниже.</system:String>
     <system:String x:Key="TaskbarWidgetPosition">Расположение виджета</system:String>
     <system:String x:Key="TaskbarWidgetPaddingTitle">Автоматический отступ для кнопки виджетов Windows</system:String>

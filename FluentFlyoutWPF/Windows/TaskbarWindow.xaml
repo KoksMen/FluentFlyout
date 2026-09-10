@@ -70,7 +70,7 @@
                     </Style>
                 </Border.Style>
                 <Grid Background="Transparent">
-                    <ui:SymbolIcon Symbol="ClipboardClock24" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+                    <ui:SymbolIcon Symbol="ClipboardPaste24" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
                 </Grid>
             </Border>
         </StackPanel>

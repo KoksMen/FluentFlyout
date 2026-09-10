@@ -76,6 +76,7 @@ hides repeat, shuffle and player info</System:String>
     <System:String x:Key="ClipboardHistoryEmptyText">Empty text</System:String>
     <System:String x:Key="ClipboardHistoryClearText">Clear</System:String>
     <System:String x:Key="ClipboardHistoryDeleteText">Delete item</System:String>
+    <System:String x:Key="ClipboardHistorySearchPlaceholder">Search clipboard history…</System:String>
     <System:String x:Key="TaskbarWidgetVisualIssuesWarning">Configure the options below if you experience visual issues.</System:String>
     <System:String x:Key="TaskbarWidgetSelectedMonitorTitle">Widget Target Display</System:String>
     <System:String x:Key="TaskbarWidgetPosition">Widget Position</System:String>
