@@ -20,7 +20,7 @@
         xmlns:viewModels="clr-namespace:FluentFlyoutWPF.ViewModels"
 		d:DataContext="{d:DesignInstance viewModels:UserSettings}">
     <Canvas Name="WidgetCanvas" Background="Transparent">
-        <StackPanel x:Name="QuickActionsPanel" Orientation="Horizontal" VerticalAlignment="Center">
+        <StackPanel x:Name="QuickActionsPanel" Orientation="Horizontal" VerticalAlignment="Center" Background="Transparent">
             <Border x:Name="MixerButton"
                     Width="36" Height="36" Margin="0,0,4,0"
                     CornerRadius="6"
@@ -29,10 +29,8 @@
                     ToolTip="{DynamicResource TaskbarMixerButtonTitle}"
                     MouseEnter="QuickAction_MouseEnter"
                     MouseLeave="QuickAction_MouseLeave"
-                    PreviewMouseLeftButtonUp="MixerButton_Click">
-                <Border.Background>
-                    <SolidColorBrush Color="#01FFFFFF" />
-                </Border.Background>
+                    MouseLeftButtonUp="MixerButton_Click"
+                    Background="Transparent">
                 <Border.Style>
                     <Style TargetType="{x:Type Border}">
                         <Setter Property="BorderThickness" Value="0" />
@@ -45,7 +43,9 @@
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
-                <ui:SymbolIcon Symbol="SpeakerSettings24" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+                <Grid Background="Transparent">
+                    <ui:SymbolIcon Symbol="SpeakerSettings24" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+                </Grid>
             </Border>
             <Border x:Name="ClipboardButton"
                     Width="36" Height="36" Margin="0,0,4,0"
@@ -55,10 +55,8 @@
                     ToolTip="{DynamicResource TaskbarClipboardButtonTitle}"
                     MouseEnter="QuickAction_MouseEnter"
                     MouseLeave="QuickAction_MouseLeave"
-                    PreviewMouseLeftButtonUp="ClipboardButton_Click">
-                <Border.Background>
-                    <SolidColorBrush Color="#01FFFFFF" />
-                </Border.Background>
+                    MouseLeftButtonUp="ClipboardButton_Click"
+                    Background="Transparent">
                 <Border.Style>
                     <Style TargetType="{x:Type Border}">
                         <Setter Property="BorderThickness" Value="0" />
@@ -71,7 +69,9 @@
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
-                <ui:SymbolIcon Symbol="ClipboardClock24" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+                <Grid Background="Transparent">
+                    <ui:SymbolIcon Symbol="ClipboardClock24" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+                </Grid>
             </Border>
         </StackPanel>
 		<controls:TaskbarVisualizerControl x:Name="TaskbarVisualizer" Margin="0,1,0,0" />

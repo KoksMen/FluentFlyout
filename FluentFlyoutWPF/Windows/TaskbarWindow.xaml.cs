@@ -792,7 +792,7 @@ on_error:
 
             if (border.Background is not SolidColorBrush scb || scb.IsFrozen)
             {
-                border.Background = new SolidColorBrush(QuickActionIdleColor);
+                border.Background = new SolidColorBrush(System.Windows.Media.Colors.Transparent) { Opacity = 0 };
             }
 
             border.Background.BeginAnimation(SolidColorBrush.ColorProperty, backgroundAnimation);
@@ -806,21 +806,21 @@ on_error:
         {
             var backgroundAnimation = new ColorAnimation
             {
-                To = QuickActionIdleColor,
+                To = System.Windows.Media.Colors.Transparent,
                 Duration = TimeSpan.FromMilliseconds(200),
                 EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
             };
 
             var backgroundOpacityAnimation = new DoubleAnimation
             {
-                To = 1,
+                To = 0,
                 Duration = TimeSpan.FromMilliseconds(200),
                 EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
             };
 
             if (border.Background is not SolidColorBrush scb || scb.IsFrozen)
             {
-                border.Background = new SolidColorBrush(QuickActionIdleColor);
+                border.Background = new SolidColorBrush(System.Windows.Media.Colors.Transparent) { Opacity = 0 };
             }
 
             border.Background.BeginAnimation(SolidColorBrush.ColorProperty, backgroundAnimation);
