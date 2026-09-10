@@ -190,7 +190,7 @@
             <TextBlock Text="{DynamicResource TaskbarUtilityButtonsSectionTitle}" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,4" />
             <TextBlock Text="{DynamicResource TaskbarUtilityButtonsSectionDescription}" FontSize="13" Opacity="0.65" Margin="0,0,0,12" TextWrapping="Wrap" />
 
-            <ui:CardControl x:Name="TaskbarMixerButtonTitleCard" Tag="Indexable" Icon="{ui:SymbolIcon SpeakerSettings24}" Margin="0,0,0,3">
+            <ui:CardControl x:Name="TaskbarMixerButtonTitleCard" Tag="Indexable" Icon="{ui:SymbolIcon Speaker224}" Margin="0,0,0,3">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">

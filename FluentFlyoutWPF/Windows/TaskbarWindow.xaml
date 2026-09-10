@@ -29,6 +29,8 @@
                     ToolTip="{DynamicResource TaskbarMixerButtonTitle}"
                     MouseEnter="QuickAction_MouseEnter"
                     MouseLeave="QuickAction_MouseLeave"
+                    PreviewMouseWheel="MixerButton_PreviewMouseWheel"
+                    MouseDown="MixerButton_MouseDown"
                     MouseLeftButtonUp="MixerButton_Click"
                     Background="#01000000">
                 <Border.Style>
@@ -44,7 +46,8 @@
                     </Style>
                 </Border.Style>
                 <Grid Background="Transparent">
-                    <ui:SymbolIcon Symbol="SpeakerSettings24" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+                    <ui:SymbolIcon x:Name="MixerSymbolNormal" Symbol="Speaker224" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" />
+                    <ui:SymbolIcon x:Name="MixerSymbolMuted" Symbol="SpeakerMute24" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" Visibility="Collapsed" />
                 </Grid>
             </Border>
             <Border x:Name="ClipboardButton"

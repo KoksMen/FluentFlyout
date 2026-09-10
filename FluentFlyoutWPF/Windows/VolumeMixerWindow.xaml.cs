@@ -233,6 +233,8 @@ public partial class VolumeMixerWindow : MicaWindow
         _cts = new CancellationTokenSource();
         var token = _cts.Token;
 
+        DateTime openTime = DateTime.UtcNow;
+
         try
         {
             while (!token.IsCancellationRequested)
@@ -240,7 +242,7 @@ public partial class VolumeMixerWindow : MicaWindow
                 await Task.Delay(100, token);
                 ViewModel.SyncMasterFromDevice();
 
-                if (GetForegroundWindow() != mixerHandle)
+                if ((DateTime.UtcNow - openTime).TotalMilliseconds > 250 && GetForegroundWindow() != mixerHandle)
                 {
                     HideTaskbarFlyout();
                     break;
@@ -439,6 +441,10 @@ public partial class VolumeMixerWindow : MicaWindow
                 return;
 
             AnimateExpandCollapse(ViewModel.IsExpanded);
+        }
+        else if (e.PropertyName is nameof(VolumeMixerViewModel.MasterVolume) or nameof(VolumeMixerViewModel.IsMasterMuted))
+        {
+            _mainWindow.taskbarWindow?.UpdateMixerButtonVisuals(ViewModel.MasterVolume, ViewModel.IsMasterMuted);
         }
     }
 

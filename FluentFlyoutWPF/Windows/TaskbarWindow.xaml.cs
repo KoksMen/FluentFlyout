@@ -10,6 +10,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -132,6 +133,16 @@ public partial class TaskbarWindow : Window
                 _mainWindow?.UpdateTaskbar();
             });
         };
+
+        try
+        {
+            var device = AudioDeviceMonitor.Instance.GetDefaultRenderDevice();
+            if (device != null)
+            {
+                UpdateMixerButtonVisuals(device.AudioEndpointVolume.MasterVolumeLevelScalar, device.AudioEndpointVolume.Mute);
+            }
+        }
+        catch { }
     }
 
     private IntPtr GetSelectedTaskbarHandle(out bool isMainTaskbarSelected)
@@ -841,7 +852,6 @@ on_error:
     }
 
     private void MixerButton_Click(object sender, RoutedEventArgs e)
-
     {
         (bool foundTaskbar, Rect taskbarRect) = GetTaskbarFrameRect(GetSelectedTaskbarHandle(out _));
         if (!foundTaskbar)
@@ -852,6 +862,74 @@ on_error:
         _mainWindow?.ShowVolumeMixerFromTaskbar(
             GetElementLogicalScreenRect(MixerButton),
             taskbarRect);
+    }
+
+    private void MixerButton_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        e.Handled = true;
+        float delta = e.Delta > 0 ? 0.02f : -0.02f;
+        _mainWindow?.AdjustTaskbarVolume(delta);
+    }
+
+    private void MixerButton_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton == MouseButton.Middle)
+        {
+            e.Handled = true;
+            _mainWindow?.AdjustTaskbarVolume(0); // Will toggle or we can toggle master mute
+            // Let's directly toggle master mute via volumeMixerWindow ViewModel if available
+            ToggleMasterMute();
+        }
+    }
+
+    private void ToggleMasterMute()
+    {
+        try
+        {
+            var device = AudioDeviceMonitor.Instance.GetDefaultRenderDevice();
+            if (device != null)
+            {
+                device.AudioEndpointVolume.Mute = !device.AudioEndpointVolume.Mute;
+                UpdateMixerButtonVisuals(device.AudioEndpointVolume.MasterVolumeLevelScalar, device.AudioEndpointVolume.Mute);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Warn(ex, "Failed to toggle master mute from taskbar button");
+        }
+    }
+
+    public void UpdateMixerButtonVisuals(float volume, bool isMuted)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            if (isMuted || volume <= 0.001f)
+            {
+                MixerSymbolNormal.Visibility = Visibility.Collapsed;
+                MixerSymbolMuted.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                MixerSymbolMuted.Visibility = Visibility.Collapsed;
+                MixerSymbolNormal.Visibility = Visibility.Visible;
+                if (volume < 0.33f)
+                {
+                    MixerSymbolNormal.Symbol = Wpf.Ui.Controls.SymbolRegular.Speaker024;
+                }
+                else if (volume < 0.66f)
+                {
+                    MixerSymbolNormal.Symbol = Wpf.Ui.Controls.SymbolRegular.Speaker124;
+                }
+                else
+                {
+                    MixerSymbolNormal.Symbol = Wpf.Ui.Controls.SymbolRegular.Speaker224;
+                }
+            }
+
+            int volPercent = (int)Math.Round(volume * 100);
+            string baseTitle = Application.Current.TryFindResource("TaskbarMixerButtonTitle") as string ?? "Volume Mixer";
+            MixerButton.ToolTip = isMuted ? $"{baseTitle} (Muted)" : $"{baseTitle} ({volPercent}%)";
+        });
     }
 
     private void ClipboardButton_Click(object sender, RoutedEventArgs e)
