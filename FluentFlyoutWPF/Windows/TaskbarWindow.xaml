@@ -30,7 +30,7 @@
                     MouseEnter="QuickAction_MouseEnter"
                     MouseLeave="QuickAction_MouseLeave"
                     MouseLeftButtonUp="MixerButton_Click"
-                    Background="Transparent">
+                    Background="#01000000">
                 <Border.Style>
                     <Style TargetType="{x:Type Border}">
                         <Setter Property="BorderThickness" Value="0" />
@@ -56,7 +56,7 @@
                     MouseEnter="QuickAction_MouseEnter"
                     MouseLeave="QuickAction_MouseLeave"
                     MouseLeftButtonUp="ClipboardButton_Click"
-                    Background="Transparent">
+                    Background="#01000000">
                 <Border.Style>
                     <Style TargetType="{x:Type Border}">
                         <Setter Property="BorderThickness" Value="0" />

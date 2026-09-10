@@ -446,7 +446,7 @@ on_error:
             SetWindowPos(taskbarWindowHandle, 0,
                      containerPos.X, containerPos.Y,
                      containerWidth, containerHeight,
-                     SWP_NOZORDER | SWP_NOACTIVATE | SWP_ASYNCWINDOWPOS | SWP_SHOWWINDOW);
+                     SWP_NOACTIVATE | SWP_ASYNCWINDOWPOS | SWP_SHOWWINDOW);
             var qRect = PositionQuickActions(taskbarHandle, taskbarRect, dpiScale, isMainTaskbarSelected, isVertical);
             var wRect = PositionWidget(taskbarHandle, taskbarRect, dpiScale, isMainTaskbarSelected, isVertical);
             var vRect = PositionVisualizer(taskbarHandle, taskbarRect, dpiScale, isMainTaskbarSelected, isVertical);
@@ -491,42 +491,50 @@ on_error:
         {
             case 0: // near start (left for horizontal, top for vertical)
                 int quickActionsWidth = (SettingsManager.Current.TaskbarMixerButtonEnabled ? 40 : 0) + (SettingsManager.Current.TaskbarClipboardButtonEnabled ? 40 : 0);
-                int quickActionsOffset = quickActionsWidth > 0 ? quickActionsWidth + 4 : 0;
                 int visualizerOffset = (SettingsManager.Current.TaskbarVisualizerEnabled && SettingsManager.Current.TaskbarVisualizerPosition == 0)
                     ? (int)(TaskbarVisualizer.Width * dpiScale) + 4
                     : 0;
 
-                primaryPos = 20 + quickActionsOffset + visualizerOffset;
-
-                if (!SettingsManager.Current.TaskbarWidgetPadding)
-                    break;
-
-                // automatic widget padding to the start
-                try
+                if (quickActionsWidth > 0)
                 {
-                    // find widget button in XAML
-                    (bool found, Rect nativeWidgetRect) = GetTaskbarWidgetRect(taskbarHandle);
-
-                    // Accept only if the native Widgets button is in the start half of the taskbar
-                    bool inStartHalf = isVertical
-                        ? nativeWidgetRect.Bottom < (taskbarRect.Top + taskbarRect.Bottom) / 2.0
-                        : nativeWidgetRect.Right < (taskbarRect.Left + taskbarRect.Right) / 2.0;
-
-                    if (found && inStartHalf)
-                    {
-                        // Convert absolute screen position to relative position within taskbar
-                        int startCoord = isVertical
-                            ? (int)(nativeWidgetRect.Bottom - taskbarRect.Top) + 2
-                            : (int)(nativeWidgetRect.Right - taskbarRect.Left) + 2;
-
-                        primaryPos = startCoord + quickActionsOffset + visualizerOffset;
-                    }
+                    double qaPos = isVertical ? Canvas.GetTop(QuickActionsPanel) : Canvas.GetLeft(QuickActionsPanel);
+                    primaryPos = (int)(qaPos * dpiScale) + quickActionsWidth + 4 + visualizerOffset;
                 }
-                catch (Exception ex)
+                else
                 {
-                    // fallback to default padding
-                    Logger.Warn(ex, "Failed to get Widgets button position.");
-                    primaryPos += _nativeWidgetsPadding + 2;
+                    const int baseStart = 84;
+                    primaryPos = baseStart + visualizerOffset;
+
+                    if (SettingsManager.Current.TaskbarWidgetPadding)
+                    {
+                        // automatic widget padding to the start
+                        try
+                        {
+                            // find widget button in XAML
+                            (bool found, Rect nativeWidgetRect) = GetTaskbarWidgetRect(taskbarHandle);
+
+                            // Accept only if the native Widgets button is in the start half of the taskbar
+                            bool inStartHalf = isVertical
+                                ? nativeWidgetRect.Bottom < (taskbarRect.Top + taskbarRect.Bottom) / 2.0
+                                : nativeWidgetRect.Right < (taskbarRect.Left + taskbarRect.Right) / 2.0;
+
+                            if (found && inStartHalf)
+                            {
+                                // Convert absolute screen position to relative position within taskbar
+                                int startCoord = isVertical
+                                    ? (int)(nativeWidgetRect.Bottom - taskbarRect.Top) + 2
+                                    : (int)(nativeWidgetRect.Right - taskbarRect.Left) + 2;
+
+                                primaryPos = startCoord + visualizerOffset;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // fallback to default padding
+                            Logger.Warn(ex, "Failed to get Widgets button position.");
+                            primaryPos += _nativeWidgetsPadding + 2;
+                        }
+                    }
                 }
                 break;
 
@@ -717,7 +725,8 @@ on_error:
         int crossPos = (crossSize - (int)(36 * dpiScale)) / 2;
 
         int quickActionsWidth = (SettingsManager.Current.TaskbarMixerButtonEnabled ? 40 : 0) + (SettingsManager.Current.TaskbarClipboardButtonEnabled ? 40 : 0);
-        int primaryPos = 20;
+        // Use 84px baseline to avoid Windows 11 Start/edge gesture/widgets area dead zone when widgets button is not present
+        int primaryPos = 84;
 
         if (SettingsManager.Current.TaskbarWidgetPadding)
         {
@@ -737,18 +746,19 @@ on_error:
             }
             catch { }
         }
+
+        primaryPos += SettingsManager.Current.TaskbarWidgetManualPadding;
+
         double leftLogical = (isVertical ? crossPos : primaryPos) / dpiScale;
         double topLogical = (isVertical ? primaryPos : crossPos) / dpiScale;
 
         Canvas.SetLeft(QuickActionsPanel, leftLogical);
         Canvas.SetTop(QuickActionsPanel, topLogical);
 
-        int rectX = isVertical ? crossPos : primaryPos;
-        int rectY = isVertical ? primaryPos : crossPos;
-        int rectW = isVertical ? (int)(36 * dpiScale) : (int)(quickActionsWidth * dpiScale);
-        int rectH = isVertical ? (int)(quickActionsWidth * dpiScale) : (int)(36 * dpiScale);
+        double rectW = isVertical ? 36 * dpiScale : quickActionsWidth * dpiScale;
+        double rectH = isVertical ? quickActionsWidth * dpiScale : 36 * dpiScale;
 
-        return new Rect(rectX, rectY, rectW, rectH);
+        return new Rect(Canvas.GetLeft(QuickActionsPanel) * dpiScale, Canvas.GetTop(QuickActionsPanel) * dpiScale, rectW, rectH);
     }
 
     private static Rect GetElementLogicalScreenRect(FrameworkElement element)
@@ -794,7 +804,7 @@ on_error:
 
             if (border.Background is not SolidColorBrush scb || scb.IsFrozen)
             {
-                border.Background = new SolidColorBrush(System.Windows.Media.Colors.Transparent) { Opacity = 0 };
+                border.Background = new SolidColorBrush(QuickActionIdleColor) { Opacity = 1.0 };
             }
 
             border.Background.BeginAnimation(SolidColorBrush.ColorProperty, backgroundAnimation);
@@ -808,21 +818,21 @@ on_error:
         {
             var backgroundAnimation = new ColorAnimation
             {
-                To = System.Windows.Media.Colors.Transparent,
+                To = QuickActionIdleColor,
                 Duration = TimeSpan.FromMilliseconds(200),
                 EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
             };
 
             var backgroundOpacityAnimation = new DoubleAnimation
             {
-                To = 0,
+                To = 1.0,
                 Duration = TimeSpan.FromMilliseconds(200),
                 EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
             };
 
             if (border.Background is not SolidColorBrush scb || scb.IsFrozen)
             {
-                border.Background = new SolidColorBrush(System.Windows.Media.Colors.Transparent) { Opacity = 0 };
+                border.Background = new SolidColorBrush(QuickActionIdleColor) { Opacity = 1.0 };
             }
 
             border.Background.BeginAnimation(SolidColorBrush.ColorProperty, backgroundAnimation);
