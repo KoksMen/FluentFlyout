@@ -45,6 +45,7 @@ public partial class TaskbarWindow : Window
     private bool _positionUpdateInProgress;
     private bool _isClosing;
     private readonly Dictionary<string, Task> _pendingAutomationTasks = [];
+    private readonly Dictionary<string, (DateTime lastAttempt, Rect rect, bool found)> _elementRectCache = [];
 
     private GlobalSystemMediaTransportControlsSessionPlaybackStatus? _lastPlaybackStatus;
     private DispatcherTimer? _autoHideTimer;
@@ -386,6 +387,7 @@ on_error:
         _trayElement = null;
         _taskbarFrameElement = null;
         _pendingAutomationTasks.Clear();
+        _elementRectCache.Clear();
     }
 
     private void CalculateAndSetPosition(IntPtr taskbarHandle, IntPtr taskbarWindowHandle, bool isMainTaskbarSelected)
@@ -1124,7 +1126,28 @@ on_error:
         {
             // reset if monitor changed
             if (_lastSelectedMonitor != SettingsManager.Current.TaskbarWidgetSelectedMonitor)
+            {
                 elementCache = null;
+                _elementRectCache.Clear();
+            }
+
+            var now = DateTime.UtcNow;
+
+            // Check if we have a recent successful or unsuccessful query
+            // If element was successfully resolved recently, reuse its rect to avoid UI Automation overhead
+            // If element was not found (e.g. native Widgets disabled), don't re-query every tick; throttle retries to every 5 seconds
+            if (_elementRectCache.TryGetValue(elementName, out var cachedData))
+            {
+                var cacheAge = now - cachedData.lastAttempt;
+                if (cachedData.found && cacheAge < TimeSpan.FromSeconds(3))
+                {
+                    return (true, cachedData.rect);
+                }
+                if (!cachedData.found && cacheAge < TimeSpan.FromSeconds(5))
+                {
+                    return (false, Rect.Empty);
+                }
+            }
 
             // find widget in XAML
             if (elementCache == null)
@@ -1144,6 +1167,7 @@ on_error:
                 if (!findTask.Wait(1000))
                 {
                     Logger.Warn("Timeout querying taskbar XAML element: " + elementName);
+                    _elementRectCache[elementName] = (now, Rect.Empty, false);
                     return (false, Rect.Empty);
                 }
 
@@ -1153,7 +1177,10 @@ on_error:
             }
 
             if (elementCache == null) // widget most likely disabled
+            {
+                _elementRectCache[elementName] = (now, Rect.Empty, false);
                 return (false, Rect.Empty);
+            }
 
             try
             {
@@ -1171,6 +1198,7 @@ on_error:
                 {
                     Logger.Warn("Timeout getting bounds for taskbar XAML element: " + elementName);
                     elementCache = null;
+                    _elementRectCache[elementName] = (now, Rect.Empty, false);
                     return (false, Rect.Empty);
                 }
 
@@ -1179,9 +1207,11 @@ on_error:
                 if (elementRect == Rect.Empty) // widget shown before but most likely disabled now
                 {
                     elementCache = null; // reset cache
+                    _elementRectCache[elementName] = (now, Rect.Empty, false);
                     return (false, Rect.Empty);
                 }
 
+                _elementRectCache[elementName] = (now, elementRect, true);
                 return (true, elementRect);
             }
             catch (ElementNotAvailableException)
@@ -1189,6 +1219,7 @@ on_error:
                 // element became stale, reset cache
                 Logger.Warn("Taskbar XAML element became stale, resetting cache: " + elementName);
                 elementCache = null;
+                _elementRectCache[elementName] = (now, Rect.Empty, false);
                 return (false, Rect.Empty);
             }
         }
@@ -1196,18 +1227,21 @@ on_error:
         {
             Logger.Warn(ex, "COM error retrieving taskbar XAML element Rect: " + elementName);
             elementCache = null; // reset cache on error
+            _elementRectCache[elementName] = (DateTime.UtcNow, Rect.Empty, false);
             return (false, Rect.Empty);
         }
         catch (ElementNotAvailableException)
         {
             Logger.Warn("Taskbar XAML element not available, resetting cache: " + elementName);
             elementCache = null;
+            _elementRectCache[elementName] = (DateTime.UtcNow, Rect.Empty, false);
             return (false, Rect.Empty);
         }
         catch (Exception ex)
         {
             Logger.Error(ex, "Error retrieving taskbar XAML element Rect: " + elementName);
             elementCache = null; // reset cache on error
+            _elementRectCache[elementName] = (DateTime.UtcNow, Rect.Empty, false);
             return (false, Rect.Empty);
         }
     }
@@ -1270,6 +1304,7 @@ on_error:
         _trayElement = null;
         _taskbarFrameElement = null;
         _pendingAutomationTasks.Clear();
+        _elementRectCache.Clear();
         base.OnClosed(e);
     }
 }
