@@ -53,8 +53,6 @@ public static class WindowBlurHelper
         SetWindowCompositionAttribute(windowHelper.Handle, ref data);
 
         Marshal.FreeHGlobal(accentPtr);
-
-        WindowHelper.ApplyModernWindowStyling(window);
     }
 
     /// <summary>
@@ -84,8 +82,6 @@ public static class WindowBlurHelper
         SetWindowCompositionAttribute(windowHelper.Handle, ref data);
 
         Marshal.FreeHGlobal(accentPtr);
-
-        WindowHelper.ApplyModernWindowStyling(window);
     }
 
     /// <summary>

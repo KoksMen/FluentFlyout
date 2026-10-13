@@ -19,9 +19,8 @@
       FlowDirection="{Binding FlowDirection}"
       KeyDown="Window_KeyDown"
       Deactivated="Window_Deactivated">
-    <Border BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" CornerRadius="8">
-        <Grid Margin="12">
-            <Grid.RowDefinitions>
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
@@ -121,5 +120,4 @@
             </ui:PassiveScrollViewer>
         </Grid>
     </Grid>
-    </Border>
 </controls:MicaWindow>

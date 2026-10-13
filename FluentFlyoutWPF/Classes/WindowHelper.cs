@@ -97,48 +97,4 @@ public static class WindowHelper
         return cursor.X >= rect.Left && cursor.X <= rect.Right &&
                cursor.Y >= rect.Top && cursor.Y <= rect.Bottom;
     }
-
-    /// <summary>
-    /// Explicitly enforces Windows 11 DWM rounded corners and native drop shadow for borderless / tool windows.
-    /// </summary>
-    public static void ApplyModernWindowStyling(Window window)
-    {
-        void Apply()
-        {
-            var helper = new WindowInteropHelper(window);
-            var handle = helper.Handle;
-            if (handle == IntPtr.Zero) return;
-
-            try
-            {
-                if (Environment.OSVersion.Version.Build >= 22000)
-                {
-                    int preference = DWMWCP_ROUND;
-                    DwmSetWindowAttribute(handle, DWMWA_WINDOW_CORNER_PREFERENCE, in preference, sizeof(int));
-                }
-
-                var margins = new MARGINS { cxLeftWidth = 0, cxRightWidth = 0, cyTopHeight = 1, cyBottomHeight = 0 };
-                DwmExtendFrameIntoClientArea(handle, ref margins);
-
-                // Notify DWM and window manager to recalculate non-client framing, rounded corners and shadow
-                SetWindowPos(handle, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED | SWP_NOACTIVATE);
-            }
-            catch (Exception ex)
-            {
-                Logger.Debug(ex, "Failed to apply modern DWM window styling");
-            }
-        }
-
-        var helper = new WindowInteropHelper(window);
-        if (helper.Handle != IntPtr.Zero)
-        {
-            Apply();
-        }
-        else
-        {
-            window.SourceInitialized += (sender, e) => Apply();
-        }
-
-        window.Loaded += (sender, e) => Apply();
-    }
 }
