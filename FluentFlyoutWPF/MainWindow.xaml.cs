@@ -256,6 +256,7 @@ public partial class MainWindow : MicaWindow
                 UpdateState.Current.IsUpdateAvailable = result.IsUpdateAvailable;
                 UpdateState.Current.NewestVersion = result.NewestVersion;
                 UpdateState.Current.UpdateUrl = result.UpdateUrl;
+                UpdateState.Current.PackageFileName = result.PackageFileName;
                 UpdateState.Current.LastUpdateCheck = result.CheckedAt;
 
                 if (result.IsUpdateAvailable)

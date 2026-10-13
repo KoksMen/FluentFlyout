@@ -513,8 +513,8 @@ namespace FluentFlyoutWPF.Classes
             // Radius 
             float baseRadius = GetCornerRadius();
 
-            // AA constants 
-            const float aa = 1.25f;
+            // AA constants (2.5f in 3x supersampled space produces a smooth ~0.8-1.0 physical screen pixel antialiased edge)
+            const float aa = 2.5f;
             float invAA = 1f / aa;
 
             bool outlineEnabled = SettingsManager.Current.TaskbarVisualizerOutlineEnabled;

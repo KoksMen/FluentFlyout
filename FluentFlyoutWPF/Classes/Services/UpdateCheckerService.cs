@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -45,9 +46,19 @@ public static class UpdateCheckerService
         public bool IsUpdateAvailable { get; set; }
         public string NewestVersion { get; set; } = string.Empty;
         public string UpdateUrl { get; set; } = string.Empty;
+        public string PackageFileName { get; set; } = string.Empty;
         public string ReleaseNotes { get; set; } = string.Empty;
         public DateTime CheckedAt { get; set; }
         public bool Success { get; set; }
+    }
+
+    public class AppUpdateProgressInfo
+    {
+        public string StageText { get; set; } = string.Empty;
+        public string StatusText { get; set; } = string.Empty;
+        public long BytesReceived { get; set; }
+        public long TotalBytes { get; set; }
+        public int Percentage { get; set; }
     }
 
     /// <summary>
@@ -89,6 +100,7 @@ public static class UpdateCheckerService
             result.UpdateUrl = !string.IsNullOrWhiteSpace(asset?.BrowserDownloadUrl)
                 ? asset.BrowserDownloadUrl
                 : (!string.IsNullOrWhiteSpace(release.HtmlUrl) ? release.HtmlUrl : ReleasesWebUrl);
+            result.PackageFileName = asset?.Name ?? (!string.IsNullOrEmpty(result.UpdateUrl) ? Path.GetFileName(new Uri(result.UpdateUrl).LocalPath) : "Portable_x64_AMD.zip");
 
             result.Success = true;
             result.IsUpdateAvailable = IsNewerVersion(effectiveVersion, result.NewestVersion);
@@ -161,6 +173,143 @@ public static class UpdateCheckerService
         catch (Exception ex)
         {
             Logger.Error(ex, "Failed to open update URL");
+        }
+    }
+
+    /// <summary>
+    /// Downloads the update package directly in-app, stages files, generates an updater script and restarts the application seamlessly.
+    /// Matches the Portal-Windows seamless in-app updater architecture.
+    /// </summary>
+    public static async Task<bool> DownloadAndLaunchUpdateAsync(
+        string downloadUrl,
+        string fileName,
+        IProgress<AppUpdateProgressInfo>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(downloadUrl))
+        {
+            Logger.Warn("Download URL is empty.");
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            fileName = "Portable_x64_AMD.zip";
+        }
+
+        try
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), "FluentFlyout_Update", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDir);
+
+            progress?.Report(new AppUpdateProgressInfo
+            {
+                StageText = "Подключение к серверу...",
+                StatusText = "Запрос файла обновления...",
+                Percentage = 0
+            });
+
+            using var response = await HttpClient.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            long totalBytes = response.Content.Headers.ContentLength ?? 0;
+            var packagePath = Path.Combine(tempDir, fileName);
+
+            await using (var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken))
+            await using (var fileStream = new FileStream(packagePath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true))
+            {
+                var buffer = new byte[81920];
+                long bytesReceived = 0;
+                int bytesRead;
+
+                while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
+                {
+                    await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
+                    bytesReceived += bytesRead;
+
+                    int percent = totalBytes > 0 ? (int)((bytesReceived * 100) / totalBytes) : 0;
+                    progress?.Report(new AppUpdateProgressInfo
+                    {
+                        StageText = "Загрузка обновления...",
+                        StatusText = totalBytes > 0
+                            ? $"{bytesReceived / 1024.0 / 1024.0:F1} МБ из {totalBytes / 1024.0 / 1024.0:F1} МБ ({percent}%)"
+                            : $"{bytesReceived / 1024.0 / 1024.0:F1} МБ",
+                        BytesReceived = bytesReceived,
+                        TotalBytes = totalBytes,
+                        Percentage = percent
+                    });
+                }
+            }
+
+            var stagingDir = Path.Combine(tempDir, "staging");
+            Directory.CreateDirectory(stagingDir);
+
+            progress?.Report(new AppUpdateProgressInfo
+            {
+                StageText = "Подготовка файлов...",
+                StatusText = "Распаковка дистрибутива...",
+                Percentage = 100
+            });
+
+            if (fileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+            {
+                ZipFile.ExtractToDirectory(packagePath, stagingDir, overwriteFiles: true);
+            }
+            else
+            {
+                File.Copy(packagePath, Path.Combine(stagingDir, "FluentFlyout.exe"), true);
+            }
+
+            var resolvedSourceDir = stagingDir;
+            var exeInSub = Directory.GetFiles(stagingDir, "FluentFlyout.exe", SearchOption.AllDirectories).FirstOrDefault();
+            if (exeInSub != null)
+            {
+                resolvedSourceDir = Path.GetDirectoryName(exeInSub) ?? stagingDir;
+            }
+
+            var targetExePath = Environment.ProcessPath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "FluentFlyout.exe");
+            var targetAppDir = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
+            var currentPid = Environment.ProcessId;
+
+            var updaterScriptPath = Path.Combine(tempDir, "apply_update.cmd");
+            var scriptContent = $@"@echo off
+chcp 65001 >nul
+echo Обновление FluentFlyout...
+timeout /t 1 /nobreak >nul
+taskkill /F /PID {currentPid} >nul 2>&1
+timeout /t 1 /nobreak >nul
+xcopy ""{resolvedSourceDir}\*"" ""{targetAppDir}\"" /E /Y /I >nul
+start """" ""{targetExePath}""
+timeout /t 1 /nobreak >nul
+exit
+";
+            await File.WriteAllTextAsync(updaterScriptPath, scriptContent, System.Text.Encoding.UTF8, cancellationToken);
+
+            progress?.Report(new AppUpdateProgressInfo
+            {
+                StageText = "Завершение обновления...",
+                StatusText = "Перезапуск приложения...",
+                Percentage = 100
+            });
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = $"/c \"{updaterScriptPath}\"",
+                CreateNoWindow = true,
+                UseShellExecute = true,
+                WorkingDirectory = tempDir
+            };
+
+            Process.Start(psi);
+            Environment.Exit(0);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Failed to download and execute in-app update, falling back to browser.");
+            OpenUpdateUrl(downloadUrl);
+            return false;
         }
     }
 

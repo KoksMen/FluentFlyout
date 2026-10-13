@@ -31,6 +31,18 @@ public partial class UpdateState : ObservableObject
     public partial string UpdateUrl { get; set; } = string.Empty;
 
     /// <summary>
+    /// File name of the update package (e.g. Portable_x64_AMD.zip)
+    /// </summary>
+    [ObservableProperty]
+    public partial string PackageFileName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Whether an update download is currently in progress
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsUpdating { get; set; }
+
+    /// <summary>
     /// Timestamp of the last update check
     /// </summary>
     [ObservableProperty]

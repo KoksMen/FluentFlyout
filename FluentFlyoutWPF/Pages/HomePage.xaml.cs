@@ -72,8 +72,32 @@ public partial class HomePage : Page
 
         if (UpdateState.Current.IsUpdateAvailable)
         {
+            if (UpdateState.Current.IsUpdating) return;
+
+            UpdateState.Current.IsUpdating = true;
             string url = !string.IsNullOrEmpty(UpdateState.Current.UpdateUrl) ? UpdateState.Current.UpdateUrl : UpdateCheckerService.ReleasesWebUrl;
-            UpdateCheckerService.OpenUpdateUrl(url);
+            string fileName = !string.IsNullOrEmpty(UpdateState.Current.PackageFileName) ? UpdateState.Current.PackageFileName : "Portable_x64_AMD.zip";
+
+            var progress = new Progress<UpdateCheckerService.AppUpdateProgressInfo>(info =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    UpdateStatusText.Text = $"{info.StageText} {info.StatusText}";
+                });
+            });
+
+            _ = Task.Run(async () =>
+            {
+                bool success = await UpdateCheckerService.DownloadAndLaunchUpdateAsync(url, fileName, progress);
+                if (!success)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        UpdateState.Current.IsUpdating = false;
+                        UpdateStatusText.Text = "Сбой загрузки. Открытие браузера...";
+                    });
+                }
+            });
         }
         else
         {
@@ -94,6 +118,7 @@ public partial class HomePage : Page
                 UpdateState.Current.IsUpdateAvailable = result.IsUpdateAvailable;
                 UpdateState.Current.NewestVersion = result.NewestVersion;
                 UpdateState.Current.UpdateUrl = result.UpdateUrl;
+                UpdateState.Current.PackageFileName = result.PackageFileName;
                 UpdateState.Current.LastUpdateCheck = result.CheckedAt;
 
                 UpdateLastCheckedText();
