@@ -200,7 +200,7 @@ public partial class MainWindow : MicaWindow
             try // update last known version. gets the version of the app
             {
                 var version = Package.Current.Id.Version;
-                SettingsManager.Current.LastKnownVersion = $"{version.Major}.{version.Minor}.{version.Build}-f2.1.0";
+                SettingsManager.Current.LastKnownVersion = $"{version.Major}.{version.Minor}.{version.Build}-f2.1.1";
             }
             catch
             {

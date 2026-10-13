@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <picture>
     <source width="70%" alt="FluentFlyout Title" media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/daa2969f-8ad2-4832-8253-26133a50c921" />
     <source width="70%" alt="FluentFlyout Title" media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/3e75e514-b9a6-40e3-b170-af9d29a82bb4" />
@@ -7,7 +7,7 @@
 </p>
 
 <h1 align="center">вњЁ FluentFlyout (KoksMen Edition) вњЁ</h1>
-<h3 align="center">рџљЂ Р’РµСЂСЃРёСЏ С„РѕСЂРєР°: <em>v2.15.0-f2.1.0</em> рџЄ„</h3>
+<h3 align="center">рџљЂ Р’РµСЂСЃРёСЏ С„РѕСЂРєР°: <em>v2.15.0-f2.1.1</em> рџЄ„</h3>
 
 <p align="center">
   <b>РЎРѕРІСЂРµРјРµРЅРЅС‹Рµ РїР»Р°РІРЅС‹Рµ РѕРІРµСЂР»РµРё Windows 11 СЃ РѕРїС‚РёРјРёР·Р°С†РёРµР№ РґР»СЏ РёРіСЂ, Р±РµСЃС€РѕРІРЅС‹Рј Р°РІС‚РѕРѕР±РЅРѕРІР»РµРЅРёРµРј РІ РїСЂРёР»РѕР¶РµРЅРёРё, РёСЃС‚РѕСЂРёРµР№ Р±СѓС„РµСЂР° РѕР±РјРµРЅР°, СЂРµРіСѓР»РёСЂРѕРІРєРѕР№ Р·РІСѓРєР° РєРѕР»РµСЃРёРєРѕРј РјС‹С€Рё Рё РїРѕРґРґРµСЂР¶РєРѕР№ Р»СЋР±С‹С… GPU</b><br>
@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/KoksMen/FluentFlyout/releases"><img src="https://img.shields.io/badge/Version-v2.15.0--f2.1.0-7c4dff?style=for-the-badge&logo=github&logoColor=white" alt="FluentFlyout v2.15.0-f2.1.0" /></a>
+  <a href="https://github.com/KoksMen/FluentFlyout/releases"><img src="https://img.shields.io/badge/Version-v2.15.0--f2.1.1-7c4dff?style=for-the-badge&logo=github&logoColor=white" alt="FluentFlyout v2.15.0-f2.1.1" /></a>
   <img src="https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET 10.0" />
   <img src="https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20(x64)-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Windows 10/11" />
   <img src="https://img.shields.io/badge/Size-~85--90%20MB-success?style=for-the-badge&logo=files&logoColor=white" alt="Compressed Size" />
@@ -30,7 +30,7 @@
 
 <p align="center">
   <a href="https://github.com/KoksMen/FluentFlyout/releases/latest">
-    <img src="https://img.shields.io/badge/в¬‡пёЏ%20РЎРєР°С‡Р°С‚СЊ%20СЂРµР»РёР·-FluentFlyout%20v2.15.0--f2.1.0-blue?style=for-the-badge" alt="Download Release" />
+    <img src="https://img.shields.io/badge/в¬‡пёЏ%20РЎРєР°С‡Р°С‚СЊ%20СЂРµР»РёР·-FluentFlyout%20v2.15.0--f2.1.1-blue?style=for-the-badge" alt="Download Release" />
   </a>
 </p>
 
@@ -53,7 +53,7 @@
 ### рџ”„ 1. Р‘РµСЃС€РѕРІРЅРѕРµ Р°РІС‚РѕРѕР±РЅРѕРІР»РµРЅРёРµ РїСЂСЏРјРѕ РІ РїСЂРёР»РѕР¶РµРЅРёРё (РєР°Рє РІ Portal-Windows)
 - **РџСЂСЏРјР°СЏ РёРЅС‚РµРіСЂР°С†РёСЏ СЃ GitHub Releases:** РџСЂРёР»РѕР¶РµРЅРёРµ СЃРєР°С‡РёРІР°РµС‚ РѕР±РЅРѕРІР»РµРЅРёРµ РЅР°РїСЂСЏРјСѓСЋ РёР· СЂРµР»РёР·РѕРІ СЂРµРїРѕР·РёС‚РѕСЂРёСЏ `KoksMen/FluentFlyout` СЃ РЅР°РіР»СЏРґРЅС‹Рј РѕС‚РѕР±СЂР°Р¶РµРЅРёРµРј РїСЂРѕРіСЂРµСЃСЃР° РІ РїСЂРѕС†РµРЅС‚Р°С… РїСЂСЏРјРѕ РІ РёРЅС‚РµСЂС„РµР№СЃРµ РЅР°СЃС‚СЂРѕРµРє.
 - **РђРІС‚РѕРјР°С‚РёС‡РµСЃРєР°СЏ СѓСЃС‚Р°РЅРѕРІРєР°:** РЎРєР°С‡Р°РЅРЅС‹Р№ РґРёСЃС‚СЂРёР±СѓС‚РёРІ СЂР°СЃРїР°РєРѕРІС‹РІР°РµС‚СЃСЏ, СЃРєСЂРёРїС‚ Р·Р°РІРµСЂС€Р°РµС‚ СЂР°Р±РѕС‚Сѓ СЃС‚Р°СЂРѕРіРѕ РїСЂРѕС†РµСЃСЃР° РїРѕ PID, РїРµСЂРµР·Р°РїРёСЃС‹РІР°РµС‚ С„Р°Р№Р»С‹ Рё Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё РїРµСЂРµР·Р°РїСѓСЃРєР°РµС‚ РѕР±РЅРѕРІР»РµРЅРЅС‹Р№ `FluentFlyout.exe`. Р‘СЂР°СѓР·РµСЂ РѕС‚РєСЂС‹РІР°С‚СЊ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ!
-- **РРЅС‚РµР»Р»РµРєС‚СѓР°Р»СЊРЅС‹Р№ SemVer:** РџР°СЂСЃРµСЂ `ForkVersion` РєРѕСЂСЂРµРєС‚РЅРѕ СЃРѕРїРѕСЃС‚Р°РІР»СЏРµС‚ РІРµСЂСЃРёРё С„РѕСЂРєР° (`2.15.0-f2.1.0` > `2.15.0-f2.0.0` > `2.13.1-f1.7.0`).
+- **РРЅС‚РµР»Р»РµРєС‚СѓР°Р»СЊРЅС‹Р№ SemVer:** РџР°СЂСЃРµСЂ `ForkVersion` РєРѕСЂСЂРµРєС‚РЅРѕ СЃРѕРїРѕСЃС‚Р°РІР»СЏРµС‚ РІРµСЂСЃРёРё С„РѕСЂРєР° (`2.15.0-f2.1.1` > `2.15.0-f2.0.0` > `2.13.1-f1.7.0`).
 
 ### рџЋ® 2. Р Р°Р·РґРµР»СЊРЅС‹Рµ СЂРµР¶РёРјС‹ РїРѕР»РЅРѕСЌРєСЂР°РЅРЅРѕРіРѕ СЌРєСЂР°РЅР° (Gaming Safeguard)
 - **Exclusive Fullscreen:** РќРµР·Р°РІРёСЃРёРјС‹Р№ РїРµСЂРµРєР»СЋС‡Р°С‚РµР»СЊ РґР»СЏ 3D-РёРіСЂ. РџСЂРё РµРіРѕ РѕС‚РєР»СЋС‡РµРЅРёРё РѕРІРµСЂР»РµРё РЅРµ РїРµСЂРµС…РІР°С‚С‹РІР°СЋС‚ С„РѕРєСѓСЃ Рё РЅРµ СЃРІРѕСЂР°С‡РёРІР°СЋС‚ РїРѕР»РЅРѕСЌРєСЂР°РЅРЅС‹Рµ РёРіСЂС‹.
@@ -142,3 +142,4 @@ It resolves gaming interruptions, taskbar latencies, integrated graphics renderi
 
 РџСЂРѕРµРєС‚ СЂР°СЃРїСЂРѕСЃС‚СЂР°РЅСЏРµС‚СЃСЏ РїРѕРґ Р»РёС†РµРЅР·РёРµР№ **GNU General Public License v3.0 (GPL-3.0)**.  
 РџРѕРґСЂРѕР±РЅРѕСЃС‚Рё РґРѕСЃС‚СѓРїРЅС‹ РІ С„Р°Р№Р»Рµ [LICENSE](LICENSE).
+
