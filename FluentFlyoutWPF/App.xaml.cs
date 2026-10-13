@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2024-2026 The FluentFlyout Authors
+// Copyright (c) 2024-2026 The FluentFlyout Authors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using FluentFlyout.Classes;
@@ -25,5 +25,18 @@ public partial class App : Application
         ToastNotificationManagerCompat.OnActivated += Notifications.HandleNotificationActivation;
 
         base.OnStartup(e);
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        try
+        {
+            FluentFlyoutWPF.Windows.VolumeMixerWindow.ShowVolumeOsd();
+        }
+        catch
+        {
+        }
+
+        base.OnExit(e);
     }
 }

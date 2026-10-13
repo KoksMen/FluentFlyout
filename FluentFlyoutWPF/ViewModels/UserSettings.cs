@@ -7,6 +7,7 @@ using FluentFlyout.Classes.Settings;
 using FluentFlyout.Classes.Utils;
 using FluentFlyout.Controls;
 using FluentFlyoutWPF.Classes;
+using FluentFlyoutWPF.Classes.Services;
 using FluentFlyoutWPF.Models;
 using FluentFlyoutWPF.Windows;
 using System.Collections.ObjectModel;
@@ -912,7 +913,7 @@ public partial class UserSettings : ObservableObject
         TaskbarVisualizerAudioSensitivity = 2;
         TaskbarVisualizerAudioPeakLevel = 3;
         TaskbarVisualizerBaselineAutoHide = false;
-        VolumeControlEnabled = false;
+        VolumeControlEnabled = true;
         VolumeControlAboveMediaFlyout = false;
         VolumeControlDuration = 3000;
         VolumeScrollStep = 2;
@@ -956,6 +957,10 @@ public partial class UserSettings : ObservableObject
         if (!newValue)
         {
             VolumeMixerWindow.ShowVolumeOsd();
+        }
+        else if (VolumeControlEnabled)
+        {
+            VolumeMixerWindow.EnsureVolumeOsdHidden();
         }
     }
 
@@ -1034,6 +1039,11 @@ public partial class UserSettings : ObservableObject
         if (!GlobalFlyoutEnabled && MediaFlyoutEnabled)
         {
             GlobalFlyoutEnabled = true;
+        }
+
+        if (!VolumeControlEnabled && LastKnownVersion != UpdateCheckerService.CurrentAppVersion)
+        {
+            VolumeControlEnabled = true;
         }
 
         _initializing = false;
@@ -1259,9 +1269,16 @@ public partial class UserSettings : ObservableObject
 
     partial void OnVolumeControlEnabledChanged(bool oldValue, bool newValue)
     {
-        if (newValue == true || oldValue == newValue || _initializing) return;
+        if (oldValue == newValue || _initializing) return;
 
-        // re-enable native volume flyout
-        VolumeMixerWindow.ShowVolumeOsd();
+        if (newValue)
+        {
+            VolumeMixerWindow.EnsureVolumeOsdHidden();
+        }
+        else
+        {
+            // re-enable native volume flyout
+            VolumeMixerWindow.ShowVolumeOsd();
+        }
     }
 }

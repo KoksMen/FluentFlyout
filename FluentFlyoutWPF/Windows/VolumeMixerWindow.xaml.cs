@@ -43,7 +43,7 @@ public partial class VolumeMixerWindow : MicaWindow
     private int _taskbarAnimationGeneration;
 
     private long _lastFlyoutTime = 0;
-    private readonly TimeSpan _flyoutCooldown = TimeSpan.FromMilliseconds(500);
+    private readonly TimeSpan _flyoutCooldown = TimeSpan.FromMilliseconds(100);
 
     public VolumeMixerWindow()
     {
@@ -64,6 +64,15 @@ public partial class VolumeMixerWindow : MicaWindow
         _normalWidth = Width;
 
         ViewModel.PropertyChanged += OnViewModelPropertyChanged;
+        ViewModel.MasterVolumeNotificationReceived += OnMasterVolumeNotificationReceived;
+    }
+
+    private void OnMasterVolumeNotificationReceived(object? sender, EventArgs e)
+    {
+        if (SettingsManager.Current.VolumeControlEnabled && !_isTaskbarAnchored)
+        {
+            ShowFlyout();
+        }
     }
 
     // one day we might want to convert these to an interface
@@ -93,13 +102,7 @@ public partial class VolumeMixerWindow : MicaWindow
 
         if (_isHiding)
         {
-            if (_nativeOsdElement == IntPtr.Zero)
-            {
-                _ = Task.Run(() =>
-                {
-                    HideVolumeOsd();
-                });
-            }
+            EnsureVolumeOsdHidden();
 
             _isHiding = false;
             if (SettingsManager.Current.VolumeMixerAcrylicWindowEnabled)
@@ -166,8 +169,7 @@ public partial class VolumeMixerWindow : MicaWindow
 
                         WindowHelper.SetVisibility(this, false);
                         ViewModel.IsExpanded = false;
-                        _isHiding = false;
-                        _ = Task.Run(() => ShowVolumeOsd());
+                        _isHiding = true;
                         break;
                     }
                 }
@@ -298,7 +300,7 @@ public partial class VolumeMixerWindow : MicaWindow
         BeginAnimation(OpacityProperty, null);
         WindowHelper.SetVisibility(this, false);
         _isTaskbarAnchored = false;
-        _isHiding = false;
+        _isHiding = true;
         _lastFlyoutTime = 0;
         SetExpandedImmediately(false);
     }
@@ -340,7 +342,7 @@ public partial class VolumeMixerWindow : MicaWindow
         BeginAnimation(OpacityProperty, null);
         Opacity = 1;
         SetExpandedImmediately(false);
-        _isHiding = false;
+        _isHiding = true;
     }
 
     private void SetTaskbarActivation(bool allowActivation)
@@ -435,60 +437,97 @@ public partial class VolumeMixerWindow : MicaWindow
     }
 
     // derived from gpkgpk/HideVolumeOSD: https://github.com/gpkgpk/HideVolumeOSD
-    private static void HideVolumeOsd()
+    public static void EnsureVolumeOsdHidden()
     {
-        // find widget in XAML
-        IntPtr hwndXamlIsland = IntPtr.Zero, hwndOsd = IntPtr.Zero;
+        if (!SettingsManager.Current.VolumeControlEnabled) return;
+
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                HideVolumeOsd();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "Failed to ensure volume OSD is hidden");
+            }
+        });
+    }
+
+    private static IntPtr FindNativeVolumeOsdWindow()
+    {
+        // 1. Windows 11: XAML Island window in Explorer
+        IntPtr hwndXamlIsland = IntPtr.Zero;
         while ((hwndXamlIsland = FindWindowEx(IntPtr.Zero, hwndXamlIsland, "XamlExplorerHostIslandWindow", null)) != IntPtr.Zero)
         {
+            IntPtr hwndOsd = FindWindowEx(hwndXamlIsland, IntPtr.Zero, "Windows.UI.Composition.DesktopWindowContentBridge", "DesktopWindowXamlSource");
+            if (hwndOsd == IntPtr.Zero) continue;
 
-            hwndOsd = FindWindowEx(hwndXamlIsland, IntPtr.Zero, "Windows.UI.Composition.DesktopWindowContentBridge", "DesktopWindowXamlSource");
-            if (hwndOsd == IntPtr.Zero)
-            {
-                continue;
-            }
-
-            // check if the child window has the expected class name and title
             IntPtr hwndInputClass = FindWindowEx(hwndOsd, IntPtr.Zero, "Windows.UI.Input.InputSite.WindowClass", null);
-            if (hwndInputClass == IntPtr.Zero)
+            if (hwndInputClass != IntPtr.Zero)
             {
-                hwndOsd = IntPtr.Zero;
-                continue;
-            }
-
-            ShowWindow(hwndInputClass, 9); // SW_RESTORE
-            if (GetWindowRect(hwndInputClass, out RECT rect))
-            {
-                if (rect.Top == 0 && rect.Left == 0 && rect.Bottom == 0 && rect.Right == 0)
-                {
-                    hwndOsd = IntPtr.Zero;
-                }
-                else break;
+                return hwndXamlIsland;
             }
         }
 
-        if (hwndOsd == IntPtr.Zero)
+        // 2. Windows 10: NativeHWNDHost with child DirectUIHWND
+        IntPtr hwndHost = IntPtr.Zero;
+        while ((hwndHost = FindWindowEx(IntPtr.Zero, hwndHost, "NativeHWNDHost", "")) != IntPtr.Zero)
         {
-            Logger.Warn("OSD window not found.");
+            if (FindWindowEx(hwndHost, IntPtr.Zero, "DirectUIHWND", "") != IntPtr.Zero)
+            {
+                return hwndHost;
+            }
+        }
+
+        return IntPtr.Zero;
+    }
+
+    private static void HideVolumeOsd()
+    {
+        if (_nativeOsdElement != IntPtr.Zero)
+        {
             return;
         }
 
-        // the parent owns the hit-test region on the desktop
-        _nativeOsdElement = hwndXamlIsland;
+        IntPtr osdWindow = FindNativeVolumeOsdWindow();
+        if (osdWindow == IntPtr.Zero)
+        {
+            // If the OSD window hasn't been instantiated yet by Windows,
+            // send a quick volume nudge to force Explorer to create it.
+            try
+            {
+                keybd_event(0xAF, 0, 0, IntPtr.Zero); // VK_VOLUME_UP
+                keybd_event(0xAF, 0, 2, IntPtr.Zero); // VK_VOLUME_UP up
+                keybd_event(0xAE, 0, 0, IntPtr.Zero); // VK_VOLUME_DOWN
+                keybd_event(0xAE, 0, 2, IntPtr.Zero); // VK_VOLUME_DOWN up
+            }
+            catch { }
+
+            Thread.Sleep(60);
+            osdWindow = FindNativeVolumeOsdWindow();
+        }
+
+        if (osdWindow == IntPtr.Zero)
+        {
+            Logger.Warn("Native volume OSD window not found.");
+            return;
+        }
+
+        _nativeOsdElement = osdWindow;
         _nativeOsdOriginalExStyle = GetWindowLong(_nativeOsdElement, GWL_EXSTYLE);
         SetWindowLong(_nativeOsdElement, GWL_EXSTYLE,
             _nativeOsdOriginalExStyle | WS_EX_LAYERED | WS_EX_TRANSPARENT);
         SetWindowPos(_nativeOsdElement, 0, -99999, -99999, 0, 0,
             SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
         ShowWindow(_nativeOsdElement, SW_MINIMIZE);
-        Logger.Info("Successfully hid volume OSD.");
+        Logger.Info("Successfully hid native volume OSD.");
     }
 
     public static void ShowVolumeOsd()
     {
         if (_nativeOsdElement == IntPtr.Zero)
         {
-            Logger.Warn("Did not try to restore OSD because it was either not found or was not hidden.");
             return;
         }
 
@@ -497,7 +536,7 @@ public partial class VolumeMixerWindow : MicaWindow
             SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
         ShowWindow(_nativeOsdElement, SW_RESTORE);
         _nativeOsdElement = IntPtr.Zero;
-        Logger.Info("Successfully restored volume OSD.");
+        Logger.Info("Successfully restored native volume OSD.");
     }
 
     private void AnimateExpandCollapse(bool expand)

@@ -165,6 +165,12 @@ public partial class MainWindow : MicaWindow
 
         mediaManager.Start();
 
+        volumeMixerWindow = new VolumeMixerWindow();
+        if (SettingsManager.Current.VolumeControlEnabled)
+        {
+            VolumeMixerWindow.EnsureVolumeOsdHidden();
+        }
+
         _hookProc = HookCallback;
         _hookId = SetHook(_hookProc);
 
@@ -1066,8 +1072,9 @@ public partial class MainWindow : MicaWindow
 
                 if (SettingsManager.Current.VolumeControlEnabled && volumeKeysPressed)
                 {
-                    volumeMixerWindow?.ViewModel.SyncMasterFromDevice();
-                    volumeMixerWindow?.ShowFlyout();
+                    volumeMixerWindow ??= new VolumeMixerWindow();
+                    volumeMixerWindow.ViewModel.SyncMasterFromDevice();
+                    volumeMixerWindow.ShowFlyout();
                 }
 
                 if (!result)
@@ -2036,30 +2043,36 @@ public partial class MainWindow : MicaWindow
                 _ => false
             };
 
-            bool isVolumeCommand = false;
-
-            if (!isMediaCommand && !SettingsManager.Current.MediaFlyoutVolumeKeysExcluded)
+            bool isVolumeCommand = cmd switch
             {
-                isVolumeCommand = cmd switch
-                {
-                    APPCOMMAND_VOLUME_MUTE => true,
-                    APPCOMMAND_VOLUME_DOWN => true,
-                    APPCOMMAND_VOLUME_UP => true,
-                    _ => false
-                };
-            }
+                APPCOMMAND_VOLUME_MUTE => true,
+                APPCOMMAND_VOLUME_DOWN => true,
+                APPCOMMAND_VOLUME_UP => true,
+                _ => false
+            };
 
             if (!isMediaCommand && !isVolumeCommand)
                 return 0;
+
+            if (isVolumeCommand && SettingsManager.Current.VolumeControlEnabled && SettingsManager.Current.GlobalFlyoutEnabled)
+            {
+                volumeMixerWindow ??= new VolumeMixerWindow();
+                volumeMixerWindow.ViewModel.SyncMasterFromDevice();
+                volumeMixerWindow.ShowFlyout();
+            }
 
             bool isKeyCommand = device == FAPPCOMMAND_KEY;
 
             if (!isKeyCommand)
                 return 0;
 
-            bool result = TryShowMediaFlyoutDebounced();
+            bool result = false;
+            if (isMediaCommand || (!SettingsManager.Current.MediaFlyoutVolumeKeysExcluded && isVolumeCommand))
+            {
+                result = TryShowMediaFlyoutDebounced();
+            }
 
-            if (!result)
+            if (!result && !(isVolumeCommand && SettingsManager.Current.VolumeControlEnabled))
             {
                 return 0;
             }
@@ -2189,7 +2202,7 @@ public partial class MainWindow : MicaWindow
         BitmapHelper.GetDominantColors(1);
         taskbarWindow = new TaskbarWindow();
         UpdateTaskbar();
-        volumeMixerWindow = new VolumeMixerWindow();
+        volumeMixerWindow ??= new VolumeMixerWindow();
     }
 
     public void RecreateTaskbarWindow()
