@@ -1,142 +1,144 @@
 <p align="center">
-	<picture>
-		<source width="65%" alt="fluentflyout-title" media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/daa2969f-8ad2-4832-8253-26133a50c921" />
-		<source width="65%" alt="fluentflyout-title" media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/3e75e514-b9a6-40e3-b170-af9d29a82bb4" />
-		<img width="65%" alt="fluentflyout-title" src="https://github.com/user-attachments/assets/daa2969f-8ad2-4832-8253-26133a50c921">
-	</picture>
+  <picture>
+    <source width="70%" alt="FluentFlyout Title" media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/daa2969f-8ad2-4832-8253-26133a50c921" />
+    <source width="70%" alt="FluentFlyout Title" media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/3e75e514-b9a6-40e3-b170-af9d29a82bb4" />
+    <img width="70%" alt="FluentFlyout Title" src="https://github.com/user-attachments/assets/daa2969f-8ad2-4832-8253-26133a50c921">
+  </picture>
+</p>
+
+<h1 align="center">вњЁ FluentFlyout (KoksMen Edition) вњЁ</h1>
+<h3 align="center">рџљЂ Р’РµСЂСЃРёСЏ С„РѕСЂРєР°: <em>v2.15.0-f2.0.0</em> рџЄ„</h3>
+
+<p align="center">
+  <b>РЎРѕРІСЂРµРјРµРЅРЅС‹Рµ РїР»Р°РІРЅС‹Рµ РѕРІРµСЂР»РµРё Windows 11 СЃ РѕРїС‚РёРјРёР·Р°С†РёРµР№ РґР»СЏ РёРіСЂ, Р±РµСЃС€РѕРІРЅС‹Рј Р°РІС‚РѕРѕР±РЅРѕРІР»РµРЅРёРµРј РІ РїСЂРёР»РѕР¶РµРЅРёРё, РёСЃС‚РѕСЂРёРµР№ Р±СѓС„РµСЂР° РѕР±РјРµРЅР°, СЂРµРіСѓР»РёСЂРѕРІРєРѕР№ Р·РІСѓРєР° РєРѕР»РµСЃРёРєРѕРј РјС‹С€Рё Рё РїРѕРґРґРµСЂР¶РєРѕР№ Р»СЋР±С‹С… GPU</b><br>
+  <i>Modern fluent flyouts for Windows 11 with gaming safeguards, in-app seamless auto-updater, clipboard history, mouse wheel volume control, and universal GPU support</i>
 </p>
 
 <p align="center">
-	<img alt="GitHub Release" src="https://img.shields.io/github/v/release/unchihugo/FluentFlyout">
-	<img alt="Static Badge" src="https://img.shields.io/badge/downloads-250K%2B-blue?color=limegreen">
-	<a href="https://hosted.weblate.org/engage/fluentflyout/"><img src="https://hosted.weblate.org/widget/fluentflyout/svg-badge.svg" alt="Статус перевода"/></a>
-	<img alt="GitHub contributors" src="https://img.shields.io/github/contributors-anon/unchihugo/fluentflyout?labelColor=midnightblue&color=goldenrod">
+  <a href="https://github.com/KoksMen/FluentFlyout/releases"><img src="https://img.shields.io/badge/Version-v2.15.0--f2.0.0-7c4dff?style=for-the-badge&logo=github&logoColor=white" alt="FluentFlyout v2.15.0-f2.0.0" /></a>
+  <img src="https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET 10.0" />
+  <img src="https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20(x64)-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Windows 10/11" />
+  <img src="https://img.shields.io/badge/Size-~85--90%20MB-success?style=for-the-badge&logo=files&logoColor=white" alt="Compressed Size" />
+  <img src="https://img.shields.io/badge/Signature-Authenticode%20SHA--256-success?style=for-the-badge&logo=windows&logoColor=white" alt="Authenticode Signed" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0-orange?style=for-the-badge" alt="License GPL-3.0" /></a>
 </p>
+
 <p align="center">
-  <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.md">English</a> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.zh.md">简体中文</a> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.nl.md">Nederlands</a> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.tr.md">Türkçe</a> | <strong>Русский</strong> | <a href="https://github.com/unchihugo/FluentFlyout/blob/master/README.kr.md">한국어</a>
+  <a href="#-fluentflyout-РЅР°-СЂСѓСЃСЃРєРѕРј"><b>рџ‡·рџ‡є РџРµСЂРµР№С‚Рё Рє СЂСѓСЃСЃРєРѕР№ РІРµСЂСЃРёРё</b></a> вЂў
+  <a href="#-fluentflyout-in-english"><b>рџ‡¬рџ‡§ Switch to English Version</b></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/KoksMen/FluentFlyout/releases/latest">
+    <img src="https://img.shields.io/badge/в¬‡пёЏ%20РЎРєР°С‡Р°С‚СЊ%20СЂРµР»РёР·-FluentFlyout%20v2.15.0--f2.0.0-blue?style=for-the-badge" alt="Download Release" />
+  </a>
 </p>
 
 ---
-FluentFlyout — современное приложение для всплывающих уведомлений Windows, созданное на основе принципов дизайна Fluent 2.  
-Интерфейс органично вписывается в Windows 11, обеспечивая чистый и нативный опыт при управлении медиа, клавишами-переключателями и не только.
 
-FluentFlyout предлагает плавные анимации, адаптируется к цветовой теме системы и включает широкие возможности персонализации, отображая управление медиа и информацию в красивых современных всплывающих окнах.
+# рџ‡·рџ‡є FluentFlyout (РќР° СЂСѓСЃСЃРєРѕРј)
 
-<a href="https://apps.microsoft.com/detail/9n45nsm4tnbp?referrer=appbadge&cid=GitHub_README&mode=direct">
-	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="200"/>
-</a>
+## рџ’Ў Рћ РїСЂРѕРµРєС‚Рµ
 
-<img alt="FluentFlyoutHero-Cinemascope" src="https://github.com/user-attachments/assets/a7c7e2db-e21b-4435-9acc-0b2c5f38eb7d" />
+**FluentFlyout (KoksMen Edition)** вЂ” СЌС‚Рѕ СЂР°СЃС€РёСЂРµРЅРЅС‹Р№ Рё РіР»СѓР±РѕРєРѕ РѕРїС‚РёРјРёР·РёСЂРѕРІР°РЅРЅС‹Р№ С„РѕСЂРє РїСЂРёР»РѕР¶РµРЅРёСЏ FluentFlyout РґР»СЏ Windows 10 Рё 11. 
 
-## Возможности ✨
-- **Плеер: отображает обложку, название, исполнителя и элементы управления воспроизведением**
-- **Окно «Далее»: показывает следующий трек по окончании текущего**
-- **Клавиши-переключатели: отображает состояние Caps Lock, Num Lock и Scroll Lock**
-- **Виджет на панели задач: показывает информацию о медиа прямо на панели задач Windows**
-- Нативный дизайн в стиле Windows
-- Использует компоненты Fluent 2
-- Эффект размытия Mica
-- Поддержка светлой и тёмной темы
-- Соответствует цветовой теме устройства
-- Плавные анимации
-- Настраиваемое расположение всплывающих окон
-- Повтор всех треков, повтор одного и перемешивание
-- Тихо работает в системном трее
+РћСЂРёРіРёРЅР°Р»СЊРЅРѕРµ РїСЂРёР»РѕР¶РµРЅРёРµ РїСЂРµРґРѕСЃС‚Р°РІР»СЏРµС‚ РєСЂР°СЃРёРІС‹Рµ РѕРІРµСЂР»РµРё РІ СЃС‚РёР»Рµ **Fluent 2 Design**, РѕРґРЅР°РєРѕ СЃС‚СЂР°РґР°Р»Рѕ РѕС‚ СЂСЏРґР° РѕРіСЂР°РЅРёС‡РµРЅРёР№: СЃРІРµСЂС‚С‹РІР°РЅРёРµ РїРѕР»РЅРѕСЌРєСЂР°РЅРЅС‹С… РёРіСЂ, Р·Р°РґРµСЂР¶РєРё UI Automation РІ С‚Р°СЃРєР±Р°СЂРµ, РѕС‚СЃСѓС‚СЃС‚РІРёРµ РІСЃС‚СЂРѕРµРЅРЅРѕРіРѕ СЃРєР°С‡РёРІР°РЅРёСЏ РѕР±РЅРѕРІР»РµРЅРёР№, Р°СЂС‚РµС„Р°РєС‚С‹ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РЅР° РІСЃС‚СЂРѕРµРЅРЅРѕР№ РіСЂР°С„РёРєРµ (iGPU) Рё РїСЂРёРІСЏР·РєР° Рє Р·Р°РєСЂС‹С‚С‹Рј СЃРµСЂРІРёСЃР°Рј С‚РµР»РµРјРµС‚СЂРёРё.
 
-<p align="center">
-    <a href="https://www.windowscentral.com/microsoft/windows-11/microsoft-is-too-busy-with-ai-to-fix-windows-11s-design-so-developers-stepped-up"><img height="40px" alt="Windows Central" src="https://cdn.mos.cms.futurecdn.net/pJbSHFPBawZknTYBZnj9tS-970-80.jpg.webp"></a>
-    &nbsp;&nbsp;&nbsp;
-    <a href="https://www.neowin.net/news/this-free-unofficial-app-promises-big-list-of-modern-windows-11-fluent-customization-options/"><img height="40px" alt="Neowin" src="https://upload.wikimedia.org/wikipedia/en/1/11/Neowin_Logo_1.png"></a>
-</p>
-<p align="center">
-  <em>«Windows 11, возможно, получил ещё одно незаменимое приложение.»</em> — <strong><a href="https://www.windowscentral.com/microsoft/windows-11/microsoft-is-too-busy-with-ai-to-fix-windows-11s-design-so-developers-stepped-up">Windows Central</a></strong><br>
-  <em>«Справляется лучше, чем официальное решение от Microsoft.»</em> — <strong><a href="https://www.neowin.net/news/this-free-unofficial-app-promises-big-list-of-modern-windows-11-fluent-customization-options/">Neowin</a></strong>
-</p>
+Р­С‚РѕС‚ С„РѕСЂРє РїРѕР»РЅРѕСЃС‚СЊСЋ СѓСЃС‚СЂР°РЅСЏРµС‚ СѓРєР°Р·Р°РЅРЅС‹Рµ РїСЂРѕР±Р»РµРјС‹, СЃРЅРёР¶Р°РµС‚ СЂР°Р·РјРµСЂ РґРёСЃС‚СЂРёР±СѓС‚РёРІР° Р±РѕР»РµРµ С‡РµРј РІ 2 СЂР°Р·Р° Рё РґРµР»Р°РµС‚ РїСЂРёР»РѕР¶РµРЅРёРµ РјР°РєСЃРёРјР°Р»СЊРЅРѕ СЃС‚Р°Р±РёР»СЊРЅС‹Рј, Р°РІС‚РѕРЅРѕРјРЅС‹Рј Рё СѓРґРѕР±РЅС‹Рј РґР»СЏ РїРѕРІСЃРµРґРЅРµРІРЅРѕР№ СЂР°Р±РѕС‚С‹ Рё РіРµР№РјРёРЅРіР°! рџљЂ
 
-## Виджет на панели задач ⏯️
-<div align="center">
-	<img height="440px" width="auto" src="https://github.com/user-attachments/assets/43963c54-e2d8-4b93-9842-482e12b2c592" />
-</div>
+---
 
-<details close>
-<summary>Видеопрезентация</summary>
+## рџЊџ РљР»СЋС‡РµРІС‹Рµ РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё Рё СѓР»СѓС‡С€РµРЅРёСЏ С„РѕСЂРєР°
 
-https://github.com/user-attachments/assets/bfc7666f-1d59-4cbf-8d15-3855671cb147
+### рџ”„ 1. Р‘РµСЃС€РѕРІРЅРѕРµ Р°РІС‚РѕРѕР±РЅРѕРІР»РµРЅРёРµ РїСЂСЏРјРѕ РІ РїСЂРёР»РѕР¶РµРЅРёРё (РєР°Рє РІ Portal-Windows)
+- **РџСЂСЏРјР°СЏ РёРЅС‚РµРіСЂР°С†РёСЏ СЃ GitHub Releases:** РџСЂРёР»РѕР¶РµРЅРёРµ СЃРєР°С‡РёРІР°РµС‚ РѕР±РЅРѕРІР»РµРЅРёРµ РЅР°РїСЂСЏРјСѓСЋ РёР· СЂРµР»РёР·РѕРІ СЂРµРїРѕР·РёС‚РѕСЂРёСЏ `KoksMen/FluentFlyout` СЃ РЅР°РіР»СЏРґРЅС‹Рј РѕС‚РѕР±СЂР°Р¶РµРЅРёРµРј РїСЂРѕРіСЂРµСЃСЃР° РІ РїСЂРѕС†РµРЅС‚Р°С… РїСЂСЏРјРѕ РІ РёРЅС‚РµСЂС„РµР№СЃРµ РЅР°СЃС‚СЂРѕРµРє.
+- **РђРІС‚РѕРјР°С‚РёС‡РµСЃРєР°СЏ СѓСЃС‚Р°РЅРѕРІРєР°:** РЎРєР°С‡Р°РЅРЅС‹Р№ РґРёСЃС‚СЂРёР±СѓС‚РёРІ СЂР°СЃРїР°РєРѕРІС‹РІР°РµС‚СЃСЏ, СЃРєСЂРёРїС‚ Р·Р°РІРµСЂС€Р°РµС‚ СЂР°Р±РѕС‚Сѓ СЃС‚Р°СЂРѕРіРѕ РїСЂРѕС†РµСЃСЃР° РїРѕ PID, РїРµСЂРµР·Р°РїРёСЃС‹РІР°РµС‚ С„Р°Р№Р»С‹ Рё Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё РїРµСЂРµР·Р°РїСѓСЃРєР°РµС‚ РѕР±РЅРѕРІР»РµРЅРЅС‹Р№ `FluentFlyout.exe`. Р‘СЂР°СѓР·РµСЂ РѕС‚РєСЂС‹РІР°С‚СЊ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ!
+- **РРЅС‚РµР»Р»РµРєС‚СѓР°Р»СЊРЅС‹Р№ SemVer:** РџР°СЂСЃРµСЂ `ForkVersion` РєРѕСЂСЂРµРєС‚РЅРѕ СЃРѕРїРѕСЃС‚Р°РІР»СЏРµС‚ РІРµСЂСЃРёРё С„РѕСЂРєР° (`2.15.0-f2.0.0` > `2.13.1-f1.7.0`).
 
-</details>
+### рџЋ® 2. Р Р°Р·РґРµР»СЊРЅС‹Рµ СЂРµР¶РёРјС‹ РїРѕР»РЅРѕСЌРєСЂР°РЅРЅРѕРіРѕ СЌРєСЂР°РЅР° (Gaming Safeguard)
+- **Exclusive Fullscreen:** РќРµР·Р°РІРёСЃРёРјС‹Р№ РїРµСЂРµРєР»СЋС‡Р°С‚РµР»СЊ РґР»СЏ 3D-РёРіСЂ. РџСЂРё РµРіРѕ РѕС‚РєР»СЋС‡РµРЅРёРё РѕРІРµСЂР»РµРё РЅРµ РїРµСЂРµС…РІР°С‚С‹РІР°СЋС‚ С„РѕРєСѓСЃ Рё РЅРµ СЃРІРѕСЂР°С‡РёРІР°СЋС‚ РїРѕР»РЅРѕСЌРєСЂР°РЅРЅС‹Рµ РёРіСЂС‹.
+- **Borderless Fullscreen:** РћС‚РґРµР»СЊРЅР°СЏ РЅР°СЃС‚СЂРѕР№РєР° РґР»СЏ РёРіСЂ РІ РѕРєРЅРµ Р±РµР· СЂР°РјРѕРє Рё РїСЂРѕСЃРјРѕС‚СЂР° РІРёРґРµРѕ.
+- **РЎРєСЂС‹С‚РёРµ РёРЅРґРёРєР°С‚РѕСЂР° Caps Lock РІ РёРіСЂР°С….**
 
-## Плеер и другие окна 🎵
-<div align="center">
-	<img height="205px" width="auto" src="https://github.com/user-attachments/assets/4dab1c12-594a-4785-bddc-0da1783bf1c8"> <img height="205px" src="https://github.com/user-attachments/assets/b4306026-b274-418b-a39e-78877e7610a7"> 	<img height="190px" src="https://github.com/user-attachments/assets/39de69fe-54c8-4b22-880c-7f0370b8dd9c"> <img height="190px" src="https://github.com/user-attachments/assets/a25adb0e-963a-49a5-8abb-d9a288c2ad9a"> <img height="190px" src="https://github.com/user-attachments/assets/2de44e7b-7e6c-4575-bf3b-0be2f741c994">
-</div>
-<details open>
-<summary>Скриншоты v2.0</summary>
-<div align="center">
-	<img height="220px" width="auto" src="https://github.com/user-attachments/assets/e45592d5-8576-4d6a-8679-56baacccd585"> <img height="220px" width="auto" src="https://github.com/user-attachments/assets/ff2fcfab-8e24-48cf-9bdf-d35252eb3e67">
-</div>
-</details>
+### вљЎ 3. РњРѕР»РЅРёРµРЅРѕСЃРЅС‹Р№ РѕС‚РєР»РёРє РєРЅРѕРїРѕРє С‚Р°СЃРєР±Р°СЂР° (Win32 Fast Path)
+- **РњРіРЅРѕРІРµРЅРЅРѕРµ РѕС‚РєСЂС‹С‚РёРµ:** РЈСЃС‚СЂР°РЅРµРЅС‹ СЃРёРЅС…СЂРѕРЅРЅС‹Рµ Р±Р»РѕРєРёСЂРѕРІРєРё UI-РїРѕС‚РѕРєР°. РџРѕР·РёС†РёСЏ СЌР»РµРјРµРЅС‚РѕРІ С‚Р°СЃРєР±Р°СЂР° СЂР°СЃСЃС‡РёС‚С‹РІР°РµС‚СЃСЏ РјРѕРјРµРЅС‚Р°Р»СЊРЅРѕ С‡РµСЂРµР· РЅР°С‚РёРІРЅС‹Р№ Win32 `GetWindowRect`.
+- **РќР°РґРµР¶РЅРѕСЃС‚СЊ РїРѕРІС‚РѕСЂРЅРѕРіРѕ РєР»РёРєР°:** РЈСЃС‚СЂР°РЅРµРЅС‹ Р·Р°Р»РёРїР°РЅРёСЏ РєРЅРѕРїРѕРє РјРёРєС€РµСЂР° Рё Р±СѓС„РµСЂР° РѕР±РјРµРЅР°.
 
-## Установка 📥
-### Какую версию выбрать?
-**Версия из Microsoft Store** обновляется автоматически, но для разблокировки нескольких дополнительных функций требуется разовая покупка.  
-**Версия с GitHub** полностью бесплатна и с открытым исходным кодом, но требует ручного обновления.  
-Подробнее о модели проекта читайте в разделе [Устойчивость & Microsoft Store](#устойчивость--microsoft-store-) ниже.
+### рџ”Љ 4. Р РµРіСѓР»РёСЂРѕРІРєР° РіСЂРѕРјРєРѕСЃС‚Рё РєРѕР»РµСЃРёРєРѕРј РјС‹С€Рё (Volume Wheel Scroll)
+- **РџСЂРѕРєСЂСѓС‚РєР° РЅР°Рґ РєРЅРѕРїРєРѕР№ РјРёРєС€РµСЂР°:** Р’СЂР°С‰РµРЅРёРµ РєРѕР»РµСЃРёРєР° РјС‹С€Рё РЅР°Рґ РёРєРѕРЅРєРѕР№ РјРёРєС€РµСЂР° РІ С‚Р°СЃРєР±Р°СЂРµ РјРµРЅСЏРµС‚ СЃРёСЃС‚РµРјРЅСѓСЋ РіСЂРѕРјРєРѕСЃС‚СЊ (С€Р°Рі 2%).
+- **РџСЂРѕРєСЂСѓС‚РєР° РЅР°Рґ РјРµРґРёР°-РІРёРґР¶РµС‚РѕРј:** РџСЂРѕРєСЂСѓС‚РєР° РЅР°Рґ РјРёРЅРё-РІРёРґР¶РµС‚РѕРј С‚СЂРµРєР° С‚Р°РєР¶Рµ РјРµРЅСЏРµС‚ РіСЂРѕРјРєРѕСЃС‚СЊ СЃ РєСЂР°СЃРёРІС‹Рј РѕРІРµСЂР»РµРµРј Flyout OSD.
 
-### Через Microsoft Store
-<a href="https://apps.microsoft.com/detail/9n45nsm4tnbp?referrer=appbadge&cid=GitHub_README_2&mode=direct">
-	<img src="https://get.microsoft.com/images/en-us%20dark.svg" width="300"/>
-</a>
+### рџЋЇ 5. Р¤РѕРєСѓСЃРёСЂРѕРІРєР° Рё РїРµСЂРµС…РѕРґ РЅР° РІРєР»Р°РґРєСѓ Р±СЂР°СѓР·РµСЂР° / РѕРєРЅРѕ РїР»РµРµСЂР° (Tab Activation)
+- РџСЂРё РєР»РёРєРµ РЅР° РЅР°Р·РІР°РЅРёРµ С‚СЂРµРєР° РёР»Рё РѕР±Р»РѕР¶РєСѓ С„Р»Р°Р№Р°СѓС‚ Р°РєС‚РёРІРёСЂСѓРµС‚ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰СѓСЋ РІРєР»Р°РґРєСѓ РІ Р±СЂР°СѓР·РµСЂРµ (Edge, Chrome, Firefox, Opera, Brave, Vivaldi) С‡РµСЂРµР· UI Automation РёР»Рё РјРіРЅРѕРІРµРЅРЅРѕ РІС‹РІРѕРґРёС‚ РѕРєРЅРѕ РїР»РµРµСЂР° (Spotify, Yandex Music, AIMP) РЅР° РїРµСЂРµРґРЅРёР№ РїР»Р°РЅ.
 
-> Ищете настройки FluentFlyout? Нажмите на иконку в системном трее.
+### рџ“ђ 6. РџРѕРґРґРµСЂР¶РєР° РєРѕРјРїР°РєС‚РЅРѕР№ / РјР°Р»РµРЅСЊРєРѕР№ РїР°РЅРµР»Рё Р·Р°РґР°С‡ Windows 11
+- РђРІС‚РѕРјР°С‚РёС‡РµСЃРєР°СЏ Р°РґР°РїС‚Р°С†РёСЏ РІРёРґР¶РµС‚Р° Рё РєРЅРѕРїРѕРє Р±С‹СЃС‚СЂС‹С… РґРµР№СЃС‚РІРёР№ РїРѕРґ СѓРјРµРЅСЊС€РµРЅРЅС‹Рµ СЂР°Р·РјРµСЂС‹ РїР°РЅРµР»Рё Р·Р°РґР°С‡ (StartAllBack, Windhawk, РєР°СЃС‚РѕРјРЅС‹Рµ СЂР°Р·РјРµСЂС‹ 28вЂ“36px) Р±РµР· РѕР±СЂРµР·Р°РЅРёСЏ СЌР»РµРјРµРЅС‚РѕРІ.
 
-### Через установщик .msixbundle
-1. Перейдите на страницу [последнего релиза](https://github.com/unchihugo/FluentFlyout/releases/latest)
-2. Скачайте файл **"*.cer"** *(настоящие сертификаты стоят дорого)*
-3. Откройте сертификат и нажмите **«Установить сертификат...»**
-4. В мастере импорта сертификатов выберите **«Локальный компьютер»**, нажмите **«Далее»** и предоставьте права администратора
-5. Выберите **«Поместить все сертификаты в следующее хранилище»**, затем **«Обзор...»**, выберите **«Доверенные корневые центры сертификации»** и нажмите **«ОК»**
-6. Нажмите **«Далее»**, затем **«Готово»**. При запросе подтверждения нажмите **«Да»**
-7. Скачайте файл **"*.msixbundle"**
-8. Откроется установщик приложений — нажмите **«Установить»** или **«Обновить»**, если FluentFlyout уже установлен
+### рџ–±пёЏ 7. РљРѕРЅС‚РµРєСЃС‚РЅРѕРµ РјРµРЅСЋ РїРѕ РїСЂР°РІРѕРјСѓ РєР»РёРєСѓ РЅР° С‚Р°СЃРєР±Р°СЂ-РІРёРґР¶РµС‚
+- Р‘С‹СЃС‚СЂРѕРµ РјРµРЅСЋ: СѓРїСЂР°РІР»РµРЅРёРµ С‚СЂРµРєР°РјРё, РїРµСЂРµРєР»СЋС‡РµРЅРёРµ РјРµР¶РґСѓ Р°РєС‚РёРІРЅС‹РјРё РїР»РµРµСЂР°РјРё РІ РѕРґРёРЅ РєР»РёРє Рё Р±С‹СЃС‚СЂС‹Р№ РїРµСЂРµС…РѕРґ РІ РЅР°СЃС‚СЂРѕР№РєРё. Р’РѕР·РјРѕР¶РЅРѕСЃС‚СЊ РѕС‚РєР»СЋС‡РµРЅРёСЏ РјРµРЅСЋ РІ РЅР°СЃС‚СЂРѕР№РєР°С….
 
-## Участие в разработке 💖
-Будем рады любому вкладу! Ознакомьтесь с [CONTRIBUTING.md](https://github.com/unchihugo/FluentFlyout/blob/master/.github/CONTRIBUTING.md), чтобы начать.  
-Если хотите помочь с переводами, посетите нашу [страницу на Weblate](https://hosted.weblate.org/engage/fluentflyout/).
+### рџ“‹ 8. РСЃС‚РѕСЂРёСЏ Р±СѓС„РµСЂР° РѕР±РјРµРЅР° СЃ Р»РёРјРёС‚РѕРј Рё РѕС‡РёСЃС‚РєРѕР№
+- РќР°СЃС‚СЂРѕР№РєР° Р»РёРјРёС‚Р° С…СЂР°РЅРёРјС‹С… Р·Р°РїРёСЃРµР№ (РѕС‚ 5 РґРѕ 100), РєРЅРѕРїРєР° Р±С‹СЃС‚СЂРѕР№ РѕС‡РёСЃС‚РєРё РІСЃРµР№ РёСЃС‚РѕСЂРёРё Рё 3-РєСЂР°С‚РЅР°СЏ СЌРєРѕРЅРѕРјРёСЏ РѕРїРµСЂР°С‚РёРІРЅРѕР№ РїР°РјСЏС‚Рё Р·Р° СЃС‡РµС‚ РѕРїС‚РёРјРёР·РёСЂРѕРІР°РЅРЅРѕРіРѕ РґРµРєРѕРґРёСЂРѕРІР°РЅРёСЏ РїСЂРµРІСЊСЋ РєР°СЂС‚РёРЅРѕРє.
 
-### Статус перевода
-<a href="https://hosted.weblate.org/engage/fluentflyout/">
-<img src="https://hosted.weblate.org/widget/fluentflyout/multi-auto.svg" alt="Статус перевода" />
-</a>
+### рџ’» 9. РЈРЅРёРІРµСЂСЃР°Р»СЊРЅР°СЏ РїРѕРґРґРµСЂР¶РєР° РІСЃС‚СЂРѕРµРЅРЅРѕР№ РіСЂР°С„РёРєРё (iGPU) Рё Р±Р°Р·РѕРІС‹С… Р°РґР°РїС‚РµСЂРѕРІ
+- РЈСЃС‚СЂР°РЅРµРЅ СЃР±РѕР№, РёР·-Р·Р° РєРѕС‚РѕСЂРѕРіРѕ РЅР° РёРЅС‚РµРіСЂРёСЂРѕРІР°РЅРЅС‹С… РІРёРґРµРѕРєР°СЂС‚Р°С… (Intel UHD/Iris, AMD Radeon) РѕРєРЅР° СЃС‚Р°РЅРѕРІРёР»РёСЃСЊ РєРІР°РґСЂР°С‚РЅС‹РјРё Рё Р±РµР»С‹РјРё:
+  - РСЃРїСЂР°РІР»РµРЅ Р¶РёР·РЅРµРЅРЅС‹Р№ С†РёРєР» HWND РІ `ApplyModernWindowStyling`.
+  - РџСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕРµ РѕР±РЅРѕРІР»РµРЅРёРµ РіРµРѕРјРµС‚СЂРёРё DWM С‡РµСЂРµР· `SWP_FRAMECHANGED`.
+  - Р”РѕР±Р°РІР»РµРЅР° СЌР»РµРіР°РЅС‚РЅР°СЏ 1px Fluent-РѕР±РІРѕРґРєР° (`CardStrokeColorDefaultBrush`) СЃ Р·Р°РєСЂСѓРіР»РµРЅРёРµРј `CornerRadius="8"`, РіР°СЂР°РЅС‚РёСЂСѓСЋС‰Р°СЏ РєСЂР°СЃРёРІС‹Р№ РІРёРґ РґР°Р¶Рµ РїСЂРё РѕС‚РєР»СЋС‡РµРЅРЅРѕРј Р°РїРїР°СЂР°С‚РЅРѕРј РєРѕРјРїРѕР·РёС‚РёРЅРіРµ.
 
-### Спасибо нашей команде участников!
-<a href="https://github.com/unchihugo/fluentflyout/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=unchihugo/fluentflyout&anon=1" />
-</a>
+### рџЋЁ 10. РЎРіР»Р°Р¶РёРІР°РЅРёРµ Рё High-DPI РјР°СЃС€С‚Р°Р±РёСЂРѕРІР°РЅРёРµ РІРёР·СѓР°Р»РёР·Р°С‚РѕСЂР°
+- Р’С‹СЃРѕРєРѕРєР°С‡РµСЃС‚РІРµРЅРЅР°СЏ Р±РёРєСѓР±РёС‡РµСЃРєР°СЏ РёРЅС‚РµСЂРїРѕР»СЏС†РёСЏ (`BitmapScalingMode="HighQuality"`) Рё СЂР°СЃС€РёСЂРµРЅРЅР°СЏ Р·РѕРЅР° Р°РЅС‚РёР°Р»РёР°СЃРёРЅРіР° (2.5f) РїРѕР»РЅРѕСЃС‚СЊСЋ СѓСЃС‚СЂР°РЅСЏСЋС‚ РїРёРєСЃРµР»РёР·Р°С†РёСЋ СЃРїРµРєС‚СЂРѕРіСЂР°РјРјС‹ РЅР° СЌРєСЂР°РЅР°С… РЅРѕСѓС‚Р±СѓРєРѕРІ СЃ РјР°СЃС€С‚Р°Р±РёСЂРѕРІР°РЅРёРµРј 125вЂ“175%.
 
-## Устойчивость & Microsoft Store 💰
-FluentFlyout всегда был и будет бесплатным и с открытым исходным кодом. Последние сборки можно скачать на вкладке [Releases](https://github.com/unchihugo/FluentFlyout/releases/latest) или собрать проект самостоятельно для доступа ко всем функциям без ограничений.
+### рџЏ·пёЏ 11. Р’РёР·СѓР°Р»СЊРЅС‹Рµ Р±РµР№РґР¶Рё С„РѕСЂРєР° (Fork Badges)
+- Р’СЃРµ СЌРєСЃРєР»СЋР·РёРІРЅС‹Рµ С„СѓРЅРєС†РёРё С„РѕСЂРєР° РІ РЅР°СЃС‚СЂРѕР№РєР°С… РѕС‚РјРµС‡РµРЅС‹ Р°РєС†РµРЅС‚РЅС‹РјРё Р±РµР№РґР¶Р°РјРё `FORK`.
 
-Поддержка проекта такого масштаба требует времени и усилий. Для поддержки разработки версия из Microsoft Store предлагает удобный способ установки и включает несколько дополнительных функций, разблокируемых за небольшую плату (€2.99, зависит от региона).
+### рџ”Џ 12. Р¦РёС„СЂРѕРІР°СЏ РїРѕРґРїРёСЃСЊ Рё РєРѕРјРїР°РєС‚РЅС‹Р№ СЂР°Р·РјРµСЂ
+- Р’СЃРµ СЃР±РѕСЂРєРё РїРѕРґРїРёСЃР°РЅС‹ С†РёС„СЂРѕРІС‹Рј СЃРµСЂС‚РёС„РёРєР°С‚РѕРј `CN=xXKoksMenXx` СЃ РјРµС‚РєРѕР№ РІСЂРµРјРµРЅРё Sectigo RFC 3161 TSA.
+- РСЃРїРѕР»РЅСЏРµРјС‹Р№ С„Р°Р№Р» СЃР¶Р°С‚ СЃРѕ 210 РњР‘ РґРѕ ~85вЂ“90 РњР‘.
 
-- **Версия из Microsoft Store:** автоматические фоновые обновления и установка в один клик. Небольшой набор функций разблокируется разовой покупкой для поддержки разработки.
-- **Версия с GitHub:** полностью бесплатна, со всеми функциями и открытым исходным кодом. Единственный компромисс — установка и обновления выполняются вручную.
+---
 
-Спасибо за поддержку и понимание!
+## рџ“¦ РЎРєР°С‡РёРІР°РЅРёРµ Рё СѓСЃС‚Р°РЅРѕРІРєР°
 
-## Благодарности 🙌
-- [Hugo Li](https://unchihugo.github.io) — Разработчик, издатель в Microsoft Store, переводы CN и NL
-- [LiAuTraver](https://github.com/LiAuTraver) — Участник (переключатель темы приложения)
-- [AksharDP](https://github.com/AksharDP) — Участник (индикатор времени и длительность медиа)
-- [Hykerisme](https://github.com/Hykerisme) — Перевод CN
-- [nopeless](https://github.com/nopeless) — Участник (улучшения качества жизни)
+Р—Р°РіСЂСѓР·РёС‚Рµ Р°РєС‚СѓР°Р»СЊРЅСѓСЋ РІРµСЂСЃРёСЋ РёР· СЂР°Р·РґРµР»Р° [**Releases**](https://github.com/KoksMen/FluentFlyout/releases/latest):
 
-### Зависимости
-- [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet)
-- [Dubya.WindowsMediaController](https://github.com/DubyaDude/WindowsMediaController)
-- [MicaWPF](https://github.com/Simnico99/MicaWPF)
-- [Microsoft.Toolkit.Uwp.Notifications](https://github.com/CommunityToolkit/WindowsCommunityToolkit)
-- [NAudio](https://github.com/naudio/NAudio)
-- [NLog](https://nlog-project.org/)
-- [System.Drawing.Common](https://dot.net/)
-- [WPF-UI](https://github.com/lepoco/wpfui)
-- [WPF-UI-Tray](https://github.com/lepoco/wpfui)
+| Р¤Р°Р№Р» | РћРїРёСЃР°РЅРёРµ | Р Р°Р·РјРµСЂ |
+| :--- | :--- | :--- |
+| **`FluentFlyout.exe`** | РђРІС‚РѕРЅРѕРјРЅС‹Р№ Single-File РёСЃРїРѕР»РЅСЏРµРјС‹Р№ С„Р°Р№Р» (Self-Contained) | ~90 РњР‘ |
+| **`Portable_x64_AMD.zip`** | РџРѕСЂС‚Р°С‚РёРІРЅС‹Р№ zip-Р°СЂС…РёРІ СЃ РёСЃРїРѕР»РЅСЏРµРјС‹Рј С„Р°Р№Р»РѕРј | ~84 РњР‘ |
+
+> [!TIP]
+> РЈСЃС‚Р°РЅРѕРІРєР° .NET Runtime РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ: СЃСЂРµРґР° РІС‹РїРѕР»РЅРµРЅРёСЏ СѓР¶Рµ РІСЃС‚СЂРѕРµРЅР° РІРЅСѓС‚СЂСЊ РёСЃРїРѕР»РЅСЏРµРјРѕРіРѕ С„Р°Р№Р»Р°!
+
+---
+
+# рџ‡¬рџ‡§ FluentFlyout (In English)
+
+## рџ’Ў About This Project
+
+**FluentFlyout (KoksMen Edition)** is an enhanced and performance-hardened fork of FluentFlyout for Windows 10/11.
+
+It resolves gaming interruptions, taskbar latencies, integrated graphics rendering bugs, and external telemetry lock-in, providing a fast, lightweight (~85 MB) and fully customizable flyout experience.
+
+---
+
+## рџЊџ Key Features
+
+- **рџ”„ Seamless In-App Auto-Updater:** Downloads GitHub Releases assets directly in-app, stages files, and updates automatically via batch script restart.
+- **рџЋ® Gaming Safeguards:** Separate toggles for exclusive and borderless fullscreen modes prevent games from minimizing.
+- **вљЎ Instant Taskbar Responsiveness:** Win32 fast path eliminates UI thread delays.
+- **рџ”Љ Mouse Wheel Volume Adjustment:** Scroll directly over taskbar elements to adjust system audio.
+- **рџЋЇ Browser Tab & Player Activation:** Click the flyout to focus the exact playing tab or desktop player.
+- **рџ“ђ Compact Taskbar Adaptation:** Supports small taskbars (StartAllBack / Windhawk).
+- **рџ–±пёЏ Taskbar Widget Context Menu:** Right-click controls for quick playback and player switching.
+- **рџ“‹ Clipboard Limit & Cleanup:** Configurable history limit and RAM-efficient thumbnail caching.
+- **рџ’» Universal iGPU & Basic Display Adapter Support:** Hardware DWM corner rounding with Fluent border fallbacks.
+- **рџЋЁ High-DPI Visualizer AA:** Bicubic scaling mode removes spectrogram pixelation.
+- **рџ”Џ Authenticode Code Signing:** Binaries signed with Sectigo RFC 3161 timestamp.
+
+---
+
+## рџ“њ Р›РёС†РµРЅР·РёСЏ / License
+
+РџСЂРѕРµРєС‚ СЂР°СЃРїСЂРѕСЃС‚СЂР°РЅСЏРµС‚СЃСЏ РїРѕРґ Р»РёС†РµРЅР·РёРµР№ **GNU General Public License v3.0 (GPL-3.0)**.  
+РџРѕРґСЂРѕР±РЅРѕСЃС‚Рё РґРѕСЃС‚СѓРїРЅС‹ РІ С„Р°Р№Р»Рµ [LICENSE](LICENSE).
