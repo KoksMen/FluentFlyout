@@ -119,6 +119,9 @@ public static class WindowHelper
 
                 var margins = new MARGINS { cxLeftWidth = 0, cxRightWidth = 0, cyTopHeight = 1, cyBottomHeight = 0 };
                 DwmExtendFrameIntoClientArea(handle, ref margins);
+
+                // Notify DWM and window manager to recalculate non-client framing, rounded corners and shadow
+                SetWindowPos(handle, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED | SWP_NOACTIVATE);
             }
             catch (Exception ex)
             {
@@ -126,7 +129,8 @@ public static class WindowHelper
             }
         }
 
-        if (window.IsLoaded)
+        var helper = new WindowInteropHelper(window);
+        if (helper.Handle != IntPtr.Zero)
         {
             Apply();
         }
@@ -134,5 +138,7 @@ public static class WindowHelper
         {
             window.SourceInitialized += (sender, e) => Apply();
         }
+
+        window.Loaded += (sender, e) => Apply();
     }
 }

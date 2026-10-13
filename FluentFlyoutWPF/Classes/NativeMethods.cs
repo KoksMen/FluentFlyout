@@ -32,6 +32,7 @@ public static partial class NativeMethods
     internal const uint SWP_HIDEWINDOW = 0x0080;
     internal const uint SWP_ASYNCWINDOWPOS = 0x4000;
     internal const uint SWP_NOACTIVATE = 0x0010;
+    internal const uint SWP_FRAMECHANGED = 0x0020;
 
     // ShowWindow Commands
     internal const int SW_MINIMIZE = 6;
