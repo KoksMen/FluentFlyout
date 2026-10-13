@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using FluentFlyout.Classes.Settings;
+using FluentFlyoutWPF.Classes;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
@@ -52,6 +53,8 @@ public static class WindowBlurHelper
         SetWindowCompositionAttribute(windowHelper.Handle, ref data);
 
         Marshal.FreeHGlobal(accentPtr);
+
+        WindowHelper.ApplyModernWindowStyling(window);
     }
 
     /// <summary>
@@ -81,6 +84,8 @@ public static class WindowBlurHelper
         SetWindowCompositionAttribute(windowHelper.Handle, ref data);
 
         Marshal.FreeHGlobal(accentPtr);
+
+        WindowHelper.ApplyModernWindowStyling(window);
     }
 
     /// <summary>

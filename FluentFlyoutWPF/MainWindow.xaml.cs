@@ -90,6 +90,7 @@ public partial class MainWindow : MicaWindow
         WindowHelper.SetNoActivate(this); // prevents some fullscreen apps from minimizing
         InitializeComponent();
         WindowHelper.SetTopmost(this); // more prevention of fullscreen apps minimizing
+        WindowHelper.ApplyModernWindowStyling(this);
 
         if (!singleton.WaitOne(TimeSpan.Zero, true)) // if another instance is already running, close this one
         {

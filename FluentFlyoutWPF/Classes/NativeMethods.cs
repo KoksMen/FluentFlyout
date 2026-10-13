@@ -354,11 +354,18 @@ public static partial class NativeMethods
 
     #region dwmapi.dll
 
+    internal const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
+    internal const int DWMWA_BORDER_COLOR = 34;
+    internal const int DWMWCP_ROUND = 2;
+
     [LibraryImport("dwmapi.dll")]
     internal static partial int DwmExtendFrameIntoClientArea(IntPtr hwnd, ref MARGINS margins);
 
     [LibraryImport("dwmapi.dll")]
     internal static partial int DwmGetWindowAttribute(IntPtr hwnd, int dwAttribute, out RECT pvAttribute, int cbAttribute);
+
+    [LibraryImport("dwmapi.dll")]
+    internal static partial int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, in int pvAttribute, int cbAttribute);
 
     #endregion
 

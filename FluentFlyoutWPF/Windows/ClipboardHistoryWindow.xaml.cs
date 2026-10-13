@@ -37,6 +37,7 @@ public partial class ClipboardHistoryWindow : MicaWindow
 
         new System.Windows.Interop.WindowInteropHelper(this).EnsureHandle();
         WindowHelper.SetTopmost(this);
+        WindowHelper.ApplyModernWindowStyling(this);
     }
 
     private DateTime _lastCloseTime = DateTime.MinValue;

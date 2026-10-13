@@ -55,6 +55,7 @@ public partial class VolumeMixerWindow : MicaWindow
         CustomWindowChrome.CaptionHeight = 0;
         CustomWindowChrome.UseAeroCaptionButtons = false;
         CustomWindowChrome.GlassFrameThickness = new Thickness(0);
+        WindowHelper.ApplyModernWindowStyling(this);
 
         WindowStartupLocation = WindowStartupLocation.Manual;
         Top = -9999; // start off-screen to prevent flickering on startup

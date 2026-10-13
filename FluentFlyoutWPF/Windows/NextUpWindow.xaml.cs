@@ -28,6 +28,7 @@ public partial class NextUpWindow : MicaWindow
         new System.Windows.Interop.WindowInteropHelper(this).EnsureHandle();
         WindowHelper.SetTopmost(this);
         CustomWindowChrome.CaptionHeight = 0;
+        WindowHelper.ApplyModernWindowStyling(this);
 
         if (SettingsManager.Current.NextUpAcrylicWindowEnabled)
         {
