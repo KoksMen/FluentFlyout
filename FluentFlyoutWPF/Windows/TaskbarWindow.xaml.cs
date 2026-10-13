@@ -439,14 +439,19 @@ on_error:
         if (!SettingsManager.Current.TaskbarWidgetEnabled)
             return Rect.Empty;
 
+        int taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
+        int taskbarWidth = taskbarRect.Right - taskbarRect.Left;
+        int crossSize = isVertical ? taskbarWidth : taskbarHeight;
+        double crossLogical = crossSize / dpiScale;
+        bool isCompact = crossLogical < 42;
+
+        Widget.SetCompactMode(isCompact, crossLogical);
+
         // Calculate widget size
         var (logicalWidth, logicalHeight) = Widget.CalculateSize(dpiScale);
 
         int physicalWidth = (int)(logicalWidth * dpiScale * _scale);
         int physicalHeight = (int)(logicalHeight * dpiScale);
-
-        int taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
-        int taskbarWidth = taskbarRect.Right - taskbarRect.Left;
 
         // Apply orientation transform
         Widget.LayoutTransform = isVertical ? new System.Windows.Media.RotateTransform(90) : null;
@@ -454,8 +459,6 @@ on_error:
         Widget.SetVerticalMode(isVertical);
 
         int primarySize = isVertical ? taskbarHeight : taskbarWidth;
-        int crossSize = isVertical ? taskbarWidth : taskbarHeight;
-
         int crossPos = (crossSize - physicalHeight) / 2;
         int primaryPos = 0;
 
@@ -694,9 +697,18 @@ on_error:
         int taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
         int taskbarWidth = taskbarRect.Right - taskbarRect.Left;
         int crossSize = isVertical ? taskbarWidth : taskbarHeight;
-        int crossPos = (crossSize - (int)(36 * dpiScale)) / 2;
+        double crossLogical = crossSize / dpiScale;
+        double buttonSize = crossLogical < 42 ? Math.Max(24, Math.Min(36, crossLogical - 4)) : 36;
 
-        int quickActionsWidth = (SettingsManager.Current.TaskbarMixerButtonEnabled ? 40 : 0) + (SettingsManager.Current.TaskbarClipboardButtonEnabled ? 40 : 0);
+        MixerButton.Width = buttonSize;
+        MixerButton.Height = buttonSize;
+        ClipboardButton.Width = buttonSize;
+        ClipboardButton.Height = buttonSize;
+
+        int crossPos = (crossSize - (int)(buttonSize * dpiScale)) / 2;
+
+        int btnWidthLogical = (int)buttonSize + 4;
+        int quickActionsWidth = (SettingsManager.Current.TaskbarMixerButtonEnabled ? btnWidthLogical : 0) + (SettingsManager.Current.TaskbarClipboardButtonEnabled ? btnWidthLogical : 0);
         int primaryPos = 12;
 
         if (SettingsManager.Current.TaskbarWidgetPadding)

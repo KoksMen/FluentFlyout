@@ -652,6 +652,24 @@ public partial class UserSettings : ObservableObject
     [ObservableProperty]
     public partial bool VolumeControlEnabled { get; set; }
 
+    /// <summary>
+    /// Volume scroll step per mouse wheel tick (percent, e.g. 1, 2, 5, 10).
+    /// </summary>
+    [ObservableProperty]
+    public partial int VolumeScrollStep { get; set; } = 2;
+
+    /// <summary>
+    /// Whether right-clicking the taskbar widget shows the media/widget context menu.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool TaskbarWidgetContextMenuEnabled { get; set; } = true;
+
+    /// <summary>
+    /// Maximum items stored and shown in the clipboard history flyout.
+    /// </summary>
+    [ObservableProperty]
+    public partial int ClipboardHistoryMaxItems { get; set; } = 30;
+
     [ObservableProperty]
     public partial bool VolumeControlAboveMediaFlyout { get; set; }
 
@@ -897,6 +915,9 @@ public partial class UserSettings : ObservableObject
         VolumeControlEnabled = false;
         VolumeControlAboveMediaFlyout = false;
         VolumeControlDuration = 3000;
+        VolumeScrollStep = 2;
+        TaskbarWidgetContextMenuEnabled = true;
+        ClipboardHistoryMaxItems = 30;
         VolumeMixerEnabled = false;
         VolumeMixerHighlightActiveApps = false;
         AcrylicBlurOpacity = 175;

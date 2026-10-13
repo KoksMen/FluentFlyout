@@ -299,7 +299,7 @@ public partial class TaskbarWidgetControl : UserControl
             logicalWidth += 104;
         }
 
-        double logicalHeight = 40; // default height
+        double logicalHeight = _isCompactMode ? Math.Max(26, _compactCrossLogical - 2) : 40;
 
         return (logicalWidth, logicalHeight);
     }
@@ -679,19 +679,46 @@ public partial class TaskbarWidgetControl : UserControl
         (_mainWindow ?? (MainWindow)Application.Current.MainWindow)?.AdjustMasterVolumeFromWheel(e.Delta);
     }
 
+    private bool _isCompactMode;
+    private double _compactCrossLogical = 40;
+
+    public void SetCompactMode(bool isCompact, double crossLogical)
+    {
+        if (_isCompactMode == isCompact && Math.Abs(_compactCrossLogical - crossLogical) < 1)
+            return;
+
+        _isCompactMode = isCompact;
+        _compactCrossLogical = crossLogical;
+
+        if (isCompact)
+        {
+            double scale = Math.Clamp((crossLogical - 4) / 40.0, 0.65, 0.95);
+            MainGrid.RenderTransform = new ScaleTransform(scale, scale);
+            Height = Math.Max(26, crossLogical - 2);
+            SongImageBorder.Width = Math.Max(24, 36 * scale);
+            SongImageBorder.Height = SongImageBorder.Width;
+        }
+        else
+        {
+            MainGrid.RenderTransform = new ScaleTransform(0.9, 0.9);
+            Height = 40;
+            SongImageBorder.Width = 36;
+            SongImageBorder.Height = 36;
+        }
+    }
+
     private void MainBorder_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
     {
+        if (!SettingsManager.Current.TaskbarWidgetContextMenuEnabled)
+            return;
+
         e.Handled = true;
-        // Disabled per user request
+        ShowMediaSessionsContextMenu();
     }
 
     public void ShowMediaSessionsContextMenu()
     {
         if (_mainWindow == null) return;
-
-        var validSessions = _mainWindow.GetValidMediaSessions();
-        // Use the cached manually-selected ID instead of GetActiveMediaSession() (avoids COM calls)
-        string? activeId = _mainWindow.ActiveSessionId;
 
         var menu = new ContextMenu
         {
@@ -699,15 +726,47 @@ public partial class TaskbarWidgetControl : UserControl
             Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint
         };
 
+        var focusedSession = _mainWindow.GetActiveWidgetMediaSession();
+        if (focusedSession != null)
+        {
+            var playPauseItem = new Wpf.Ui.Controls.MenuItem
+            {
+                Header = "Воспроизведение / Пауза",
+                Icon = new Wpf.Ui.Controls.SymbolIcon { Symbol = Wpf.Ui.Controls.SymbolRegular.Play24 }
+            };
+            playPauseItem.Click += (s, args) => PlayPause_Click(s, args);
+            menu.Items.Add(playPauseItem);
+
+            var prevItem = new Wpf.Ui.Controls.MenuItem
+            {
+                Header = "Предыдущий трек",
+                Icon = new Wpf.Ui.Controls.SymbolIcon { Symbol = Wpf.Ui.Controls.SymbolRegular.Previous24 }
+            };
+            prevItem.Click += (s, args) => Previous_Click(s, args);
+            menu.Items.Add(prevItem);
+
+            var nextItem = new Wpf.Ui.Controls.MenuItem
+            {
+                Header = "Следующий трек",
+                Icon = new Wpf.Ui.Controls.SymbolIcon { Symbol = Wpf.Ui.Controls.SymbolRegular.Next24 }
+            };
+            nextItem.Click += (s, args) => Next_Click(s, args);
+            menu.Items.Add(nextItem);
+
+            menu.Items.Add(new Separator());
+        }
+
+        var validSessions = _mainWindow.GetValidMediaSessions();
+        string? activeId = _mainWindow.ActiveSessionId;
+
         if (validSessions.Count > 0)
         {
             menu.Items.Add(new System.Windows.Controls.MenuItem
             {
-                Header = "Плееры / Media Players",
+                Header = "Плееры",
                 IsEnabled = false,
                 FontWeight = FontWeights.Bold
             });
-            menu.Items.Add(new Separator());
 
             foreach (var session in validSessions)
             {
@@ -738,6 +797,14 @@ public partial class TaskbarWidgetControl : UserControl
         };
         settingsItem.Click += (s, args) => SettingsWindow.ShowInstance("TaskbarWidgetPage");
         menu.Items.Add(settingsItem);
+
+        var hideItem = new Wpf.Ui.Controls.MenuItem
+        {
+            Header = "Скрыть виджет",
+            Icon = new Wpf.Ui.Controls.SymbolIcon { Symbol = Wpf.Ui.Controls.SymbolRegular.EyeOff24 }
+        };
+        hideItem.Click += (s, args) => SettingsManager.Current.TaskbarWidgetEnabled = false;
+        menu.Items.Add(hideItem);
 
         menu.IsOpen = true;
     }

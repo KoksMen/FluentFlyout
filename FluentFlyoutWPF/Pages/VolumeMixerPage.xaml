@@ -84,11 +84,31 @@
                 </StackPanel>
             </ui:CardControl>
 
+            <ui:CardControl x:Name="VolumeScrollStepCard" Tag="Indexable" Icon="{ui:SymbolIcon ArrowRotateClockwise24}" Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource VolumeScrollStepTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
+                        </StackPanel>
+                        <TextBlock Text="{DynamicResource VolumeScrollStepDescription}" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Slider Minimum="1" Maximum="10" TickFrequency="1" IsSnapToTickEnabled="True"
+                            Value="{Binding VolumeScrollStep, Mode=TwoWay}" Width="150" />
+                    <TextBlock Text="{Binding VolumeScrollStep, StringFormat='{}{0}%'}" Width="40" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7" />
+                </StackPanel>
+            </ui:CardControl>
+
             <!-- Feature 2: Show volume flyout in fullscreen -->
             <ui:CardControl x:Name="VolumeFlyoutShowInExclusiveFullscreenCard" Tag="Indexable" Icon="{ui:SymbolIcon FullScreenMaximize24}" Margin="0,0,0,3">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
-                        <TextBlock Text="Show in exclusive fullscreen mode" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Show in exclusive fullscreen mode" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
+                        </StackPanel>
                         <TextBlock Text="Show the volume flyout even when a fullscreen DirectX/game application is running" FontSize="12" Opacity="0.5" />
                     </StackPanel>
                 </ui:CardControl.Header>
@@ -98,7 +118,10 @@
             <ui:CardControl x:Name="VolumeFlyoutShowInBorderlessCard" Tag="Indexable" Icon="{ui:SymbolIcon FullScreenMaximize24}" Margin="0,0,0,12">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
-                        <TextBlock Text="Show in borderless fullscreen / windowed mode" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Show in borderless fullscreen / windowed mode" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
+                        </StackPanel>
                         <TextBlock Text="Show the volume flyout even when playing video fullscreen (e.g. YouTube) or borderless games" FontSize="12" Opacity="0.5" />
                     </StackPanel>
                 </ui:CardControl.Header>

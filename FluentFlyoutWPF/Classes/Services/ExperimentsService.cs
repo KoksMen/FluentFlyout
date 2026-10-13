@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2024-2026 The FluentFlyout Authors
+// Copyright (c) 2024-2026 The FluentFlyout Authors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using FluentFlyout.Classes.Settings;
@@ -45,50 +45,16 @@ internal class ExperimentsService
 
     public static bool HasExperiments => _hasExperiments;
 
-    public static async Task<ExperimentsResult> GetExperimentsAsync()
+    public static Task<ExperimentsResult> GetExperimentsAsync()
     {
-        var result = new ExperimentsResult();
-        try
+        var result = new ExperimentsResult
         {
-            var response = await FluentFlyoutApiClient.GetStringAsync(ApiEndpoint);
-            var experimentDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, Experiment>>(response);
-            if (experimentDict != null)
-            {
-                // Convert dictionary to list and set Name property from key
-                result.Experiments = experimentDict.Select(kvp =>
-                {
-                    kvp.Value.Name = kvp.Key;
-                    return kvp.Value;
-                }).ToList();
-                result.Success = true;
-                Logger.Debug($"Fetched {result.Experiments.Count} experiments successfully.");
-            }
-            else
-            {
-                Logger.Debug("No experiments found.");
-                result.Success = false;
-            }
-        }
-        catch (HttpRequestException ex)
-        {
-            Logger.Info($"Failed to fetch experiments - network error: {ex.Message}");
-            result.Success = false;
-        }
-        catch (TaskCanceledException ex)
-        {
-            Logger.Info(ex, "Failed to fetch experiments - request timed out.");
-            result.Success = false;
-        }
-        catch (Exception ex)
-        {
-            Logger.Error(ex, "Failed to fetch experiments.");
-            result.Success = false;
-        }
-
+            Experiments = new List<Experiment>(),
+            Success = true
+        };
         _experiments = result.Experiments;
-        _hasExperiments = result.Experiments.Count > 0;
-
-        return result;
+        _hasExperiments = false;
+        return Task.FromResult(result);
     }
 
     // returns variantName

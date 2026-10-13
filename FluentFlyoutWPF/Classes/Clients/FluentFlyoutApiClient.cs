@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2024-2026 The FluentFlyout Authors
+// Copyright (c) 2024-2026 The FluentFlyout Authors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using FluentFlyout.Classes.Settings;
@@ -22,36 +22,14 @@ public sealed class FluentFlyoutApiClient
         _client = CreateClient();
     }
 
-    public static async Task<string> GetStringAsync(string endpoint)
+    public static Task<string> GetStringAsync(string endpoint)
     {
-        UpdateUserAgent();
-        try
-        {
-            var result = await _client.GetStringAsync(endpoint);
-            OnRequestSucceeded();
-            return result;
-        }
-        catch (Exception ex) when (IsTimeout(ex))
-        {
-            OnRequestTimedOut();
-            throw;
-        }
+        return Task.FromResult(string.Empty);
     }
 
-    public static async Task PostAsJsonAsync<T>(string endpoint, T content)
+    public static Task PostAsJsonAsync<T>(string endpoint, T content)
     {
-        UpdateUserAgent();
-        try
-        {
-            await _client.PostAsJsonAsync(endpoint, content);
-            OnRequestSucceeded();
-
-        }
-        catch (Exception ex) when (IsTimeout(ex))
-        {
-            OnRequestTimedOut();
-            throw;
-        }
+        return Task.CompletedTask;
     }
 
     private static bool IsTimeout(Exception ex)

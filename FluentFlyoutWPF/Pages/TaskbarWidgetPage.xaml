@@ -308,14 +308,30 @@
                 <controls:ToggleSwitch IsChecked="{Binding TaskbarWidgetShowPauseOverlay, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" />
             </ui:CardControl>
 
-            <ui:CardControl x:Name="TaskbarQuickActionsAutoHideCard" Tag="Indexable" Grid.Row="16" Icon="{ui:SymbolIcon DismissCircle24}" Margin="0,0,0,76">
+            <ui:CardControl x:Name="TaskbarQuickActionsAutoHideCard" Tag="Indexable" Grid.Row="16" Icon="{ui:SymbolIcon DismissCircle24}" Margin="0,0,0,3">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
-                        <TextBlock Text="Автозакрытие окон панели задач" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Автозакрытие окон панели задач" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
+                        </StackPanel>
                         <TextBlock Text="Автоматически закрывать микшер громкости и буфер обмена при клике в другое место" FontSize="12" Opacity="0.5" />
                     </StackPanel>
                 </ui:CardControl.Header>
                 <controls:ToggleSwitch IsChecked="{Binding TaskbarQuickActionsAutoHide, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" />
+            </ui:CardControl>
+
+            <ui:CardControl x:Name="TaskbarWidgetContextMenuCard" Tag="Indexable" Grid.Row="17" Icon="{ui:SymbolIcon AppsListDetail24}" Margin="0,0,0,76">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource TaskbarWidgetContextMenuTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
+                        </StackPanel>
+                        <TextBlock Text="{DynamicResource TaskbarWidgetContextMenuDescription}" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <controls:ToggleSwitch IsChecked="{Binding TaskbarWidgetContextMenuEnabled, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" />
             </ui:CardControl>
         </StackPanel>
     </StackPanel>

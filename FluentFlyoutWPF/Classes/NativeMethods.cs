@@ -271,6 +271,14 @@ public static partial class NativeMethods
     [DllImport("user32.dll")]
     internal static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
+    [LibraryImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool SetForegroundWindow(IntPtr hWnd);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool IsIconic(IntPtr hWnd);
+
     [LibraryImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool ScreenToClient(IntPtr hWnd, ref POINT lpPoint);
@@ -328,10 +336,6 @@ public static partial class NativeMethods
 
     [LibraryImport("user32.dll", SetLastError = true)]
     internal static partial IntPtr GetForegroundWindow();
-
-    [LibraryImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal static partial bool SetForegroundWindow(IntPtr hWnd);
     #endregion
 
     #region gdi32.dll

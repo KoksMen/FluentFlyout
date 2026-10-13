@@ -193,7 +193,7 @@
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{DynamicResource TaskbarMixerButtonTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
-                            <ui:InfoBadge Value=" NEW " FontWeight="Medium" FontSize="10" Margin="6,-2,0,-2" Severity="Success" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
                         </StackPanel>
                         <TextBlock Text="{DynamicResource TaskbarMixerButtonDescription}" FontSize="12" Opacity="0.5" />
                     </StackPanel>
@@ -206,7 +206,7 @@
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{DynamicResource TaskbarClipboardButtonTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
-                            <ui:InfoBadge Value=" NEW " FontWeight="Medium" FontSize="10" Margin="6,-2,0,-2" Severity="Success" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
                         </StackPanel>
                         <TextBlock Text="{DynamicResource TaskbarClipboardButtonDescription}" FontSize="12" Opacity="0.5" />
                     </StackPanel>
@@ -217,17 +217,23 @@
             <ui:CardControl x:Name="TaskbarUtilityButtonsOutlineTitleCard" Tag="Indexable" Icon="{ui:SymbolIcon SquareHint24}" Margin="0,0,0,3">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
-                        <TextBlock Text="{DynamicResource TaskbarUtilityButtonsOutlineTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource TaskbarUtilityButtonsOutlineTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
+                        </StackPanel>
                         <TextBlock Text="{DynamicResource TaskbarUtilityButtonsOutlineDescription}" FontSize="12" Opacity="0.5" />
                     </StackPanel>
                 </ui:CardControl.Header>
                 <controls:ToggleSwitch IsChecked="{Binding TaskbarUtilityButtonsOutlineEnabled, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" />
             </ui:CardControl>
 
-            <ui:CardControl x:Name="TaskbarClipboardModeTitleCard" Tag="Indexable" Icon="{ui:SymbolIcon WindowApps24}" Margin="0,0,0,12">
+            <ui:CardControl x:Name="TaskbarClipboardModeTitleCard" Tag="Indexable" Icon="{ui:SymbolIcon WindowApps24}" Margin="0,0,0,3">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
-                        <TextBlock Text="{DynamicResource TaskbarClipboardModeTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource TaskbarClipboardModeTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
+                        </StackPanel>
                         <TextBlock Text="{DynamicResource TaskbarClipboardModeDescription}" FontSize="12" Opacity="0.5" />
                     </StackPanel>
                 </ui:CardControl.Header>
@@ -238,12 +244,30 @@
                 </ComboBox>
             </ui:CardControl>
 
+            <ui:CardControl x:Name="ClipboardHistoryLimitCard" Tag="Indexable" Icon="{ui:SymbolIcon History24}" Margin="0,0,0,12">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource ClipboardHistoryLimitTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
+                        </StackPanel>
+                        <TextBlock Text="{DynamicResource ClipboardHistoryLimitDescription}" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Slider Minimum="10" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True"
+                            Value="{Binding ClipboardHistoryMaxItems, Mode=TwoWay}" Width="150"
+                            IsEnabled="{Binding TaskbarClipboardButtonEnabled}" />
+                    <TextBlock Text="{Binding ClipboardHistoryMaxItems}" Width="30" Margin="8,0,0,0" VerticalAlignment="Center" Opacity="0.7" />
+                </StackPanel>
+            </ui:CardControl>
+
             <!-- app filtering -->
             <ui:CardAction x:Name="AppFilteringTitleCard" Tag="Indexable" Margin="0,0,0,4" IsChevronVisible="True" Click="AppFiltering_Click">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <ui:TextBlock Text="{DynamicResource AppFilteringTitle}" />
-                        <ui:InfoBadge Value=" NEW " FontWeight="Medium" FontSize="10" Margin="6,-2,0,-2" Severity="Success" />
+                        <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
                     </StackPanel>
                 </StackPanel>
             </ui:CardAction>

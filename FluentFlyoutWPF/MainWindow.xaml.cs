@@ -152,7 +152,7 @@ public partial class MainWindow : MicaWindow
             RegistryKey? key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
             string? executablePath = Environment.ProcessPath;
             if (key != null && executablePath != null)
-                key.SetValue("FluentFlyout", executablePath);
+                key.SetValue("FluentFlyout", $"\"{executablePath}\"");
         }
 
         // display tray icon if enabled
@@ -1243,6 +1243,30 @@ public partial class MainWindow : MicaWindow
         }
     }
 
+    private async void MediaInfo_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        if (GetActiveMediaSession() is { } activeSession)
+        {
+            try
+            {
+                var mediaProperties = await activeSession.ControlSession.TryGetMediaPropertiesAsync();
+                string? title = mediaProperties?.Title;
+                string sessionId = activeSession.Id;
+
+                // Activate asynchronously without blocking UI thread
+                _ = Task.Run(() =>
+                {
+                    MediaPlayerData.TryActivateMediaPlayer(sessionId, title);
+                });
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex, "Failed to activate media player on click");
+            }
+        }
+    }
+
     public async void ShowMediaFlyout(bool toggleMode = false, bool forceShow = false, bool anchorToTaskbarWidget = true)
     {
         if (toggleMode && (DateTime.UtcNow - _lastMediaFlyoutCloseTime).TotalMilliseconds < 400)
@@ -2215,7 +2239,8 @@ public partial class MainWindow : MicaWindow
     {
         volumeMixerWindow ??= new VolumeMixerWindow();
 
-        _volumeScrollAccumulator += (delta / 120.0f) * 0.02f;
+        float stepFraction = Math.Clamp(SettingsManager.Current.VolumeScrollStep, 1, 20) / 100.0f;
+        _volumeScrollAccumulator += (delta / 120.0f) * stepFraction;
         if (MathF.Abs(_volumeScrollAccumulator) >= 0.01f)
         {
             float step = _volumeScrollAccumulator;

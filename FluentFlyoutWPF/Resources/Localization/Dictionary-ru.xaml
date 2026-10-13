@@ -128,6 +128,14 @@
     <system:String x:Key="ClipboardHistoryEmptyText">Пустой текст</system:String>
     <system:String x:Key="ClipboardHistoryClearText">Очистить</system:String>
     <system:String x:Key="ClipboardHistoryDeleteText">Удалить элемент</system:String>
+    <system:String x:Key="ClipboardHistoryLimitTitle">Лимит истории буфера</system:String>
+    <system:String x:Key="ClipboardHistoryLimitDescription">Максимальное количество записей в истории</system:String>
+    <system:String x:Key="VolumeScrollStepTitle">Шаг колесика громкости</system:String>
+    <system:String x:Key="VolumeScrollStepDescription">Процент изменения громкости за один щелчок колесика мыши</system:String>
+    <system:String x:Key="TaskbarWidgetContextMenuTitle">Контекстное меню по правому клику</system:String>
+    <system:String x:Key="TaskbarWidgetContextMenuDescription">Показывать управление треками и переключение плеера по правому клику</system:String>
+    <system:String x:Key="MediaFlyoutOpenPlayerOnClickTitle">Активация вкладки и плеера</system:String>
+    <system:String x:Key="MediaFlyoutOpenPlayerOnClickDescription">Клик по названию или плееру переносит на приложение или вкладку браузера</system:String>
     <system:String x:Key="TaskbarWidgetVisualIssuesWarning">Если у вас возникают проблемы с отображением виджета, настройте параметры ниже.</system:String>
     <system:String x:Key="TaskbarWidgetPosition">Расположение виджета</system:String>
     <system:String x:Key="TaskbarWidgetPaddingTitle">Автоматический отступ для кнопки виджетов Windows</system:String>

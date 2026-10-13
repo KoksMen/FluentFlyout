@@ -96,10 +96,11 @@ public partial class ClipboardHistoryWindow : MicaWindow
                 return;
             }
 
+            int maxItems = Math.Clamp(SettingsManager.Current.ClipboardHistoryMaxItems, 5, 100);
             var itemsData = await Task.Run(async () =>
             {
                 List<(ClipboardHistoryItem Item, string Preview, string Timestamp, RandomAccessStreamReference? BitmapRef)> list = [];
-                foreach (ClipboardHistoryItem item in result.Items)
+                foreach (ClipboardHistoryItem item in result.Items.Take(maxItems))
                 {
                     string preview = "";
                     RandomAccessStreamReference? bitmapRef = null;
@@ -142,7 +143,7 @@ public partial class ClipboardHistoryWindow : MicaWindow
                         BitmapImage bitmap = new();
                         bitmap.BeginInit();
                         bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                        bitmap.DecodePixelWidth = 320;
+                        bitmap.DecodePixelWidth = 160;
                         bitmap.StreamSource = stream;
                         bitmap.EndInit();
                         bitmap.Freeze();

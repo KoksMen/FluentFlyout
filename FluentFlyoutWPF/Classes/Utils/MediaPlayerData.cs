@@ -2,13 +2,18 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using static FluentFlyout.Classes.NativeMethods;
+
 namespace FluentFlyout.Classes.Utils;
 
 public static class MediaPlayerData
 {
+    private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
     private class CachedMediaPlayerInfo
     {
         public required string Title { get; set; }
@@ -183,4 +188,100 @@ public static class MediaPlayerData
             return null;
         }
     }
+
+    /// <summary>
+    /// Attempts to bring the media player application or active browser tab to the foreground.
+    /// </summary>
+    public static bool TryActivateMediaPlayer(string mediaPlayerId, string? mediaTitle = null)
+    {
+        GetAndCacheMediaPlayerData(mediaPlayerId);
+        if (!mediaPlayerCache.TryGetValue(mediaPlayerId, out var cachedInfo)
+            && (!mediaPlayerIdVariants.TryGetValue(mediaPlayerId, out var variantKey)
+            || !mediaPlayerCache.TryGetValue(variantKey, out cachedInfo))) return false;
+
+        try
+        {
+            using var process = Process.GetProcessById(cachedInfo.ProcessId);
+            IntPtr handle = process.MainWindowHandle;
+            if (IsBrowser(process.ProcessName)) return TryActivateBrowserTab(process.ProcessName, mediaTitle);
+
+            if (handle == IntPtr.Zero)
+            {
+                foreach (var candidate in Process.GetProcessesByName(process.ProcessName))
+                {
+                    handle = candidate.MainWindowHandle;
+                    candidate.Dispose();
+                    if (handle != IntPtr.Zero) break;
+                }
+            }
+
+            if (handle != IntPtr.Zero)
+            {
+                if (IsIconic(handle)) ShowWindow(handle, SW_RESTORE);
+                return SetForegroundWindow(handle);
+            }
+
+            string? path = process.MainModule?.FileName;
+            if (!string.IsNullOrWhiteSpace(path) && !IsBrowser(Path.GetFileNameWithoutExtension(path)))
+            {
+                Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Failed to activate media player");
+        }
+
+        return false;
+    }
+
+    private static bool TryActivateBrowserTab(string processName, string? mediaTitle)
+    {
+        if (!IsBrowser(processName) || string.IsNullOrWhiteSpace(mediaTitle)) return false;
+
+        foreach (var browserProcess in Process.GetProcessesByName(processName))
+        {
+            try
+            {
+                var windows = AutomationElement.RootElement.FindAll(TreeScope.Children,
+                    new AndCondition(
+                        new PropertyCondition(AutomationElement.ProcessIdProperty, browserProcess.Id),
+                        new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Window)));
+
+                foreach (AutomationElement window in windows)
+                {
+                    IntPtr handle = new(window.Current.NativeWindowHandle);
+                    if (handle == IntPtr.Zero) continue;
+
+                    var tabs = window.FindAll(TreeScope.Descendants,
+                        new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.TabItem));
+
+                    foreach (AutomationElement tab in tabs)
+                    {
+                        if (!tab.Current.Name.Contains(mediaTitle, StringComparison.OrdinalIgnoreCase)) continue;
+                        if (tab.TryGetCurrentPattern(SelectionItemPattern.Pattern, out var pattern))
+                            ((SelectionItemPattern)pattern).Select();
+                        else if (tab.TryGetCurrentPattern(InvokePattern.Pattern, out pattern))
+                            ((InvokePattern)pattern).Invoke();
+                        else continue;
+
+                        if (IsIconic(handle)) ShowWindow(handle, SW_RESTORE);
+                        return SetForegroundWindow(handle);
+                    }
+                }
+            }
+            catch { }
+            finally
+            {
+                browserProcess.Dispose();
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsBrowser(string processName) =>
+        new[] { "chrome", "msedge", "firefox", "brave", "brave-browser", "opera", "vivaldi" }
+        .Contains(processName, StringComparer.OrdinalIgnoreCase);
 }
