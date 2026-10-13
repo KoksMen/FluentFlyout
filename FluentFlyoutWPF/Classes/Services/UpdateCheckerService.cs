@@ -19,7 +19,7 @@ public static class UpdateCheckerService
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public const string CurrentAppVersion = "2.15.0-f2.0.0";
+    public const string CurrentAppVersion = "2.15.0-f2.1.0";
     public const string GitHubRepoOwner = "KoksMen";
     public const string GitHubRepoName = "FluentFlyout";
     public static string ReleasesApiUrl => $"https://api.github.com/repos/{GitHubRepoOwner}/{GitHubRepoName}/releases/latest";
@@ -64,7 +64,7 @@ public static class UpdateCheckerService
     /// <summary>
     /// Check for updates from GitHub Releases API
     /// </summary>
-    /// <param name="currentVersion">The current app version (e.g., "2.15.0-f2.0.0")</param>
+    /// <param name="currentVersion">The current app version (e.g., "2.15.0-f2.1.0")</param>
     /// <returns>UpdateCheckResult with update information</returns>
     public static async Task<UpdateCheckResult> CheckForUpdatesAsync(string currentVersion)
     {
