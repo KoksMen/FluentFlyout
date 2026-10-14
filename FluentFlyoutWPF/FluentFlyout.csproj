@@ -19,7 +19,7 @@
     <Version>2.15.0</Version>
     <AssemblyVersion>2.15.0.0</AssemblyVersion>
     <FileVersion>2.15.0.0</FileVersion>
-    <InformationalVersion>2.15.0-f2.1.1</InformationalVersion>
+    <InformationalVersion>2.15.0-f2.2.0</InformationalVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'GitHub Release'">
     <DefineConstants>GITHUB_RELEASE</DefineConstants>
