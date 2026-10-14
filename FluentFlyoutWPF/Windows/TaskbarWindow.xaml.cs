@@ -51,6 +51,15 @@ public partial class TaskbarWindow : Window
     private GlobalSystemMediaTransportControlsSessionPlaybackStatus? _lastPlaybackStatus;
     private DispatcherTimer? _autoHideTimer;
 
+    private Rect _lastRegionQRect = Rect.Empty;
+    private Rect _lastRegionWRect = Rect.Empty;
+    private Rect _lastRegionVRect = Rect.Empty;
+    private int _lastContainerX = int.MinValue;
+    private int _lastContainerY = int.MinValue;
+    private int _lastContainerWidth = int.MinValue;
+    private int _lastContainerHeight = int.MinValue;
+    private IntPtr _lastTaskbarHandle = IntPtr.Zero;
+
     public TaskbarWindow()
     {
         WindowHelper.SetNoActivate(this);
@@ -370,33 +379,7 @@ on_error:
 
             // Get Taskbar dimensions
             RECT taskbarRect;
-
-            if (!SettingsManager.Current.LegacyTaskbarWidthEnabled)
-            {
-                // first, try to find the Taskbar.TaskbarFrame element in the XAML
-                // this should give us the actual bounds of the taskbar, excluding invisible margins on some Windows configurations
-                (bool success, Rect result) = GetTaskbarFrameRect(taskbarHandle);
-                if (success)
-                {
-                    taskbarRect = new RECT
-                    {
-                        Left = (int)result.Left,
-                        Top = (int)result.Top,
-                        Right = (int)result.Right,
-                        Bottom = (int)result.Bottom
-                    };
-                }
-                else
-                {
-                    // fallback to GetWindowRect if we fail to get the frame bounds for some reason
-                    GetWindowRect(taskbarHandle, out taskbarRect);
-                }
-            }
-            else
-            {
-                // legacy method - GetWindowRect on the entire taskbar, which includes invisible margins on some Windows configurations
-                GetWindowRect(taskbarHandle, out taskbarRect);
-            }
+            GetWindowRect(taskbarHandle, out taskbarRect);
 
             int taskbarHeight = taskbarRect.Bottom - taskbarRect.Top;
             int taskbarWidth = taskbarRect.Right - taskbarRect.Left;
@@ -411,20 +394,41 @@ on_error:
             POINT containerPos = new() { X = taskbarRect.Left, Y = taskbarRect.Top };
             ScreenToClient(taskbarHandle, ref containerPos);
 
-            // Apply using SetWindowPos (Bypassing WPF layout engine).
-            // HWND_TOP keeps this child window at the top of the taskbar's child z-order:
-            // Explorer's taskbar XAML content bridge (Windows.UI.Composition.DesktopWindowContentBridge)
-            // spans the whole taskbar and otherwise ends up above this window, hiding the widget.
-            // Do NOT pass SWP_NOZORDER here, it would turn hWndInsertAfter into a no-op.
-            SetWindowPos(taskbarWindowHandle, HWND_TOP,
-                     containerPos.X, containerPos.Y,
-                     containerWidth, containerHeight,
-                     SWP_NOACTIVATE | SWP_ASYNCWINDOWPOS | SWP_SHOWWINDOW);
+            bool boundsChanged = containerPos.X != _lastContainerX ||
+                                 containerPos.Y != _lastContainerY ||
+                                 containerWidth != _lastContainerWidth ||
+                                 containerHeight != _lastContainerHeight ||
+                                 taskbarHandle != _lastTaskbarHandle;
+
+            if (boundsChanged)
+            {
+                SetWindowPos(taskbarWindowHandle, HWND_TOP,
+                         containerPos.X, containerPos.Y,
+                         containerWidth, containerHeight,
+                         SWP_NOACTIVATE | SWP_ASYNCWINDOWPOS | SWP_SHOWWINDOW);
+                _lastContainerX = containerPos.X;
+                _lastContainerY = containerPos.Y;
+                _lastContainerWidth = containerWidth;
+                _lastContainerHeight = containerHeight;
+                _lastTaskbarHandle = taskbarHandle;
+            }
+
             var qRect = PositionQuickActions(taskbarHandle, taskbarRect, dpiScale, isMainTaskbarSelected, isVertical);
             var wRect = PositionWidget(taskbarHandle, taskbarRect, dpiScale, isMainTaskbarSelected, isVertical);
             var vRect = PositionVisualizer(taskbarHandle, taskbarRect, dpiScale, isMainTaskbarSelected, isVertical);
 
-            UpdateWindowRegion(taskbarWindowHandle, qRect, wRect, vRect);
+            bool regionChanged = boundsChanged ||
+                                 qRect != _lastRegionQRect ||
+                                 wRect != _lastRegionWRect ||
+                                 vRect != _lastRegionVRect;
+
+            if (regionChanged)
+            {
+                UpdateWindowRegion(taskbarWindowHandle, qRect, wRect, vRect);
+                _lastRegionQRect = qRect;
+                _lastRegionWRect = wRect;
+                _lastRegionVRect = vRect;
+            }
 
             _lastSelectedMonitor = SettingsManager.Current.TaskbarWidgetSelectedMonitor;
         }
@@ -1033,9 +1037,7 @@ on_error:
                             Dispatcher.InvokeAsync(() =>
                             {
                                 cache.IsQueryingBounds = false;
-                                cache.Element = null;
-                                cache.Bounds = Rect.Empty;
-                                cache.NegativeCacheUntil = DateTime.UtcNow.AddSeconds(20);
+                                // Keep existing cache.Bounds on transient failure instead of immediately discarding
                             });
                         }
                     });

@@ -26,15 +26,7 @@ public partial class HomePage : Page
         InitializeComponent();
         DataContext = SettingsManager.Current;
 
-        try
-        {
-            var version = Package.Current.Id.Version;
-            VersionTextBlock.Text = $"v{version.Major}.{version.Minor}.{version.Build}";
-        }
-        catch
-        {
-            VersionTextBlock.Text = "debug version";
-        }
+        VersionTextBlock.Text = $"v{UpdateCheckerService.CurrentAppVersion}";
 
         UpdateLastCheckedText();
     }
@@ -191,27 +183,6 @@ public partial class HomePage : Page
         SettingsWindow.NavigateToPage(typeof(SystemPage));
     }
 
-    // same as in AboutPage.xaml.cs
-    private async void UnlockPremiumButton_Click(object sender, System.Windows.RoutedEventArgs e)
-    {
-        LicenseManager.UnlockPremium(sender);
-    }
-
-    private void ViewMicrosoftStore_Click(object sender, System.Windows.RoutedEventArgs e)
-    {
-        try
-        {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = "https://apps.microsoft.com/detail/9N45NSM4TNBP",
-                UseShellExecute = true
-            });
-        }
-        catch
-        {
-            Logger.Error("Failed to open Microsoft Store page");
-        }
-    }
 
     private void ViewLogs_Click(object sender, System.Windows.RoutedEventArgs e)
     {

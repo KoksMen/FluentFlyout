@@ -12,7 +12,7 @@ public partial class AboutViewModel : ObservableObject
 {
     public ObservableCollection<string> Developers { get; } =
     [
-        "unchihugo",
+        "KoksMen",
         "LiAuTraver",
         "kitUIN",
         "DmitriySalnikov",
@@ -31,7 +31,7 @@ public partial class AboutViewModel : ObservableObject
 
     public ObservableCollection<string> Translators { get; } =
     [
-        "unchihugo",
+        "KoksMen",
         "tnhung2011",
         "xsm2",
         "Ste3798",

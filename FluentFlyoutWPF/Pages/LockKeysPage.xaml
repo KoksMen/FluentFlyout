@@ -142,10 +142,10 @@
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Show in exclusive fullscreen mode" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource ShowInExclusiveFullscreenTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
                             <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
                         </StackPanel>
-                        <TextBlock Text="Show lock keys flyout even when a fullscreen DirectX/game application is running" FontSize="12" Opacity="0.5" />
+                        <TextBlock Text="{DynamicResource ShowInExclusiveFullscreenDescription}" FontSize="12" Opacity="0.5" />
                     </StackPanel>
                 </ui:CardControl.Header>
                 <controls:ToggleSwitch Name="LockKeysFlyoutShowInExclusiveFullscreenSwitch" IsChecked="{Binding LockKeysFlyoutShowInExclusiveFullscreen, Mode=TwoWay}" />
@@ -155,10 +155,10 @@
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Show in borderless fullscreen / windowed mode" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <TextBlock Text="{DynamicResource ShowInBorderlessFullscreenTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
                             <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
                         </StackPanel>
-                        <TextBlock Text="Show lock keys flyout even when playing video fullscreen (e.g. YouTube) or borderless games" FontSize="12" Opacity="0.5" />
+                        <TextBlock Text="{DynamicResource ShowInBorderlessFullscreenDescription}" FontSize="12" Opacity="0.5" />
                     </StackPanel>
                 </ui:CardControl.Header>
                 <controls:ToggleSwitch Name="LockKeysFlyoutShowInBorderlessSwitch" IsChecked="{Binding LockKeysFlyoutShowInBorderless, Mode=TwoWay}" />

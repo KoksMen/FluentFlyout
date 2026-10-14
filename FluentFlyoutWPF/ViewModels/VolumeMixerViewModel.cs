@@ -149,7 +149,7 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
 
 
     [RelayCommand]
-    private void ToggleMasterMute() => IsMasterMuted = !IsMasterMuted;
+    public void ToggleMasterMute() => IsMasterMuted = !IsMasterMuted;
 
     [RelayCommand]
     private void OpenVolumeMixer() => IsExpanded = !IsExpanded;

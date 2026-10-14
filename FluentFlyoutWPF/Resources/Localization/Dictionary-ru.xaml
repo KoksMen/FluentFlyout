@@ -320,4 +320,14 @@
     <system:String x:Key="OnboardingStepsCounter">Шаг {0} из {1}</system:String>
     <system:String x:Key="TaskbarVisualizerOutlineDynamicColorTitle">Динамический цвет обводки</system:String>
     <system:String x:Key="TaskbarVisualizerOutlineDynamicColorDescription">Использовать немного более тёмный оттенок текущего цвета визуализатора</system:String>
+    <system:String x:Key="GlobalFlyoutsMasterTitle">Все всплывающие окна</system:String>
+    <system:String x:Key="GlobalFlyoutsMasterDescription">Главный переключатель — отключить все всплывающие окна одновременно без потери индивидуальных настроек</system:String>
+    <system:String x:Key="ShowInExclusiveFullscreenTitle">Полноэкранный режим (Exclusive)</system:String>
+    <system:String x:Key="ShowInExclusiveFullscreenDescription">Показывать всплывающее окно даже в эксклюзивных полноэкранных играх и приложениях</system:String>
+    <system:String x:Key="ShowInBorderlessFullscreenTitle">Режим без рамок и в окне (Borderless)</system:String>
+    <system:String x:Key="ShowInBorderlessFullscreenDescription">Показывать всплывающее окно при полноэкранном просмотре видео (например, YouTube) или в играх без рамок</system:String>
+    <system:String x:Key="HideAudioFlyoutOnPauseTitle">Скрывать при паузе с клавиатуры</system:String>
+    <system:String x:Key="HideAudioFlyoutOnPauseDescription">Не отображать всплывающее окно, если нажатие медиа-клавиши ставит трек на паузу</system:String>
+    <system:String x:Key="TaskbarQuickActionsAutoHideTitle">Автозакрытие окон панели задач</system:String>
+    <system:String x:Key="TaskbarQuickActionsAutoHideDescription">Автоматически закрывать микшер громкости и буфер обмена при клике в другое место</system:String>
 </ResourceDictionary>

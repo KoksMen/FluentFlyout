@@ -166,10 +166,5 @@ public partial class OnboardingWindow : MicaWindow
         SettingsWindow.ShowInstance();
         Close();
     }
-
-    // same as in AboutPage.xaml.cs
-    private async void UnlockPremiumButton_Click(object sender, RoutedEventArgs e)
-    {
-        FluentFlyout.Classes.LicenseManager.UnlockPremium(sender);
-    }
 }
+

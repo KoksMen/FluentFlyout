@@ -1066,16 +1066,40 @@ public partial class MainWindow : MicaWindow
                 if (!SettingsManager.Current.GlobalFlyoutEnabled)
                     return CallNextHookEx(_hookId, nCode, wParam, lParam);
 
+                // Handle volume control keys:
+                if (volumeKeysPressed && SettingsManager.Current.VolumeControlEnabled)
+                {
+                    if (wParam == WM_KEYDOWN)
+                    {
+                        volumeMixerWindow ??= new VolumeMixerWindow();
+                        float step = (SettingsManager.Current.VolumeScrollStep > 0 ? SettingsManager.Current.VolumeScrollStep : 2) / 100f;
+                        if (vkCode == 0xAF) // VK_VOLUME_UP
+                        {
+                            volumeMixerWindow.ViewModel.AdjustMasterVolume(step);
+                        }
+                        else if (vkCode == 0xAE) // VK_VOLUME_DOWN
+                        {
+                            volumeMixerWindow.ViewModel.AdjustMasterVolume(-step);
+                        }
+                        else if (vkCode == 0xAD) // VK_VOLUME_MUTE
+                        {
+                            volumeMixerWindow.ViewModel.ToggleMasterMute();
+                        }
+                        volumeMixerWindow.ShowFlyout();
+                    }
+
+                    if (!SettingsManager.Current.MediaFlyoutVolumeKeysExcluded)
+                    {
+                        TryShowMediaFlyoutDebounced();
+                    }
+
+                    // SWALLOW the volume key event so Windows OS never shows the native volume OSD!
+                    return (IntPtr)1;
+                }
+
                 bool result = false;
                 if (mediaKeysPressed || (!SettingsManager.Current.MediaFlyoutVolumeKeysExcluded && volumeKeysPressed))
                     result = TryShowMediaFlyoutDebounced();
-
-                if (SettingsManager.Current.VolumeControlEnabled && volumeKeysPressed)
-                {
-                    volumeMixerWindow ??= new VolumeMixerWindow();
-                    volumeMixerWindow.ViewModel.SyncMasterFromDevice();
-                    volumeMixerWindow.ShowFlyout();
-                }
 
                 if (!result)
                 {

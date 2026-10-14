@@ -456,21 +456,7 @@ public partial class VolumeMixerWindow : MicaWindow
 
     private static IntPtr FindNativeVolumeOsdWindow()
     {
-        // 1. Windows 11: XAML Island window in Explorer
-        IntPtr hwndXamlIsland = IntPtr.Zero;
-        while ((hwndXamlIsland = FindWindowEx(IntPtr.Zero, hwndXamlIsland, "XamlExplorerHostIslandWindow", null)) != IntPtr.Zero)
-        {
-            IntPtr hwndOsd = FindWindowEx(hwndXamlIsland, IntPtr.Zero, "Windows.UI.Composition.DesktopWindowContentBridge", "DesktopWindowXamlSource");
-            if (hwndOsd == IntPtr.Zero) continue;
-
-            IntPtr hwndInputClass = FindWindowEx(hwndOsd, IntPtr.Zero, "Windows.UI.Input.InputSite.WindowClass", null);
-            if (hwndInputClass != IntPtr.Zero)
-            {
-                return hwndXamlIsland;
-            }
-        }
-
-        // 2. Windows 10: NativeHWNDHost with child DirectUIHWND
+        // Windows 10 / Legacy Windows OSD: NativeHWNDHost with child DirectUIHWND
         IntPtr hwndHost = IntPtr.Zero;
         while ((hwndHost = FindWindowEx(IntPtr.Zero, hwndHost, "NativeHWNDHost", "")) != IntPtr.Zero)
         {
@@ -493,24 +479,6 @@ public partial class VolumeMixerWindow : MicaWindow
         IntPtr osdWindow = FindNativeVolumeOsdWindow();
         if (osdWindow == IntPtr.Zero)
         {
-            // If the OSD window hasn't been instantiated yet by Windows,
-            // send a quick volume nudge to force Explorer to create it.
-            try
-            {
-                keybd_event(0xAF, 0, 0, IntPtr.Zero); // VK_VOLUME_UP
-                keybd_event(0xAF, 0, 2, IntPtr.Zero); // VK_VOLUME_UP up
-                keybd_event(0xAE, 0, 0, IntPtr.Zero); // VK_VOLUME_DOWN
-                keybd_event(0xAE, 0, 2, IntPtr.Zero); // VK_VOLUME_DOWN up
-            }
-            catch { }
-
-            Thread.Sleep(60);
-            osdWindow = FindNativeVolumeOsdWindow();
-        }
-
-        if (osdWindow == IntPtr.Zero)
-        {
-            Logger.Warn("Native volume OSD window not found.");
             return;
         }
 
@@ -521,7 +489,7 @@ public partial class VolumeMixerWindow : MicaWindow
         SetWindowPos(_nativeOsdElement, 0, -99999, -99999, 0, 0,
             SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
         ShowWindow(_nativeOsdElement, SW_MINIMIZE);
-        Logger.Info("Successfully hid native volume OSD.");
+        Logger.Info("Successfully hid legacy volume OSD.");
     }
 
     public static void ShowVolumeOsd()

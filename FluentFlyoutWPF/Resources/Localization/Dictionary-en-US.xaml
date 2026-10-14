@@ -316,4 +316,14 @@ You can help contribute translations on</System:String>
     <System:String x:Key="MasterVolumeText">Master volume</System:String>
     <System:String x:Key="TaskbarVisualizerOutlineDynamicColorTitle">Dynamic outline color</System:String>
     <System:String x:Key="TaskbarVisualizerOutlineDynamicColorDescription">Use a slightly darker shade of the current visualizer color</System:String>
+    <System:String x:Key="GlobalFlyoutsMasterTitle">All Flyouts</System:String>
+    <System:String x:Key="GlobalFlyoutsMasterDescription">Master switch — disable all flyouts at once without losing individual settings</System:String>
+    <System:String x:Key="ShowInExclusiveFullscreenTitle">Show in exclusive fullscreen mode</System:String>
+    <System:String x:Key="ShowInExclusiveFullscreenDescription">Show flyout even when a fullscreen game or exclusive application is active</System:String>
+    <System:String x:Key="ShowInBorderlessFullscreenTitle">Show in borderless fullscreen / windowed mode</System:String>
+    <System:String x:Key="ShowInBorderlessFullscreenDescription">Show flyout even when playing video fullscreen (e.g. YouTube) or borderless games</System:String>
+    <System:String x:Key="HideAudioFlyoutOnPauseTitle">Hide flyout when pausing with media key</System:String>
+    <System:String x:Key="HideAudioFlyoutOnPauseDescription">Suppress the flyout when the media Play/Pause key causes a pause</System:String>
+    <System:String x:Key="TaskbarQuickActionsAutoHideTitle">Auto-hide taskbar windows</System:String>
+    <System:String x:Key="TaskbarQuickActionsAutoHideDescription">Automatically close volume mixer and clipboard history when clicking elsewhere</System:String>
 </ResourceDictionary>

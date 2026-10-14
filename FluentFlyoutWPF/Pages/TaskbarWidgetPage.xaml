@@ -43,60 +43,6 @@
                 </Border>
                 <TextBlock FontSize="14" FontWeight="Regular" HorizontalAlignment="Stretch" Opacity="0.75" Margin="12,0,0,0" MaxWidth="450" TextWrapping="WrapWithOverflow" Text="{DynamicResource TaskbarWidgetDescription}" />
             </StackPanel>
-
-            <!-- Premium Status InfoBar (only shown for Store versions) -->
-            <ui:InfoBar Grid.Row="1" Title="{DynamicResource PremiumUnlockedMessage}" Severity="Success" IsClosable="True" Margin="0,0,0,3">
-                <ui:InfoBar.Style>
-                    <Style TargetType="ui:InfoBar" BasedOn="{StaticResource {x:Type ui:InfoBar}}">
-                        <Setter Property="IsOpen" Value="False" />
-                        <Style.Triggers>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding IsStoreVersion}" Value="True" />
-                                    <Condition Binding="{Binding IsPremiumUnlocked}" Value="True" />
-                                </MultiDataTrigger.Conditions>
-                                <Setter Property="IsOpen" Value="True" />
-                            </MultiDataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ui:InfoBar.Style>
-            </ui:InfoBar>
-
-            <!-- Premium Locked InfoBar (only shown for Store versions without premium) -->
-            <ui:InfoBar Grid.Row="1" IsOpen="True" Severity="Warning" IsClosable="False" Margin="0,0,0,3">
-                <ui:InfoBar.Style>
-                    <Style TargetType="ui:InfoBar">
-                        <Setter Property="Visibility" Value="Collapsed" />
-                        <Style.Triggers>
-                            <MultiDataTrigger>
-                                <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding IsStoreVersion}" Value="True" />
-                                    <Condition Binding="{Binding IsPremiumUnlocked}" Value="False" />
-                                </MultiDataTrigger.Conditions>
-                                <Setter Property="Visibility" Value="Visible" />
-                            </MultiDataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ui:InfoBar.Style>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{DynamicResource PremiumLockedMessage}" VerticalAlignment="Center" />
-                    <ui:Button Name="UnlockPremiumButton"
-                            Click="UnlockPremiumButton_Click" 
-                            Appearance="Primary"
-                            Margin="12,2,0,2" FontSize="12">
-                        <ui:Button.Content>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{DynamicResource UnlockPremiumButton}" />
-                                <TextBlock Text=" - " />
-                                <TextBlock Text="{Binding PremiumPrice}" />
-                            </StackPanel>
-                        </ui:Button.Content>
-                    </ui:Button>
-                </StackPanel>
-            </ui:InfoBar>
-
-            <!-- GitHub Version InfoBar -->
-            <ui:InfoBar Grid.Row="1" Title="{DynamicResource PremiumGitHubMessage}" IsOpen="True" Severity="Informational" IsClosable="False" Margin="0,0,0,3" Visibility="{Binding IsStoreVersion, Converter={StaticResource BoolToCollapsedVisibleConverter}}" />
         </Grid>
 
         <StackPanel Opacity="{Binding IsPremiumUnlocked, Converter={StaticResource BoolToFullHalfOpacityConverter}}">
@@ -239,7 +185,7 @@
                 </ui:CardControl.Header>
                 <controls:ToggleSwitch IsChecked="{Binding TaskbarWidgetControlsEnabled, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" />
             </ui:CardControl>
-            <ui:CardControl x:Name="TaskbarWidgetControlsPositionTitleCard" Tag="Indexable" Grid.Row="12" Icon="{ui:SymbolIcon ArrowMove24}" Margin="0,0,0,12">
+            <ui:CardControl x:Name="TaskbarWidgetControlsPositionTitleCard" Tag="Indexable" Grid.Row="12" Icon="{ui:SymbolIcon ArrowMove24}" Margin="0,0,0,3">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="{DynamicResource TaskbarWidgetControlsPositionTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
@@ -251,7 +197,19 @@
                     <ComboBoxItem Content="{DynamicResource PositionRight}" />
                 </ComboBox>
             </ui:CardControl>
-            <ui:CardControl x:Name="TaskbarWidgetAnimatedTitleCard" Tag="Indexable" Grid.Row="13" Icon="{ui:SymbolIcon Wand24}" Margin="0,0,0,3">
+            <ui:CardControl x:Name="TaskbarWidgetContextMenuCard" Tag="Indexable" Grid.Row="13" Icon="{ui:SymbolIcon AppsListDetail24}" Margin="0,0,0,12">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource TaskbarWidgetContextMenuTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
+                        </StackPanel>
+                        <TextBlock Text="{DynamicResource TaskbarWidgetContextMenuDescription}" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <controls:ToggleSwitch IsChecked="{Binding TaskbarWidgetContextMenuEnabled, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" />
+            </ui:CardControl>
+            <ui:CardControl x:Name="TaskbarWidgetAnimatedTitleCard" Tag="Indexable" Grid.Row="14" Icon="{ui:SymbolIcon Wand24}" Margin="0,0,0,3">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="{DynamicResource TaskbarWidgetAnimatedTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
@@ -261,7 +219,7 @@
                 <controls:ToggleSwitch IsChecked="{Binding TaskbarWidgetAnimated, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" />
             </ui:CardControl>
 
-            <ui:CardExpander x:Name="TaskbarWidgetScrollingTextCard" Tag="Indexable" Grid.Row="14" Icon="{ui:SymbolIcon TextDirectionHorizontalRight24}" ContentPadding="0" Margin="0,0,0,3">
+            <ui:CardExpander x:Name="TaskbarWidgetScrollingTextCard" Tag="Indexable" Grid.Row="15" Icon="{ui:SymbolIcon TextDirectionHorizontalRight24}" ContentPadding="0" Margin="0,0,0,3">
                 <ui:CardExpander.Header>
                     <Grid ColumnDefinitions="*, Auto">
                         <StackPanel Orientation="Vertical">
@@ -298,7 +256,7 @@
                 </StackPanel>
             </ui:CardExpander>
 
-            <ui:CardControl x:Name="TaskbarWidgetShowPauseOverlayTitleCard" Tag="Indexable" Grid.Row="15" Icon="{ui:SymbolIcon Pause24}" Margin="0,0,0,3">
+            <ui:CardControl x:Name="TaskbarWidgetShowPauseOverlayTitleCard" Tag="Indexable" Grid.Row="16" Icon="{ui:SymbolIcon Pause24}" Margin="0,0,0,76">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="{DynamicResource TaskbarWidgetShowPauseOverlayTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
@@ -306,32 +264,6 @@
                     </StackPanel>
                 </ui:CardControl.Header>
                 <controls:ToggleSwitch IsChecked="{Binding TaskbarWidgetShowPauseOverlay, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" />
-            </ui:CardControl>
-
-            <ui:CardControl x:Name="TaskbarQuickActionsAutoHideCard" Tag="Indexable" Grid.Row="16" Icon="{ui:SymbolIcon DismissCircle24}" Margin="0,0,0,3">
-                <ui:CardControl.Header>
-                    <StackPanel Orientation="Vertical">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Автозакрытие окон панели задач" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
-                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
-                        </StackPanel>
-                        <TextBlock Text="Автоматически закрывать микшер громкости и буфер обмена при клике в другое место" FontSize="12" Opacity="0.5" />
-                    </StackPanel>
-                </ui:CardControl.Header>
-                <controls:ToggleSwitch IsChecked="{Binding TaskbarQuickActionsAutoHide, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" />
-            </ui:CardControl>
-
-            <ui:CardControl x:Name="TaskbarWidgetContextMenuCard" Tag="Indexable" Grid.Row="17" Icon="{ui:SymbolIcon AppsListDetail24}" Margin="0,0,0,76">
-                <ui:CardControl.Header>
-                    <StackPanel Orientation="Vertical">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{DynamicResource TaskbarWidgetContextMenuTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
-                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
-                        </StackPanel>
-                        <TextBlock Text="{DynamicResource TaskbarWidgetContextMenuDescription}" FontSize="12" Opacity="0.5" />
-                    </StackPanel>
-                </ui:CardControl.Header>
-                <controls:ToggleSwitch IsChecked="{Binding TaskbarWidgetContextMenuEnabled, Mode=TwoWay}" IsEnabled="{Binding IsPremiumUnlocked}" />
             </ui:CardControl>
         </StackPanel>
     </StackPanel>
