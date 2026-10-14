@@ -1,4 +1,4 @@
-﻿<p align="center">
+<p align="center">
   <picture>
     <source width="70%" alt="FluentFlyout Title" media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/daa2969f-8ad2-4832-8253-26133a50c921" />
     <source width="70%" alt="FluentFlyout Title" media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/3e75e514-b9a6-40e3-b170-af9d29a82bb4" />
@@ -6,11 +6,11 @@
   </picture>
 </p>
 
-<h1 align="center">вњЁ FluentFlyout (KoksMen Edition) вњЁ</h1>
-<h3 align="center">рџљЂ Р’РµСЂСЃРёСЏ С„РѕСЂРєР°: <em>v2.15.0-f2.1.1</em> рџЄ„</h3>
+<h1 align="center">✨ FluentFlyout (KoksMen Edition) ✨</h1>
+<h3 align="center">🚀 Версия форка: <em>v2.15.0-f2.1.1</em> 🪄</h3>
 
 <p align="center">
-  <b>РЎРѕРІСЂРµРјРµРЅРЅС‹Рµ РїР»Р°РІРЅС‹Рµ РѕРІРµСЂР»РµРё Windows 11 СЃ РѕРїС‚РёРјРёР·Р°С†РёРµР№ РґР»СЏ РёРіСЂ, Р±РµСЃС€РѕРІРЅС‹Рј Р°РІС‚РѕРѕР±РЅРѕРІР»РµРЅРёРµРј РІ РїСЂРёР»РѕР¶РµРЅРёРё, РёСЃС‚РѕСЂРёРµР№ Р±СѓС„РµСЂР° РѕР±РјРµРЅР°, СЂРµРіСѓР»РёСЂРѕРІРєРѕР№ Р·РІСѓРєР° РєРѕР»РµСЃРёРєРѕРј РјС‹С€Рё Рё РїРѕРґРґРµСЂР¶РєРѕР№ Р»СЋР±С‹С… GPU</b><br>
+  <b>Современные плавные оверлеи Windows 11 с оптимизацией для игр, бесшовным автообновлением в приложении, историей буфера обмена, регулировкой звука колесиком мыши и поддержкой любых GPU</b><br>
   <i>Modern fluent flyouts for Windows 11 with gaming safeguards, in-app seamless auto-updater, clipboard history, mouse wheel volume control, and universal GPU support</i>
 </p>
 
@@ -18,128 +18,153 @@
   <a href="https://github.com/KoksMen/FluentFlyout/releases"><img src="https://img.shields.io/badge/Version-v2.15.0--f2.1.1-7c4dff?style=for-the-badge&logo=github&logoColor=white" alt="FluentFlyout v2.15.0-f2.1.1" /></a>
   <img src="https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET 10.0" />
   <img src="https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20(x64)-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Windows 10/11" />
-  <img src="https://img.shields.io/badge/Size-~85--90%20MB-success?style=for-the-badge&logo=files&logoColor=white" alt="Compressed Size" />
+  <img src="https://img.shields.io/badge/Size-~84%20MB-success?style=for-the-badge&logo=files&logoColor=white" alt="Compressed Size" />
   <img src="https://img.shields.io/badge/Signature-Authenticode%20SHA--256-success?style=for-the-badge&logo=windows&logoColor=white" alt="Authenticode Signed" />
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-GPL--3.0-orange?style=for-the-badge" alt="License GPL-3.0" /></a>
 </p>
 
 <p align="center">
-  <a href="#-fluentflyout-РЅР°-СЂСѓСЃСЃРєРѕРј"><b>рџ‡·рџ‡є РџРµСЂРµР№С‚Рё Рє СЂСѓСЃСЃРєРѕР№ РІРµСЂСЃРёРё</b></a> вЂў
-  <a href="#-fluentflyout-in-english"><b>рџ‡¬рџ‡§ Switch to English Version</b></a>
+  <a href="#-fluentflyout-на-русском"><b>🇷🇺 Перейти к русской версии</b></a> •
+  <a href="#-fluentflyout-in-english"><b>🇬🇧 Switch to English Version</b></a>
 </p>
 
 <p align="center">
   <a href="https://github.com/KoksMen/FluentFlyout/releases/latest">
-    <img src="https://img.shields.io/badge/в¬‡пёЏ%20РЎРєР°С‡Р°С‚СЊ%20СЂРµР»РёР·-FluentFlyout%20v2.15.0--f2.1.1-blue?style=for-the-badge" alt="Download Release" />
+    <img src="https://img.shields.io/badge/⬇️%20Скачать%20релиз-FluentFlyout%20v2.15.0--f2.1.1-blue?style=for-the-badge" alt="Download Release" />
   </a>
 </p>
 
 ---
 
-# рџ‡·рџ‡є FluentFlyout (РќР° СЂСѓСЃСЃРєРѕРј)
+# 🇷🇺 FluentFlyout (На русском)
 
-## рџ’Ў Рћ РїСЂРѕРµРєС‚Рµ
+## 💡 О проекте
 
-**FluentFlyout (KoksMen Edition)** вЂ” СЌС‚Рѕ СЂР°СЃС€РёСЂРµРЅРЅС‹Р№ Рё РіР»СѓР±РѕРєРѕ РѕРїС‚РёРјРёР·РёСЂРѕРІР°РЅРЅС‹Р№ С„РѕСЂРє РїСЂРёР»РѕР¶РµРЅРёСЏ FluentFlyout РґР»СЏ Windows 10 Рё 11. 
+**FluentFlyout (KoksMen Edition)** — это расширенный и глубоко оптимизированный форк приложения FluentFlyout для Windows 10 и 11.
 
-РћСЂРёРіРёРЅР°Р»СЊРЅРѕРµ РїСЂРёР»РѕР¶РµРЅРёРµ РїСЂРµРґРѕСЃС‚Р°РІР»СЏРµС‚ РєСЂР°СЃРёРІС‹Рµ РѕРІРµСЂР»РµРё РІ СЃС‚РёР»Рµ **Fluent 2 Design**, РѕРґРЅР°РєРѕ СЃС‚СЂР°РґР°Р»Рѕ РѕС‚ СЂСЏРґР° РѕРіСЂР°РЅРёС‡РµРЅРёР№: СЃРІРµСЂС‚С‹РІР°РЅРёРµ РїРѕР»РЅРѕСЌРєСЂР°РЅРЅС‹С… РёРіСЂ, Р·Р°РґРµСЂР¶РєРё UI Automation РІ С‚Р°СЃРєР±Р°СЂРµ, РѕС‚СЃСѓС‚СЃС‚РІРёРµ РІСЃС‚СЂРѕРµРЅРЅРѕРіРѕ СЃРєР°С‡РёРІР°РЅРёСЏ РѕР±РЅРѕРІР»РµРЅРёР№, Р°СЂС‚РµС„Р°РєС‚С‹ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РЅР° РІСЃС‚СЂРѕРµРЅРЅРѕР№ РіСЂР°С„РёРєРµ (iGPU) Рё РїСЂРёРІСЏР·РєР° Рє Р·Р°РєСЂС‹С‚С‹Рј СЃРµСЂРІРёСЃР°Рј С‚РµР»РµРјРµС‚СЂРёРё.
+Оригинальное приложение предоставляет красивые оверлеи в стиле **Fluent 2 Design**, однако страдало от ряда ограничений: свёртывание полноэкранных игр, задержки UI Automation в таскбаре, отсутствие встроенного скачивания обновлений, артефакты отображения на встроенной графике (iGPU), потеря флайаута громкости и привязка к закрытым сервисам телеметрии.
 
-Р­С‚РѕС‚ С„РѕСЂРє РїРѕР»РЅРѕСЃС‚СЊСЋ СѓСЃС‚СЂР°РЅСЏРµС‚ СѓРєР°Р·Р°РЅРЅС‹Рµ РїСЂРѕР±Р»РµРјС‹, СЃРЅРёР¶Р°РµС‚ СЂР°Р·РјРµСЂ РґРёСЃС‚СЂРёР±СѓС‚РёРІР° Р±РѕР»РµРµ С‡РµРј РІ 2 СЂР°Р·Р° Рё РґРµР»Р°РµС‚ РїСЂРёР»РѕР¶РµРЅРёРµ РјР°РєСЃРёРјР°Р»СЊРЅРѕ СЃС‚Р°Р±РёР»СЊРЅС‹Рј, Р°РІС‚РѕРЅРѕРјРЅС‹Рј Рё СѓРґРѕР±РЅС‹Рј РґР»СЏ РїРѕРІСЃРµРґРЅРµРІРЅРѕР№ СЂР°Р±РѕС‚С‹ Рё РіРµР№РјРёРЅРіР°! рџљЂ
-
----
-
-## рџЊџ РљР»СЋС‡РµРІС‹Рµ РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё Рё СѓР»СѓС‡С€РµРЅРёСЏ С„РѕСЂРєР°
-
-### рџ”„ 1. Р‘РµСЃС€РѕРІРЅРѕРµ Р°РІС‚РѕРѕР±РЅРѕРІР»РµРЅРёРµ РїСЂСЏРјРѕ РІ РїСЂРёР»РѕР¶РµРЅРёРё (РєР°Рє РІ Portal-Windows)
-- **РџСЂСЏРјР°СЏ РёРЅС‚РµРіСЂР°С†РёСЏ СЃ GitHub Releases:** РџСЂРёР»РѕР¶РµРЅРёРµ СЃРєР°С‡РёРІР°РµС‚ РѕР±РЅРѕРІР»РµРЅРёРµ РЅР°РїСЂСЏРјСѓСЋ РёР· СЂРµР»РёР·РѕРІ СЂРµРїРѕР·РёС‚РѕСЂРёСЏ `KoksMen/FluentFlyout` СЃ РЅР°РіР»СЏРґРЅС‹Рј РѕС‚РѕР±СЂР°Р¶РµРЅРёРµРј РїСЂРѕРіСЂРµСЃСЃР° РІ РїСЂРѕС†РµРЅС‚Р°С… РїСЂСЏРјРѕ РІ РёРЅС‚РµСЂС„РµР№СЃРµ РЅР°СЃС‚СЂРѕРµРє.
-- **РђРІС‚РѕРјР°С‚РёС‡РµСЃРєР°СЏ СѓСЃС‚Р°РЅРѕРІРєР°:** РЎРєР°С‡Р°РЅРЅС‹Р№ РґРёСЃС‚СЂРёР±СѓС‚РёРІ СЂР°СЃРїР°РєРѕРІС‹РІР°РµС‚СЃСЏ, СЃРєСЂРёРїС‚ Р·Р°РІРµСЂС€Р°РµС‚ СЂР°Р±РѕС‚Сѓ СЃС‚Р°СЂРѕРіРѕ РїСЂРѕС†РµСЃСЃР° РїРѕ PID, РїРµСЂРµР·Р°РїРёСЃС‹РІР°РµС‚ С„Р°Р№Р»С‹ Рё Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё РїРµСЂРµР·Р°РїСѓСЃРєР°РµС‚ РѕР±РЅРѕРІР»РµРЅРЅС‹Р№ `FluentFlyout.exe`. Р‘СЂР°СѓР·РµСЂ РѕС‚РєСЂС‹РІР°С‚СЊ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ!
-- **РРЅС‚РµР»Р»РµРєС‚СѓР°Р»СЊРЅС‹Р№ SemVer:** РџР°СЂСЃРµСЂ `ForkVersion` РєРѕСЂСЂРµРєС‚РЅРѕ СЃРѕРїРѕСЃС‚Р°РІР»СЏРµС‚ РІРµСЂСЃРёРё С„РѕСЂРєР° (`2.15.0-f2.1.1` > `2.15.0-f2.0.0` > `2.13.1-f1.7.0`).
-
-### рџЋ® 2. Р Р°Р·РґРµР»СЊРЅС‹Рµ СЂРµР¶РёРјС‹ РїРѕР»РЅРѕСЌРєСЂР°РЅРЅРѕРіРѕ СЌРєСЂР°РЅР° (Gaming Safeguard)
-- **Exclusive Fullscreen:** РќРµР·Р°РІРёСЃРёРјС‹Р№ РїРµСЂРµРєР»СЋС‡Р°С‚РµР»СЊ РґР»СЏ 3D-РёРіСЂ. РџСЂРё РµРіРѕ РѕС‚РєР»СЋС‡РµРЅРёРё РѕРІРµСЂР»РµРё РЅРµ РїРµСЂРµС…РІР°С‚С‹РІР°СЋС‚ С„РѕРєСѓСЃ Рё РЅРµ СЃРІРѕСЂР°С‡РёРІР°СЋС‚ РїРѕР»РЅРѕСЌРєСЂР°РЅРЅС‹Рµ РёРіСЂС‹.
-- **Borderless Fullscreen:** РћС‚РґРµР»СЊРЅР°СЏ РЅР°СЃС‚СЂРѕР№РєР° РґР»СЏ РёРіСЂ РІ РѕРєРЅРµ Р±РµР· СЂР°РјРѕРє Рё РїСЂРѕСЃРјРѕС‚СЂР° РІРёРґРµРѕ.
-- **РЎРєСЂС‹С‚РёРµ РёРЅРґРёРєР°С‚РѕСЂР° Caps Lock РІ РёРіСЂР°С….**
-
-### вљЎ 3. РњРѕР»РЅРёРµРЅРѕСЃРЅС‹Р№ РѕС‚РєР»РёРє РєРЅРѕРїРѕРє С‚Р°СЃРєР±Р°СЂР° (Win32 Fast Path)
-- **РњРіРЅРѕРІРµРЅРЅРѕРµ РѕС‚РєСЂС‹С‚РёРµ:** РЈСЃС‚СЂР°РЅРµРЅС‹ СЃРёРЅС…СЂРѕРЅРЅС‹Рµ Р±Р»РѕРєРёСЂРѕРІРєРё UI-РїРѕС‚РѕРєР°. РџРѕР·РёС†РёСЏ СЌР»РµРјРµРЅС‚РѕРІ С‚Р°СЃРєР±Р°СЂР° СЂР°СЃСЃС‡РёС‚С‹РІР°РµС‚СЃСЏ РјРѕРјРµРЅС‚Р°Р»СЊРЅРѕ С‡РµСЂРµР· РЅР°С‚РёРІРЅС‹Р№ Win32 `GetWindowRect`.
-- **РќР°РґРµР¶РЅРѕСЃС‚СЊ РїРѕРІС‚РѕСЂРЅРѕРіРѕ РєР»РёРєР°:** РЈСЃС‚СЂР°РЅРµРЅС‹ Р·Р°Р»РёРїР°РЅРёСЏ РєРЅРѕРїРѕРє РјРёРєС€РµСЂР° Рё Р±СѓС„РµСЂР° РѕР±РјРµРЅР°.
-
-### рџ”Љ 4. Р РµРіСѓР»РёСЂРѕРІРєР° РіСЂРѕРјРєРѕСЃС‚Рё РєРѕР»РµСЃРёРєРѕРј РјС‹С€Рё (Volume Wheel Scroll)
-- **РџСЂРѕРєСЂСѓС‚РєР° РЅР°Рґ РєРЅРѕРїРєРѕР№ РјРёРєС€РµСЂР°:** Р’СЂР°С‰РµРЅРёРµ РєРѕР»РµСЃРёРєР° РјС‹С€Рё РЅР°Рґ РёРєРѕРЅРєРѕР№ РјРёРєС€РµСЂР° РІ С‚Р°СЃРєР±Р°СЂРµ РјРµРЅСЏРµС‚ СЃРёСЃС‚РµРјРЅСѓСЋ РіСЂРѕРјРєРѕСЃС‚СЊ (С€Р°Рі 2%).
-- **РџСЂРѕРєСЂСѓС‚РєР° РЅР°Рґ РјРµРґРёР°-РІРёРґР¶РµС‚РѕРј:** РџСЂРѕРєСЂСѓС‚РєР° РЅР°Рґ РјРёРЅРё-РІРёРґР¶РµС‚РѕРј С‚СЂРµРєР° С‚Р°РєР¶Рµ РјРµРЅСЏРµС‚ РіСЂРѕРјРєРѕСЃС‚СЊ СЃ РєСЂР°СЃРёРІС‹Рј РѕРІРµСЂР»РµРµРј Flyout OSD.
-
-### рџЋЇ 5. Р¤РѕРєСѓСЃРёСЂРѕРІРєР° Рё РїРµСЂРµС…РѕРґ РЅР° РІРєР»Р°РґРєСѓ Р±СЂР°СѓР·РµСЂР° / РѕРєРЅРѕ РїР»РµРµСЂР° (Tab Activation)
-- РџСЂРё РєР»РёРєРµ РЅР° РЅР°Р·РІР°РЅРёРµ С‚СЂРµРєР° РёР»Рё РѕР±Р»РѕР¶РєСѓ С„Р»Р°Р№Р°СѓС‚ Р°РєС‚РёРІРёСЂСѓРµС‚ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰СѓСЋ РІРєР»Р°РґРєСѓ РІ Р±СЂР°СѓР·РµСЂРµ (Edge, Chrome, Firefox, Opera, Brave, Vivaldi) С‡РµСЂРµР· UI Automation РёР»Рё РјРіРЅРѕРІРµРЅРЅРѕ РІС‹РІРѕРґРёС‚ РѕРєРЅРѕ РїР»РµРµСЂР° (Spotify, Yandex Music, AIMP) РЅР° РїРµСЂРµРґРЅРёР№ РїР»Р°РЅ.
-
-### рџ“ђ 6. РџРѕРґРґРµСЂР¶РєР° РєРѕРјРїР°РєС‚РЅРѕР№ / РјР°Р»РµРЅСЊРєРѕР№ РїР°РЅРµР»Рё Р·Р°РґР°С‡ Windows 11
-- РђРІС‚РѕРјР°С‚РёС‡РµСЃРєР°СЏ Р°РґР°РїС‚Р°С†РёСЏ РІРёРґР¶РµС‚Р° Рё РєРЅРѕРїРѕРє Р±С‹СЃС‚СЂС‹С… РґРµР№СЃС‚РІРёР№ РїРѕРґ СѓРјРµРЅСЊС€РµРЅРЅС‹Рµ СЂР°Р·РјРµСЂС‹ РїР°РЅРµР»Рё Р·Р°РґР°С‡ (StartAllBack, Windhawk, РєР°СЃС‚РѕРјРЅС‹Рµ СЂР°Р·РјРµСЂС‹ 28вЂ“36px) Р±РµР· РѕР±СЂРµР·Р°РЅРёСЏ СЌР»РµРјРµРЅС‚РѕРІ.
-
-### рџ–±пёЏ 7. РљРѕРЅС‚РµРєСЃС‚РЅРѕРµ РјРµРЅСЋ РїРѕ РїСЂР°РІРѕРјСѓ РєР»РёРєСѓ РЅР° С‚Р°СЃРєР±Р°СЂ-РІРёРґР¶РµС‚
-- Р‘С‹СЃС‚СЂРѕРµ РјРµРЅСЋ: СѓРїСЂР°РІР»РµРЅРёРµ С‚СЂРµРєР°РјРё, РїРµСЂРµРєР»СЋС‡РµРЅРёРµ РјРµР¶РґСѓ Р°РєС‚РёРІРЅС‹РјРё РїР»РµРµСЂР°РјРё РІ РѕРґРёРЅ РєР»РёРє Рё Р±С‹СЃС‚СЂС‹Р№ РїРµСЂРµС…РѕРґ РІ РЅР°СЃС‚СЂРѕР№РєРё. Р’РѕР·РјРѕР¶РЅРѕСЃС‚СЊ РѕС‚РєР»СЋС‡РµРЅРёСЏ РјРµРЅСЋ РІ РЅР°СЃС‚СЂРѕР№РєР°С….
-
-### рџ“‹ 8. РСЃС‚РѕСЂРёСЏ Р±СѓС„РµСЂР° РѕР±РјРµРЅР° СЃ Р»РёРјРёС‚РѕРј Рё РѕС‡РёСЃС‚РєРѕР№
-- РќР°СЃС‚СЂРѕР№РєР° Р»РёРјРёС‚Р° С…СЂР°РЅРёРјС‹С… Р·Р°РїРёСЃРµР№ (РѕС‚ 5 РґРѕ 100), РєРЅРѕРїРєР° Р±С‹СЃС‚СЂРѕР№ РѕС‡РёСЃС‚РєРё РІСЃРµР№ РёСЃС‚РѕСЂРёРё Рё 3-РєСЂР°С‚РЅР°СЏ СЌРєРѕРЅРѕРјРёСЏ РѕРїРµСЂР°С‚РёРІРЅРѕР№ РїР°РјСЏС‚Рё Р·Р° СЃС‡РµС‚ РѕРїС‚РёРјРёР·РёСЂРѕРІР°РЅРЅРѕРіРѕ РґРµРєРѕРґРёСЂРѕРІР°РЅРёСЏ РїСЂРµРІСЊСЋ РєР°СЂС‚РёРЅРѕРє.
-
-### рџ’» 9. РЈРЅРёРІРµСЂСЃР°Р»СЊРЅР°СЏ РїРѕРґРґРµСЂР¶РєР° РІСЃС‚СЂРѕРµРЅРЅРѕР№ РіСЂР°С„РёРєРё (iGPU) Рё Р±Р°Р·РѕРІС‹С… Р°РґР°РїС‚РµСЂРѕРІ
-- РЈСЃС‚СЂР°РЅРµРЅ СЃР±РѕР№, РёР·-Р·Р° РєРѕС‚РѕСЂРѕРіРѕ РЅР° РёРЅС‚РµРіСЂРёСЂРѕРІР°РЅРЅС‹С… РІРёРґРµРѕРєР°СЂС‚Р°С… (Intel UHD/Iris, AMD Radeon) РѕРєРЅР° СЃС‚Р°РЅРѕРІРёР»РёСЃСЊ РєРІР°РґСЂР°С‚РЅС‹РјРё Рё Р±РµР»С‹РјРё:
-  - РСЃРїСЂР°РІР»РµРЅ Р¶РёР·РЅРµРЅРЅС‹Р№ С†РёРєР» HWND РІ `ApplyModernWindowStyling`.
-  - РџСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕРµ РѕР±РЅРѕРІР»РµРЅРёРµ РіРµРѕРјРµС‚СЂРёРё DWM С‡РµСЂРµР· `SWP_FRAMECHANGED`.
-  - Р”РѕР±Р°РІР»РµРЅР° СЌР»РµРіР°РЅС‚РЅР°СЏ 1px Fluent-РѕР±РІРѕРґРєР° (`CardStrokeColorDefaultBrush`) СЃ Р·Р°РєСЂСѓРіР»РµРЅРёРµРј `CornerRadius="8"`, РіР°СЂР°РЅС‚РёСЂСѓСЋС‰Р°СЏ РєСЂР°СЃРёРІС‹Р№ РІРёРґ РґР°Р¶Рµ РїСЂРё РѕС‚РєР»СЋС‡РµРЅРЅРѕРј Р°РїРїР°СЂР°С‚РЅРѕРј РєРѕРјРїРѕР·РёС‚РёРЅРіРµ.
-
-### рџЋЁ 10. РЎРіР»Р°Р¶РёРІР°РЅРёРµ Рё High-DPI РјР°СЃС€С‚Р°Р±РёСЂРѕРІР°РЅРёРµ РІРёР·СѓР°Р»РёР·Р°С‚РѕСЂР°
-- Р’С‹СЃРѕРєРѕРєР°С‡РµСЃС‚РІРµРЅРЅР°СЏ Р±РёРєСѓР±РёС‡РµСЃРєР°СЏ РёРЅС‚РµСЂРїРѕР»СЏС†РёСЏ (`BitmapScalingMode="HighQuality"`) Рё СЂР°СЃС€РёСЂРµРЅРЅР°СЏ Р·РѕРЅР° Р°РЅС‚РёР°Р»РёР°СЃРёРЅРіР° (2.5f) РїРѕР»РЅРѕСЃС‚СЊСЋ СѓСЃС‚СЂР°РЅСЏСЋС‚ РїРёРєСЃРµР»РёР·Р°С†РёСЋ СЃРїРµРєС‚СЂРѕРіСЂР°РјРјС‹ РЅР° СЌРєСЂР°РЅР°С… РЅРѕСѓС‚Р±СѓРєРѕРІ СЃ РјР°СЃС€С‚Р°Р±РёСЂРѕРІР°РЅРёРµРј 125вЂ“175%.
-
-### рџЏ·пёЏ 11. Р’РёР·СѓР°Р»СЊРЅС‹Рµ Р±РµР№РґР¶Рё С„РѕСЂРєР° (Fork Badges)
-- Р’СЃРµ СЌРєСЃРєР»СЋР·РёРІРЅС‹Рµ С„СѓРЅРєС†РёРё С„РѕСЂРєР° РІ РЅР°СЃС‚СЂРѕР№РєР°С… РѕС‚РјРµС‡РµРЅС‹ Р°РєС†РµРЅС‚РЅС‹РјРё Р±РµР№РґР¶Р°РјРё `FORK`.
-
-### рџ”Џ 12. Р¦РёС„СЂРѕРІР°СЏ РїРѕРґРїРёСЃСЊ Рё РєРѕРјРїР°РєС‚РЅС‹Р№ СЂР°Р·РјРµСЂ
-- Р’СЃРµ СЃР±РѕСЂРєРё РїРѕРґРїРёСЃР°РЅС‹ С†РёС„СЂРѕРІС‹Рј СЃРµСЂС‚РёС„РёРєР°С‚РѕРј `CN=xXKoksMenXx` СЃ РјРµС‚РєРѕР№ РІСЂРµРјРµРЅРё Sectigo RFC 3161 TSA.
-- РСЃРїРѕР»РЅСЏРµРјС‹Р№ С„Р°Р№Р» СЃР¶Р°С‚ СЃРѕ 210 РњР‘ РґРѕ ~85вЂ“90 РњР‘.
+Этот форк полностью устраняет указанные проблемы, снижает размер дистрибутива более чем в 2 раза и делает приложение максимально стабильным, автономным и удобным для повседневной работы и гейминга! 🚀
 
 ---
 
-## рџ“¦ РЎРєР°С‡РёРІР°РЅРёРµ Рё СѓСЃС‚Р°РЅРѕРІРєР°
+## 🌟 Ключевые возможности и улучшения форка
 
-Р—Р°РіСЂСѓР·РёС‚Рµ Р°РєС‚СѓР°Р»СЊРЅСѓСЋ РІРµСЂСЃРёСЋ РёР· СЂР°Р·РґРµР»Р° [**Releases**](https://github.com/KoksMen/FluentFlyout/releases/latest):
+### 🔄 1. Бесшовное автообновление прямо в приложении (как в Portal-Windows)
+- **Прямая интеграция с GitHub Releases:** Приложение скачивает обновление напрямую из релизов репозитория `KoksMen/FluentFlyout` с наглядным отображением прогресса в процентах прямо в интерфейсе настроек.
+- **Автоматическая установка:** Скачанный дистрибутив распаковывается, скрипт завершает работу старого процесса по PID, перезаписывает файлы и автоматически перезапускает обновленный `FluentFlyout.exe`. Браузер открывать не требуется!
+- **Интеллектуальный SemVer:** Парсер `ForkVersion` корректно сопоставляет составные версии форка (`2.15.0-f2.1.1` > `2.15.0-f2.1.0` > `2.15.0-f2.0.0` > `2.13.1-f1.7.0`).
 
-| Р¤Р°Р№Р» | РћРїРёСЃР°РЅРёРµ | Р Р°Р·РјРµСЂ |
+### 🔊 2. Надежный микшер громкости и подавление системного Windows OSD
+- **Реакция на любые источники звука:** Подписка на низкоуровневые события аудиоэндпоинта (`AudioEndpointVolume.OnVolumeNotification`). Флайаут мгновенно появляется при смене звука с любых устройств: клавиатурных Fn-клавиш ноутбуков, колесиков мультимедийных клавиатур, внешних звуковых карт (ЦАП), мыши и сторонних программ.
+- **Полное подавление стандартного OSD Windows:** Устранена ошибка, восстанавливавшая системный индикатор громкости при каждом закрытии флайаута. Поддерживаются оверлеи Windows 11 (`XamlExplorerHostIslandWindow`) и Windows 10 (`NativeHWNDHost` / `DirectUIHWND`).
+
+### 🎮 3. Раздельные режимы полноэкранного экрана (Gaming Safeguard)
+- **Exclusive Fullscreen:** Независимый переключатель для 3D-игр. При его отключении оверлеи не перехватывают фокус и не сворачивают полноэкранные игры.
+- **Borderless Fullscreen:** Отдельная настройка для игр в окне без рамок и просмотра видео.
+- **Скрытие индикатора Caps Lock в играх:** Предотвращает случайное сворачивание игр при нажатии клавиши Caps Lock.
+
+### ⚡ 4. Молниеносный отклик кнопок таскбара (Win32 Fast Path)
+- **Мгновенное открытие:** Устранены синхронные блокировки UI-потока. Позиция элементов таскбара рассчитывается моментально через нативный Win32 `GetWindowRect`.
+- **Надежность повторного клика:** Устранены залипания кнопок микшера и буфера обмена.
+
+### 🔊 5. Регулировка громкости колесиком мыши (Volume Wheel Scroll)
+- **Прокрутка над кнопкой микшера:** Вращение колесика мыши над иконкой микшера в таскбаре плавно меняет общую громкость системы (настраиваемый шаг 1–10%, по умолчанию 2%).
+- **Прокрутка над медиа-виджетом:** Прокрутка над мини-виджетом трека также меняет громкость с красивым оверлеем Flyout OSD.
+
+### 🎯 6. Фокусировка и переход на вкладку браузера / окно плеера (Tab Activation)
+- При клике на название трека или обложку флайаут активирует соответствующую вкладку в браузере (Edge, Chrome, Firefox, Opera, Brave, Vivaldi) через UI Automation или мгновенно выводит окно плеера (Spotify, Yandex Music, AIMP) на передний план.
+
+### 📐 7. Поддержка компактной / маленькой панели задач Windows 11
+- Автоматическая адаптация виджета и кнопок быстрых действий под уменьшенные размеры панели задач (StartAllBack, Windhawk, кастомные размеры 28–36px) без обрезания элементов.
+
+### 🖱️ 8. Контекстное меню по правому клику на таскбар-виджет
+- Быстрое меню: управление треками, переключение между активными плеерами в один клик и быстрый переход в настройки. Возможность отключения меню в параметрах.
+
+### 📋 9. История буфера обмена с лимитом и очисткой
+- Настройка лимита хранимых записей (от 5 до 100), кнопка быстрой очистки всей истории и 3-кратная экономия оперативной памяти за счёт оптимизированного декодирования превью картинок.
+
+### 💻 10. Исправление прозрачности окон и поддержка встроенной графики (iGPU)
+- Устранены артефакты заливки окон чёрным цветом и квадратные рамки на интегрированных видеокартах (Intel UHD/Iris, AMD Radeon):
+  - Ликвидирован конфликт `DwmExtendFrameIntoClientArea` с композитором Windows 11 DirectComposition.
+  - Сохранены нативные системные материалы Mica, Acrylic и Tabbed.
+  - Принудительное обновление геометрии DWM через `SWP_FRAMECHANGED` с красивым закруглением `CornerRadius="8"`.
+
+### 🎨 11. Сглаживание и High-DPI масштабирование визуализатора
+- Высококачественная бикубическая интерполяция (`BitmapScalingMode="HighQuality"`) и зона антиалиасинга (2.5f) полностью устраняют пикселизацию спектрограммы на экранах ноутбуков с масштабированием 125–175%.
+
+### 🏷️ 12. Визуальные бейджи форка (Fork Badges)
+- Все эксклюзивные функции форка в настройках отмечены акцентными бейджами `FORK`.
+
+### 🧹 13. Удаление телеметрии и Microsoft Store
+- Полностью вырезаны фоновые сетевые запросы к серверам телеметрии и магазину Microsoft.
+
+### 🔏 14. Цифровая подпись и компактный размер
+- Все сборки подписаны цифровым сертификатом `CN=xXKoksMenXx` с меткой времени Sectigo RFC 3161 TSA.
+- Исполняемый файл в сжатом архиве занимает всего **~84 МБ**.
+
+---
+
+## 📦 Скачивание и установка
+
+Загрузите актуальную версию из раздела [**Releases**](https://github.com/KoksMen/FluentFlyout/releases/latest):
+
+| Файл | Описание | Размер |
 | :--- | :--- | :--- |
-| **`FluentFlyout.exe`** | РђРІС‚РѕРЅРѕРјРЅС‹Р№ Single-File РёСЃРїРѕР»РЅСЏРµРјС‹Р№ С„Р°Р№Р» (Self-Contained) | ~90 РњР‘ |
-| **`Portable_x64_AMD.zip`** | РџРѕСЂС‚Р°С‚РёРІРЅС‹Р№ zip-Р°СЂС…РёРІ СЃ РёСЃРїРѕР»РЅСЏРµРјС‹Рј С„Р°Р№Р»РѕРј | ~84 РњР‘ |
+| **`FluentFlyout.exe`** | Автономный Single-File исполняемый файл (Self-Contained) | ~210 МБ |
+| **`Portable_x64_AMD.zip`** | Портативный zip-архив (используется встроенным автообновлением) | ~84 МБ |
+| **`FluentFlyout-v2.15.0-f2.1.1-Portable-x64.zip`** | Каталожная копия релиза | ~84 МБ |
 
 > [!TIP]
-> РЈСЃС‚Р°РЅРѕРІРєР° .NET Runtime РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ: СЃСЂРµРґР° РІС‹РїРѕР»РЅРµРЅРёСЏ СѓР¶Рµ РІСЃС‚СЂРѕРµРЅР° РІРЅСѓС‚СЂСЊ РёСЃРїРѕР»РЅСЏРµРјРѕРіРѕ С„Р°Р№Р»Р°!
+> Установка .NET Runtime не требуется: среда выполнения уже встроена внутрь исполняемого файла!
 
 ---
 
-# рџ‡¬рџ‡§ FluentFlyout (In English)
+## 🛠️ Сборка из исходного кода
 
-## рџ’Ў About This Project
+Для самостоятельной сборки потребуется [.NET 10.0 SDK](https://dotnet.microsoft.com/download):
+
+```powershell
+# Клонирование репозитория
+git clone https://github.com/KoksMen/FluentFlyout.git
+cd FluentFlyout
+
+# Сборка и публикация автономного Single-File релиза
+dotnet publish FluentFlyoutWPF\FluentFlyout.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish\win-x64
+```
+
+---
+
+# 🇬🇧 FluentFlyout (In English)
+
+## 💡 About This Project
 
 **FluentFlyout (KoksMen Edition)** is an enhanced and performance-hardened fork of FluentFlyout for Windows 10/11.
 
-It resolves gaming interruptions, taskbar latencies, integrated graphics rendering bugs, and external telemetry lock-in, providing a fast, lightweight (~85 MB) and fully customizable flyout experience.
+It resolves gaming interruptions, taskbar latencies, integrated graphics rendering bugs, and external telemetry lock-in, providing a fast, lightweight (~84 MB compressed) and fully customizable flyout experience.
 
 ---
 
-## рџЊџ Key Features
+## 🌟 Key Features
 
-- **рџ”„ Seamless In-App Auto-Updater:** Downloads GitHub Releases assets directly in-app, stages files, and updates automatically via batch script restart.
-- **рџЋ® Gaming Safeguards:** Separate toggles for exclusive and borderless fullscreen modes prevent games from minimizing.
-- **вљЎ Instant Taskbar Responsiveness:** Win32 fast path eliminates UI thread delays.
-- **рџ”Љ Mouse Wheel Volume Adjustment:** Scroll directly over taskbar elements to adjust system audio.
-- **рџЋЇ Browser Tab & Player Activation:** Click the flyout to focus the exact playing tab or desktop player.
-- **рџ“ђ Compact Taskbar Adaptation:** Supports small taskbars (StartAllBack / Windhawk).
-- **рџ–±пёЏ Taskbar Widget Context Menu:** Right-click controls for quick playback and player switching.
-- **рџ“‹ Clipboard Limit & Cleanup:** Configurable history limit and RAM-efficient thumbnail caching.
-- **рџ’» Universal iGPU & Basic Display Adapter Support:** Hardware DWM corner rounding with Fluent border fallbacks.
-- **рџЋЁ High-DPI Visualizer AA:** Bicubic scaling mode removes spectrogram pixelation.
-- **рџ”Џ Authenticode Code Signing:** Binaries signed with Sectigo RFC 3161 timestamp.
+- **🔄 Seamless In-App Auto-Updater:** Downloads GitHub Releases assets directly in-app, stages files, and updates automatically via batch script restart.
+- **🔊 Reliable Volume Mixer & Native OSD Suppression:** Subscribes to endpoint volume events to reliably catch laptop Fn keys, DAC dials, mouse wheels, and software volume changes, while fully suppressing the Windows 10/11 native volume overlay.
+- **🎮 Gaming Safeguards:** Separate toggles for exclusive and borderless fullscreen modes prevent games from minimizing.
+- **⚡ Instant Taskbar Responsiveness:** Win32 fast path eliminates UI thread delays.
+- **🔊 Mouse Wheel Volume Adjustment:** Scroll directly over taskbar elements to adjust system audio.
+- **🎯 Browser Tab & Player Activation:** Click the flyout to focus the exact playing tab (Edge, Chrome, Firefox, Brave, Opera, Vivaldi) or desktop player (Spotify, Yandex Music, AIMP).
+- **📐 Compact Taskbar Adaptation:** Supports small taskbars (StartAllBack / Windhawk).
+- **🖱️ Taskbar Widget Context Menu:** Right-click controls for quick playback and player switching.
+- **📋 Clipboard Limit & Cleanup:** Configurable history limit and RAM-efficient thumbnail caching.
+- **💻 Window Backdrop & Translucency Fix:** Fixes black window backgrounds and supports all GPUs with clean Mica/Acrylic backdrops and rounded borders.
+- **🎨 High-DPI Visualizer AA:** Bicubic scaling mode removes spectrogram pixelation.
+- **🏷️ Fork Feature Badges:** Clear `FORK` markers in Settings for fork-exclusive features.
+- **🧹 Zero Telemetry:** Removed all background telemetry and Microsoft Store dependencies.
+- **🔏 Authenticode Code Signing:** Binaries signed with Sectigo RFC 3161 timestamp.
 
 ---
 
-## рџ“њ Р›РёС†РµРЅР·РёСЏ / License
+## 📜 Лицензия / License
 
-РџСЂРѕРµРєС‚ СЂР°СЃРїСЂРѕСЃС‚СЂР°РЅСЏРµС‚СЃСЏ РїРѕРґ Р»РёС†РµРЅР·РёРµР№ **GNU General Public License v3.0 (GPL-3.0)**.  
-РџРѕРґСЂРѕР±РЅРѕСЃС‚Рё РґРѕСЃС‚СѓРїРЅС‹ РІ С„Р°Р№Р»Рµ [LICENSE](LICENSE).
-
+Проект распространяется под лицензией **GNU General Public License v3.0 (GPL-3.0)**.  
+Подробности доступны в файле [LICENSE](LICENSE).
