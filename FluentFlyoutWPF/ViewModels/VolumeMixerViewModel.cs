@@ -110,6 +110,8 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
         RefreshSessions();
     }
 
+    private long _lastInternalVolumeChangeTime;
+
     private void OnAudioEndpointVolumeNotification(AudioVolumeNotificationData data)
     {
         var dispatcher = System.Windows.Application.Current?.Dispatcher;
@@ -117,7 +119,10 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
 
         dispatcher.InvokeAsync(() =>
         {
-            bool changed = MathF.Abs(MasterVolume - data.MasterVolume) > 0.002f || IsMasterMuted != data.Muted;
+            bool isInternal = (Environment.TickCount64 - _lastInternalVolumeChangeTime) < 600;
+            bool volumeChangedSignificant = MathF.Abs(MasterVolume - data.MasterVolume) > 0.009f;
+            bool muteChanged = IsMasterMuted != data.Muted;
+            bool shouldNotify = (volumeChangedSignificant || muteChanged) && !isInternal;
 
             _isUpdatingFromDevice = true;
             try
@@ -130,7 +135,7 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
                 _isUpdatingFromDevice = false;
             }
 
-            if (changed)
+            if (shouldNotify)
             {
                 MasterVolumeNotificationReceived?.Invoke(this, EventArgs.Empty);
             }
@@ -149,7 +154,11 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
 
 
     [RelayCommand]
-    public void ToggleMasterMute() => IsMasterMuted = !IsMasterMuted;
+    public void ToggleMasterMute()
+    {
+        _lastInternalVolumeChangeTime = Environment.TickCount64;
+        IsMasterMuted = !IsMasterMuted;
+    }
 
     [RelayCommand]
     private void OpenVolumeMixer() => IsExpanded = !IsExpanded;
@@ -157,6 +166,7 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
     partial void OnMasterVolumeChanged(float value)
     {
         if (_isUpdatingFromDevice || _device == null) return;
+        _lastInternalVolumeChangeTime = Environment.TickCount64;
         _device.AudioEndpointVolume.MasterVolumeLevelScalar = Math.Clamp(value, 0f, 1f);
         if (MasterVolume == 0f)
         {
@@ -171,6 +181,7 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
     partial void OnIsMasterMutedChanged(bool value)
     {
         if (_isUpdatingFromDevice || _device == null) return;
+        _lastInternalVolumeChangeTime = Environment.TickCount64;
         _device.AudioEndpointVolume.Mute = value;
     }
 
@@ -199,6 +210,7 @@ public partial class VolumeMixerViewModel : ObservableObject, IDisposable
 
     public void AdjustMasterVolume(float delta)
     {
+        _lastInternalVolumeChangeTime = Environment.TickCount64;
         if (_device == null)
         {
             AttachDevice(AudioDeviceMonitor.Instance.GetDefaultRenderDevice());

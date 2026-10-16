@@ -50,7 +50,19 @@ public static partial class NativeMethods
     internal const int WH_KEYBOARD_LL = 13;
     internal const int WM_KEYDOWN = 0x0100;
     internal const int WM_KEYUP = 0x0101;
+    internal const int WM_SYSKEYDOWN = 0x0104;
+    internal const int WM_SYSKEYUP = 0x0105;
     internal const int WM_SETTINGCHANGE = 0x001A;
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct KBDLLHOOKSTRUCT
+    {
+        public uint vkCode;
+        public uint scanCode;
+        public uint flags;
+        public uint time;
+        public UIntPtr dwExtraInfo;
+    }
 
     // Shell Hook Messages
     internal const int HSHELL_APPCOMMAND = 12;
@@ -221,6 +233,9 @@ public static partial class NativeMethods
     #endregion
 
     #region user32.dll
+
+    [LibraryImport("user32.dll")]
+    internal static partial short GetKeyState(int nVirtKey);
 
     [LibraryImport("user32.dll", EntryPoint = "FindWindowW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
     internal static partial IntPtr FindWindow(string lpClassName, string? lpWindowName);

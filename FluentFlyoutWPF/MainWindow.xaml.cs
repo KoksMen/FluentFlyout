@@ -972,7 +972,7 @@ public partial class MainWindow : MicaWindow
             {
                 createNewNextUpWindow();
             }
-            else if (nextUpWindow != null)
+            else if (nextUpWindow != null && currentTitle != mediaProperties.Title && mediaProperties.Thumbnail != null)
             {
                 Dispatcher.Invoke(() =>
                 {
@@ -1041,104 +1041,176 @@ public partial class MainWindow : MicaWindow
         return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
     }
 
+    // Modifier tracking for reliable language switch detection
+    private bool _isAltDown = false;
+    private bool _isShiftDown = false;
+    private bool _isCtrlDown = false;
+    private bool _isWinDown = false;
+    private bool _otherKeyPressedDuringCombo = false;
+    private int _languageCheckSequence = 0;
+    private long _lastForegroundChangeTime = 0;
+
     private IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
     {
-        if (nCode >= 0 && (wParam == WM_KEYDOWN || wParam == WM_KEYUP))
+        if (nCode >= 0)
         {
-            int vkCode = Marshal.ReadInt32(lParam);
+            int msg = (int)wParam;
+            bool isKeyDown = msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN;
+            bool isKeyUp = msg == WM_KEYUP || msg == WM_SYSKEYUP;
 
-            bool mediaKeysPressed = vkCode == 0xB3 || vkCode == 0xB0 || vkCode == 0xB1 || vkCode == 0xB2; // Play/Pause, next, previous, stop
-            bool volumeKeysPressed = vkCode == 0xAD || vkCode == 0xAE || vkCode == 0xAF; // Mute, Volume Down, Volume Up
-
-            // Feature 3: record when the Play/Pause key is pressed so ShowMediaFlyout can suppress on pause
-            if (vkCode == 0xB3 && wParam == WM_KEYDOWN) // VK_MEDIA_PLAY_PAUSE
+            if (isKeyDown || isKeyUp)
             {
-                _pauseKeyPressed = true;
-                // Auto-reset after 1 s to avoid stale flag in edge cases
-                _pauseKeyResetTimer?.Dispose();
-                _pauseKeyResetTimer = new Timer(_ => _pauseKeyPressed = false, null, 1000, Timeout.Infinite);
-            }
+                var hookStruct = Marshal.PtrToStructure<KBDLLHOOKSTRUCT>(lParam);
+                int vkCode = (int)hookStruct.vkCode;
+                bool isExtended = (hookStruct.flags & 1) != 0;
 
-            // MainWindow.WndProc() also handles media and volume keys
-            if (mediaKeysPressed || volumeKeysPressed)
-            {
-                // Feature 1: global master switch
-                if (!SettingsManager.Current.GlobalFlyoutEnabled)
-                    return CallNextHookEx(_hookId, nCode, wParam, lParam);
+                bool isAlt = vkCode == 0x12 || vkCode == 0xA4 || vkCode == 0xA5;
+                bool isShift = vkCode == 0x10 || vkCode == 0xA0 || vkCode == 0xA1;
+                bool isCtrl = vkCode == 0x11 || vkCode == 0xA2 || vkCode == 0xA3;
+                bool isWin = vkCode == 0x5B || vkCode == 0x5C;
 
-                // Handle volume control keys:
-                if (volumeKeysPressed && SettingsManager.Current.VolumeControlEnabled)
+                if (isKeyDown)
                 {
-                    if (wParam == WM_KEYDOWN)
+                    if (isAlt) _isAltDown = true;
+                    else if (isShift) _isShiftDown = true;
+                    else if (isCtrl) _isCtrlDown = true;
+                    else if (isWin) _isWinDown = true;
+                    else
                     {
-                        volumeMixerWindow ??= new VolumeMixerWindow();
-                        float step = (SettingsManager.Current.VolumeScrollStep > 0 ? SettingsManager.Current.VolumeScrollStep : 2) / 100f;
-                        if (vkCode == 0xAF) // VK_VOLUME_UP
+                        // Check for Win + Space language switch
+                        bool winHeld = _isWinDown || (GetAsyncKeyState(0x5B) & 0x8000) != 0 || (GetAsyncKeyState(0x5C) & 0x8000) != 0;
+                        if (vkCode == 0x20 && winHeld)
                         {
-                            volumeMixerWindow.ViewModel.AdjustMasterVolume(step);
+                            ScheduleLanguageCheck();
                         }
-                        else if (vkCode == 0xAE) // VK_VOLUME_DOWN
+                        else
                         {
-                            volumeMixerWindow.ViewModel.AdjustMasterVolume(-step);
+                            _otherKeyPressedDuringCombo = true;
                         }
-                        else if (vkCode == 0xAD) // VK_VOLUME_MUTE
+                    }
+                }
+                else if (isKeyUp)
+                {
+                    if (isAlt || isShift || isCtrl || isWin)
+                    {
+                        if (!_otherKeyPressedDuringCombo)
                         {
-                            volumeMixerWindow.ViewModel.ToggleMasterMute();
+                            bool altDown = _isAltDown || (GetAsyncKeyState(0x12) & 0x8000) != 0;
+                            bool shiftDown = _isShiftDown || (GetAsyncKeyState(0x10) & 0x8000) != 0;
+                            bool ctrlDown = _isCtrlDown || (GetAsyncKeyState(0x11) & 0x8000) != 0;
+
+                            bool isAltShift = (isShift && altDown) || (isAlt && shiftDown);
+                            bool isCtrlShift = (isShift && ctrlDown) || (isCtrl && shiftDown);
+
+                            if (isAltShift || isCtrlShift)
+                            {
+                                ScheduleLanguageCheck();
+                            }
                         }
-                        volumeMixerWindow.ShowFlyout();
+
+                        if (isAlt) _isAltDown = false;
+                        if (isShift) _isShiftDown = false;
+                        if (isCtrl) _isCtrlDown = false;
+                        if (isWin) _isWinDown = false;
+
+                        if (!_isAltDown && !_isShiftDown && !_isCtrlDown && !_isWinDown)
+                        {
+                            _otherKeyPressedDuringCombo = false;
+                        }
+                    }
+                }
+
+                bool mediaKeysPressed = vkCode == 0xB3 || vkCode == 0xB0 || vkCode == 0xB1 || vkCode == 0xB2; // Play/Pause, next, previous, stop
+                bool volumeKeysPressed = vkCode == 0xAD || vkCode == 0xAE || vkCode == 0xAF; // Mute, Volume Down, Volume Up
+
+                // Feature 3: record when the Play/Pause key is pressed so ShowMediaFlyout can suppress on pause
+                if (vkCode == 0xB3 && isKeyDown) // VK_MEDIA_PLAY_PAUSE
+                {
+                    _pauseKeyPressed = true;
+                    // Auto-reset after 1 s to avoid stale flag in edge cases
+                    _pauseKeyResetTimer?.Dispose();
+                    _pauseKeyResetTimer = new Timer(_ => _pauseKeyPressed = false, null, 1000, Timeout.Infinite);
+                }
+
+                // MainWindow.WndProc() also handles media and volume keys
+                if (mediaKeysPressed || volumeKeysPressed)
+                {
+                    // Feature 1: global master switch
+                    if (!SettingsManager.Current.GlobalFlyoutEnabled)
+                        return CallNextHookEx(_hookId, nCode, wParam, lParam);
+
+                    // Handle volume control keys:
+                    if (volumeKeysPressed && SettingsManager.Current.VolumeControlEnabled)
+                    {
+                        if (isKeyDown)
+                        {
+                            volumeMixerWindow ??= new VolumeMixerWindow();
+                            float step = (SettingsManager.Current.VolumeScrollStep > 0 ? SettingsManager.Current.VolumeScrollStep : 2) / 100f;
+                            if (vkCode == 0xAF) // VK_VOLUME_UP
+                            {
+                                volumeMixerWindow.ViewModel.AdjustMasterVolume(step);
+                            }
+                            else if (vkCode == 0xAE) // VK_VOLUME_DOWN
+                            {
+                                volumeMixerWindow.ViewModel.AdjustMasterVolume(-step);
+                            }
+                            else if (vkCode == 0xAD) // VK_VOLUME_MUTE
+                            {
+                                volumeMixerWindow.ViewModel.ToggleMasterMute();
+                            }
+                            volumeMixerWindow.ShowFlyout();
+                        }
+
+                        if (!SettingsManager.Current.MediaFlyoutVolumeKeysExcluded)
+                        {
+                            TryShowMediaFlyoutDebounced();
+                        }
+
+                        // SWALLOW the volume key event so Windows OS never shows the native volume OSD!
+                        return (IntPtr)1;
                     }
 
-                    if (!SettingsManager.Current.MediaFlyoutVolumeKeysExcluded)
+                    bool result = false;
+                    if (mediaKeysPressed || (!SettingsManager.Current.MediaFlyoutVolumeKeysExcluded && volumeKeysPressed))
+                        result = TryShowMediaFlyoutDebounced();
+
+                    if (!result)
                     {
-                        TryShowMediaFlyoutDebounced();
+                        return CallNextHookEx(_hookId, nCode, wParam, lParam);
                     }
-
-                    // SWALLOW the volume key event so Windows OS never shows the native volume OSD!
-                    return (IntPtr)1;
                 }
 
-                bool result = false;
-                if (mediaKeysPressed || (!SettingsManager.Current.MediaFlyoutVolumeKeysExcluded && volumeKeysPressed))
-                    result = TryShowMediaFlyoutDebounced();
-
-                if (!result)
+                // Feature 1: global master switch for lock keys
+                if (SettingsManager.Current.GlobalFlyoutEnabled
+                    && SettingsManager.Current.LockKeysEnabled
+                    // Feature 2: per-flyout fullscreen setting for lock keys
+                    && !FullscreenDetector.ShouldSuppressForFullscreen(SettingsManager.Current.LockKeysFlyoutShowInExclusiveFullscreen, SettingsManager.Current.LockKeysFlyoutShowInBorderless)
+                    && isKeyUp)
                 {
-                    return CallNextHookEx(_hookId, nCode, wParam, lParam);
-                }
-            }
-
-            // Feature 1: global master switch for lock keys
-            if (SettingsManager.Current.GlobalFlyoutEnabled
-                && SettingsManager.Current.LockKeysEnabled
-                // Feature 2: per-flyout fullscreen setting for lock keys
-                && !FullscreenDetector.ShouldSuppressForFullscreen(SettingsManager.Current.LockKeysFlyoutShowInExclusiveFullscreen, SettingsManager.Current.LockKeysFlyoutShowInBorderless)
-                && wParam == WM_KEYUP)
-            {
-                if (vkCode == 0x14 && SettingsManager.Current.LockKeysCapsEnabled) // Caps Lock
-                {
-                    lockWindow ??= new LockWindow();
-                    lockWindow.ShowLockFlyout(FindResource("LockWindow_CapsLock").ToString(), Keyboard.IsKeyToggled(Key.CapsLock));
-                }
-                else if (vkCode == 0x90 && SettingsManager.Current.LockKeysNumEnabled) // Num Lock
-                {
-                    lockWindow ??= new LockWindow();
-                    lockWindow.ShowLockFlyout(FindResource("LockWindow_NumLock").ToString(), Keyboard.IsKeyToggled(Key.NumLock));
-                }
-                else if (vkCode == 0x91 && SettingsManager.Current.LockKeysScrollEnabled) // Scroll Lock
-                {
-                    lockWindow ??= new LockWindow();
-                    lockWindow.ShowLockFlyout(FindResource("LockWindow_ScrollLock").ToString(), Keyboard.IsKeyToggled(Key.Scroll));
-                }
-                else if (vkCode == 0x2D && SettingsManager.Current.LockKeysInsertEnabled) // Insert
-                {
-                    lockWindow ??= new LockWindow();
-                    lockWindow.ShowLockFlyout("Insert", Keyboard.IsKeyToggled(Key.Insert));
-                }
-
-                // Also check language layout change on modifier key releases (Alt, Shift, Ctrl, Win, Space, Caps)
-                if (vkCode == 0x12 || vkCode == 0x10 || vkCode == 0x11 || vkCode == 0x5B || vkCode == 0x5C || vkCode == 0x20 || vkCode == 0x14)
-                {
-                    CheckKeyboardLayoutChange(triggeredByKey: true);
+                    if (vkCode == 0x14 && SettingsManager.Current.LockKeysCapsEnabled) // Caps Lock
+                    {
+                        bool isToggled = (GetKeyState(0x14) & 1) != 0;
+                        lockWindow ??= new LockWindow();
+                        lockWindow.ShowLockFlyout(FindResource("LockWindow_CapsLock").ToString(), isToggled);
+                    }
+                    else if (vkCode == 0x90 && SettingsManager.Current.LockKeysNumEnabled) // Num Lock
+                    {
+                        bool isToggled = (GetKeyState(0x90) & 1) != 0;
+                        lockWindow ??= new LockWindow();
+                        lockWindow.ShowLockFlyout(FindResource("LockWindow_NumLock").ToString(), isToggled);
+                    }
+                    else if (vkCode == 0x91 && SettingsManager.Current.LockKeysScrollEnabled) // Scroll Lock
+                    {
+                        bool isToggled = (GetKeyState(0x91) & 1) != 0;
+                        lockWindow ??= new LockWindow();
+                        lockWindow.ShowLockFlyout(FindResource("LockWindow_ScrollLock").ToString(), isToggled);
+                    }
+                    else if (vkCode == 0x2D && SettingsManager.Current.LockKeysInsertEnabled && isExtended && !_isShiftDown && !_isCtrlDown) // Dedicated Insert key only (not Numpad 0 or Shift+Insert)
+                    {
+                        bool isToggled = (GetKeyState(0x2D) & 1) != 0;
+                        lockWindow ??= new LockWindow();
+                        lockWindow.ShowLockFlyout("Insert", isToggled);
+                    }
                 }
             }
         }
@@ -1175,59 +1247,150 @@ public partial class MainWindow : MicaWindow
     private IntPtr _lastForegroundHwnd = IntPtr.Zero;
     private DispatcherTimer? _langCheckTimer;
 
+    private void ScheduleLanguageCheck()
+    {
+        if (!SettingsManager.Current.GlobalFlyoutEnabled) return;
+        if (!SettingsManager.Current.LockKeysEnabled) return;
+        if (!SettingsManager.Current.LockKeysLanguageFlyoutEnabled) return;
+
+        int seq = Interlocked.Increment(ref _languageCheckSequence);
+        _ = Task.Run(async () =>
+        {
+            IntPtr initialHkl = _lastKeyboardLayout;
+            for (int i = 0; i < 5; i++)
+            {
+                await Task.Delay(40);
+                if (seq != _languageCheckSequence) return;
+
+                bool changed = false;
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    changed = CheckKeyboardLayoutChangeInternal(triggeredByKey: true, initialHkl);
+                });
+
+                if (changed) break;
+            }
+        });
+    }
+
     private void StartLanguageMonitoring()
     {
         _langCheckTimer = new DispatcherTimer
         {
-            Interval = TimeSpan.FromMilliseconds(150)
+            Interval = TimeSpan.FromMilliseconds(500)
         };
-        _langCheckTimer.Tick += (s, e) => CheckKeyboardLayoutChange(triggeredByKey: false);
+        _langCheckTimer.Tick += (s, e) =>
+        {
+            if (!SettingsManager.Current.GlobalFlyoutEnabled) return;
+            if (!SettingsManager.Current.LockKeysEnabled) return;
+            if (!SettingsManager.Current.LockKeysLanguageFlyoutEnabled) return;
+
+            IntPtr hwnd = GetForegroundWindow();
+            if (hwnd == IntPtr.Zero) return;
+
+            GetWindowThreadProcessId(hwnd, out uint pid);
+            if (pid == (uint)Environment.ProcessId) return;
+
+            uint threadId = GetWindowThreadProcessId(hwnd, out _);
+            if (threadId == 0) return;
+
+            IntPtr currentHkl = GetKeyboardLayout(threadId);
+            if (currentHkl == IntPtr.Zero) return;
+
+            if (_lastKeyboardLayout == IntPtr.Zero)
+            {
+                _lastKeyboardLayout = currentHkl;
+                _lastForegroundHwnd = hwnd;
+                _lastForegroundChangeTime = Environment.TickCount64;
+                return;
+            }
+
+            // Window focus changed: silently update state, never trigger flyout
+            if (hwnd != _lastForegroundHwnd)
+            {
+                _lastForegroundHwnd = hwnd;
+                _lastForegroundChangeTime = Environment.TickCount64;
+                _lastKeyboardLayout = currentHkl;
+                return;
+            }
+
+            // Grace period: ignore during first 800ms after window focus change
+            if (Environment.TickCount64 - _lastForegroundChangeTime < 800)
+            {
+                _lastKeyboardLayout = currentHkl;
+                return;
+            }
+
+            // Foreground window has been stable for > 800ms and layout changed (e.g. mouse click on taskbar switcher)
+            if (currentHkl != _lastKeyboardLayout)
+            {
+                _lastKeyboardLayout = currentHkl;
+                if (!FullscreenDetector.ShouldSuppressForFullscreen(
+                    SettingsManager.Current.LockKeysFlyoutShowInExclusiveFullscreen,
+                    SettingsManager.Current.LockKeysFlyoutShowInBorderless))
+                {
+                    string langText = GetLanguageDisplayName(currentHkl);
+                    lockWindow ??= new LockWindow();
+                    lockWindow.ShowLanguageFlyout(langText);
+                }
+            }
+        };
         _langCheckTimer.Start();
     }
 
     public void CheckKeyboardLayoutChange(bool triggeredByKey = false)
     {
-        if (!SettingsManager.Current.GlobalFlyoutEnabled) return;
-        if (!SettingsManager.Current.LockKeysEnabled) return;
-        if (!SettingsManager.Current.LockKeysLanguageFlyoutEnabled) return;
+        CheckKeyboardLayoutChangeInternal(triggeredByKey, IntPtr.Zero);
+    }
+
+    private bool CheckKeyboardLayoutChangeInternal(bool triggeredByKey, IntPtr compareHkl)
+    {
+        if (!SettingsManager.Current.GlobalFlyoutEnabled) return false;
+        if (!SettingsManager.Current.LockKeysEnabled) return false;
+        if (!SettingsManager.Current.LockKeysLanguageFlyoutEnabled) return false;
         if (FullscreenDetector.ShouldSuppressForFullscreen(
             SettingsManager.Current.LockKeysFlyoutShowInExclusiveFullscreen,
-            SettingsManager.Current.LockKeysFlyoutShowInBorderless)) return;
+            SettingsManager.Current.LockKeysFlyoutShowInBorderless)) return false;
 
         IntPtr hwnd = GetForegroundWindow();
-        if (hwnd == IntPtr.Zero) return;
+        if (hwnd == IntPtr.Zero) return false;
+
+        GetWindowThreadProcessId(hwnd, out uint pid);
+        if (pid == (uint)Environment.ProcessId) return false;
 
         uint threadId = GetWindowThreadProcessId(hwnd, out _);
+        if (threadId == 0) return false;
+
         IntPtr currentHkl = GetKeyboardLayout(threadId);
-        if (currentHkl == IntPtr.Zero) return;
+        if (currentHkl == IntPtr.Zero) return false;
 
         if (_lastKeyboardLayout == IntPtr.Zero)
         {
             _lastKeyboardLayout = currentHkl;
             _lastForegroundHwnd = hwnd;
-            return;
+            _lastForegroundChangeTime = Environment.TickCount64;
+            return false;
         }
 
-        if (currentHkl != _lastKeyboardLayout)
+        if (hwnd != _lastForegroundHwnd)
         {
-            bool isSameWindow = (hwnd == _lastForegroundHwnd);
+            _lastForegroundHwnd = hwnd;
+            _lastForegroundChangeTime = Environment.TickCount64;
             _lastKeyboardLayout = currentHkl;
-            _lastForegroundHwnd = hwnd;
+            if (!triggeredByKey) return false;
+        }
 
-            if (isSameWindow || triggeredByKey)
-            {
-                string langText = GetLanguageDisplayName(currentHkl);
-                Dispatcher.Invoke(() =>
-                {
-                    lockWindow ??= new LockWindow();
-                    lockWindow.ShowLanguageFlyout(langText);
-                });
-            }
-        }
-        else
+        IntPtr baseline = compareHkl != IntPtr.Zero ? compareHkl : _lastKeyboardLayout;
+        if (currentHkl != baseline || (triggeredByKey && currentHkl != _lastKeyboardLayout))
         {
-            _lastForegroundHwnd = hwnd;
+            _lastKeyboardLayout = currentHkl;
+            string langText = GetLanguageDisplayName(currentHkl);
+            lockWindow ??= new LockWindow();
+            lockWindow.ShowLanguageFlyout(langText);
+            return true;
         }
+
+        return false;
     }
 
     private string GetLanguageDisplayName(IntPtr hkl)
@@ -1667,9 +1830,6 @@ public partial class MainWindow : MicaWindow
                     {
                         _mediaSessionSupportsSeekbar = mediaSessionSupportsSeekbar;
                         UpdateUILayout();
-                        // Force refly
-                        _isHiding = true;
-                        ShowMediaFlyout();
                     }
 
                     if (mediaSessionSupportsSeekbar)
