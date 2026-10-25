@@ -34,50 +34,89 @@ public partial class AudioSessionModel : ObservableObject
 
     public bool IsActive => State == AudioSessionState.AudioSessionStateActive;
 
-    public AudioSessionModel(AudioSessionControl sessionControl, string displayName, int processId, AudioSessionState sessionState, ImageSource? icon)
+    public AudioSessionControl SessionControl => _sessionControl;
+
+    public string AppName { get; init; } = string.Empty;
+    public string ProductName { get; init; } = string.Empty;
+    public string ProcessName { get; init; } = string.Empty;
+    public string WindowTitle { get; init; } = string.Empty;
+
+    public event EventHandler<float>? VolumeChanged;
+
+    public AudioSessionModel(AudioSessionControl sessionControl, string displayName, int processId, AudioSessionState sessionState, ImageSource? icon, string appName = "", string processName = "", string windowTitle = "", string productName = "")
     {
         _sessionControl = sessionControl;
         DisplayName = displayName;
         ProcessId = processId;
         State = sessionState;
         Icon = icon;
-        Volume = _sessionControl.SimpleAudioVolume.Volume;
-        IsMuted = _sessionControl.SimpleAudioVolume.Mute;
-    }
-
-    partial void OnVolumeChanged(float value)
-    {
-        _sessionControl.SimpleAudioVolume.Volume = Math.Clamp(value, 0f, 1f);
-        if (Volume == 0f)
+        AppName = !string.IsNullOrWhiteSpace(appName) ? appName : displayName;
+        ProcessName = processName;
+        WindowTitle = windowTitle;
+        ProductName = productName;
+        try
         {
-            IsMuted = true;
+            Volume = _sessionControl.SimpleAudioVolume.Volume;
+            IsMuted = _sessionControl.SimpleAudioVolume.Mute;
         }
-        else
+        catch
         {
+            Volume = 1.0f;
             IsMuted = false;
         }
     }
 
+    partial void OnVolumeChanged(float value)
+    {
+        try
+        {
+            _sessionControl.SimpleAudioVolume.Volume = Math.Clamp(value, 0f, 1f);
+            if (Volume == 0f)
+            {
+                IsMuted = true;
+            }
+            else if (IsMuted && value > 0f)
+            {
+                IsMuted = false;
+            }
+        }
+        catch { }
+        VolumeChanged?.Invoke(this, Volume);
+    }
+
     partial void OnIsMutedChanged(bool value)
     {
-        _sessionControl.SimpleAudioVolume.Mute = value;
+        try
+        {
+            _sessionControl.SimpleAudioVolume.Mute = value;
+        }
+        catch { }
     }
 
     [RelayCommand]
     private void ToggleMute() => IsMuted = !IsMuted;
+
+    public void AdjustVolume(float delta)
+    {
+        Volume = Math.Clamp(Volume + delta, 0f, 1f);
+    }
 
     /// <summary>
     /// refreshes Volume and IsMuted from the audio session without pushing changes back
     /// </summary>
     public void SyncFromDevice()
     {
-        var vol = _sessionControl.SimpleAudioVolume.Volume;
-        var mute = _sessionControl.SimpleAudioVolume.Mute;
+        try
+        {
+            var vol = _sessionControl.SimpleAudioVolume.Volume;
+            var mute = _sessionControl.SimpleAudioVolume.Mute;
 
-        if (MathF.Abs(Volume - vol) > 0.001f)
-            Volume = vol;
+            if (MathF.Abs(Volume - vol) > 0.001f)
+                Volume = vol;
 
-        if (IsMuted != mute)
-            IsMuted = mute;
+            if (IsMuted != mute)
+                IsMuted = mute;
+        }
+        catch { }
     }
 }

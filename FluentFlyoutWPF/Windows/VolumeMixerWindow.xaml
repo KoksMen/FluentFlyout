@@ -9,14 +9,15 @@
       xmlns:viewModels="clr-namespace:FluentFlyoutWPF.ViewModels"
       xmlns:converters="clr-namespace:FluentFlyoutWPF.Classes.Converters"
       mc:Ignorable="d"
-      Title="VolumeMixerWindow" Height="50" Width="240"
+      Title="VolumeMixerWindow" Height="52" Width="280"
       ResizeMode="NoResize"
       WindowStyle="None" ShowInTaskbar="False"
       ChangeTitleColorWhenInactive="False" Visibility="Visible"
       TextOptions.TextRenderingMode="ClearType" TextOptions.TextFormattingMode="Ideal"
       FontFamily="{Binding UserSettings.FontFamily}"
       FlowDirection="{Binding UserSettings.FlowDirection}"
-      d:DataContext="{d:DesignInstance viewModels:UserSettings}">
+      d:DataContext="{d:DesignInstance viewModels:UserSettings}"
+      PreviewMouseWheel="Window_PreviewMouseWheel">
     
     <Window.Triggers>
         <EventTrigger RoutedEvent="Window.Loaded">
@@ -46,7 +47,9 @@
     </Window.Resources>
 
     <StackPanel>
-        <Grid ColumnDefinitions="Auto, *, Auto, Auto" Margin="8,8,8,0">
+        <!-- Master Volume Mode -->
+        <Grid ColumnDefinitions="Auto, *, Auto, Auto" Margin="8,8,8,0"
+              Visibility="{Binding ViewModel.IsAppFlyoutActive, Converter={StaticResource BoolToCollapsedVisibleConverter}}">
             <ui:Button Appearance="Transparent" BorderBrush="Transparent" VerticalAlignment="Center" Padding="8" Margin="0,0,4,0"
                        Command="{Binding ViewModel.ToggleMasterMuteCommand}"
                        ToolTipService.ToolTip="{DynamicResource MasterVolumeText}"
@@ -60,7 +63,7 @@
                 </Grid>
             </ui:Button>
             <Slider Grid.Column="1" Value="{Binding ViewModel.MasterVolume, Mode=TwoWay}" Minimum="0" Maximum="1" TickFrequency="0.01" SmallChange="0.01" LargeChange="0.01" VerticalAlignment="Center" />
-            <TextBlock Grid.Column="2" Text="{Binding ViewModel.MasterVolume, Converter={StaticResource DecimalPercentage}}" FontSize="14" VerticalAlignment="Center" Margin="8,-2,8,0" Width="24" TextAlignment="Center" />
+            <TextBlock Grid.Column="2" Text="{Binding ViewModel.MasterVolume, Converter={StaticResource DecimalPercentage}}" FontSize="14" VerticalAlignment="Center" Margin="8,-2,8,0" Width="28" TextAlignment="Center" />
             <ui:Button Name="OpenVolumeMixerButton" Grid.Column="3" VerticalAlignment="Center" Padding="4" Margin="0,0,4,0"
                        Command="{Binding ViewModel.OpenVolumeMixerCommand}" Focusable="False"
                        Visibility="{Binding UserSettings.VolumeMixerEnabled, Converter={StaticResource BoolToVisibleCollapsedConverter}}">
@@ -71,20 +74,98 @@
                 </ui:SymbolIcon>
             </ui:Button>
         </Grid>
-        <Border x:Name="SessionsSeparator" BorderThickness="0 1 0 0" BorderBrush="{DynamicResource TextFillColorDisabledBrush}" Opacity="0.5" Margin="8,6,8,0" Visibility="Collapsed" />
-        <ui:PassiveScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="220" Margin="0" Padding="8,0" >
-            <StackPanel x:Name="SessionsExpanded" Visibility="Collapsed" >
-                <!-- hacky way to set top margin in scrollviewer -->
-                <Grid Height="24" Margin="8">
-                    <TextBlock
-                        Text="{DynamicResource VolumeMixerSectionTitle}"
-                        FontWeight="Medium"
-                        VerticalAlignment="Bottom" />
+
+        <!-- Specific App Volume Mode -->
+        <Grid ColumnDefinitions="Auto, *, Auto, Auto" Margin="8,4,8,4"
+              Visibility="{Binding ViewModel.IsAppFlyoutActive, Converter={StaticResource BoolToVisibleCollapsedConverter}}">
+            <ui:Button Appearance="Transparent" BorderBrush="Transparent" VerticalAlignment="Center" Padding="6" Margin="0,0,4,0"
+                       Command="{Binding ViewModel.ToggleActiveAppMuteCommand}"
+                       ToolTipService.ToolTip="{Binding ViewModel.ActiveAppDisplayName}"
+                       ToolTipService.InitialShowDelay="0"
+                       ToolTipService.Placement="Right">
+                <Grid>
+                    <ui:SymbolIcon Symbol="Speaker224" FontSize="16"
+                                   Opacity="{Binding ViewModel.IsActiveAppMuted, Converter={StaticResource BoolToHalfFullOpacityConverter}}"
+                                   Visibility="{Binding ViewModel.ActiveAppIcon, Converter={StaticResource NullToVisibleConverter}}" />
+                    <Image Source="{Binding ViewModel.ActiveAppIcon}" Width="20" Height="20"
+                           Opacity="{Binding ViewModel.IsActiveAppMuted, Converter={StaticResource BoolToHalfFullOpacityConverter}}" />
+                    <ui:SymbolIcon Symbol="SpeakerMute28" FontSize="12" Margin="0,0,-16,-16"
+                                   Visibility="{Binding ViewModel.IsActiveAppMuted, Converter={StaticResource BoolToVisibleCollapsedConverter}}" />
                 </Grid>
-                <ItemsControl x:Name="SessionsPanel" ItemsSource="{Binding ViewModel.Sessions}" Focusable="False" Margin="0,0,0,8" >
+            </ui:Button>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="2,0,2,0">
+                <TextBlock Text="{Binding ViewModel.ActiveAppDisplayName}" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="2,0,0,1" Opacity="0.9" />
+                <Slider Value="{Binding ViewModel.ActiveAppVolume, Mode=TwoWay}" Minimum="0" Maximum="1" TickFrequency="0.01" SmallChange="0.01" LargeChange="0.01" VerticalAlignment="Center" />
+            </StackPanel>
+            <TextBlock Grid.Column="2" Text="{Binding ViewModel.ActiveAppVolume, Converter={StaticResource DecimalPercentage}}" FontSize="14" VerticalAlignment="Center" Margin="8,-2,8,0" Width="28" TextAlignment="Center" />
+            <ui:Button Grid.Column="3" VerticalAlignment="Center" Padding="4" Margin="0,0,4,0"
+                       Command="{Binding ViewModel.OpenVolumeMixerCommand}" Focusable="False"
+                       Visibility="{Binding UserSettings.VolumeMixerEnabled, Converter={StaticResource BoolToVisibleCollapsedConverter}}">
+                <ui:SymbolIcon Symbol="ChevronUp24" FontSize="16" />
+            </ui:Button>
+        </Grid>
+
+        <Border x:Name="SessionsSeparator" BorderThickness="0 1 0 0" BorderBrush="{DynamicResource TextFillColorDisabledBrush}" Opacity="0.5" Margin="8,6,8,0" Visibility="Collapsed" />
+        <StackPanel x:Name="SessionsExpanded" Visibility="Collapsed" Margin="8,0">
+            <!-- Device Selectors -->
+            <StackPanel Visibility="{Binding UserSettings.VolumeMixerDeviceSelectorEnabled, Converter={StaticResource BoolToVisibleCollapsedConverter}}" Margin="4,6,4,2">
+                <TextBlock Text="{DynamicResource PlaybackDeviceText}" FontSize="11" Opacity="0.7" Margin="2,0,0,2" />
+                <ComboBox ItemsSource="{Binding ViewModel.PlaybackDevices}"
+                          SelectedItem="{Binding ViewModel.SelectedPlaybackDevice, Mode=TwoWay}"
+                          DisplayMemberPath="Name"
+                          FontSize="12" Margin="0,0,0,6" />
+
+                <TextBlock Text="{DynamicResource RecordingDeviceText}" FontSize="11" Opacity="0.7" Margin="2,0,0,2" />
+                <ComboBox ItemsSource="{Binding ViewModel.RecordingDevices}"
+                          SelectedItem="{Binding ViewModel.SelectedRecordingDevice, Mode=TwoWay}"
+                          DisplayMemberPath="Name"
+                          FontSize="12" Margin="0,0,0,2" />
+            </StackPanel>
+
+            <!-- Microphone Control -->
+            <StackPanel Visibility="{Binding UserSettings.VolumeMixerMicrophoneControlEnabled, Converter={StaticResource BoolToVisibleCollapsedConverter}}" Margin="0,2,0,2">
+                <Border BorderThickness="0 1 0 0" BorderBrush="{DynamicResource TextFillColorDisabledBrush}" Opacity="0.25" Margin="4,4,4,4" />
+                <Grid ColumnDefinitions="Auto, *, Auto" Margin="4,0,4,0">
+                    <ui:Button Appearance="Transparent" BorderBrush="Transparent" VerticalAlignment="Center" Padding="8" Margin="0,0,4,0"
+                               Command="{Binding ViewModel.ToggleMicrophoneMuteCommand}"
+                               ToolTipService.ToolTip="{DynamicResource MicrophoneText}"
+                               ToolTipService.InitialShowDelay="0"
+                               ToolTipService.Placement="Right">
+                        <Grid>
+                            <ui:SymbolIcon Symbol="Mic24" FontSize="16"
+                                           Visibility="{Binding ViewModel.IsMicrophoneMuted, Converter={StaticResource BoolToCollapsedVisibleConverter}}" />
+                            <ui:SymbolIcon Symbol="MicOff24" FontSize="16"
+                                           Visibility="{Binding ViewModel.IsMicrophoneMuted, Converter={StaticResource BoolToVisibleCollapsedConverter}}" />
+                        </Grid>
+                    </ui:Button>
+                    <Slider Grid.Column="1" Value="{Binding ViewModel.MicrophoneVolume, Mode=TwoWay}" Minimum="0" Maximum="1" TickFrequency="0.01" SmallChange="0.01" LargeChange="0.01" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="{Binding ViewModel.MicrophoneVolume, Converter={StaticResource DecimalPercentage}}" FontSize="14" VerticalAlignment="Center" Margin="8,-2,8,0" Width="28" TextAlignment="Center" />
+                </Grid>
+            </StackPanel>
+
+            <Border BorderThickness="0 1 0 0" BorderBrush="{DynamicResource TextFillColorDisabledBrush}" Opacity="0.25" Margin="4,4,4,4" />
+
+            <!-- App Sessions Section -->
+            <Grid Height="24" Margin="6,2,6,2">
+                <TextBlock
+                    Text="{DynamicResource VolumeMixerSectionTitle}"
+                    FontWeight="Medium"
+                    FontSize="12"
+                    Opacity="0.8"
+                    VerticalAlignment="Center" />
+            </Grid>
+            <ScrollViewer x:Name="SessionsScrollViewer"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          CanContentScroll="False"
+                          MaxHeight="360"
+                          Margin="0"
+                          Padding="0,0,4,0"
+                          PreviewMouseWheel="SessionsScrollViewer_PreviewMouseWheel">
+                <ItemsControl x:Name="SessionsPanel" ItemsSource="{Binding ViewModel.Sessions}" Focusable="False" Margin="0,0,0,8">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border CornerRadius="4" Background="{Binding IsActive, Converter={StaticResource ActiveToAccentBrush}}" >
+                            <Border CornerRadius="4" Background="{Binding IsActive, Converter={StaticResource ActiveToAccentBrush}}" Margin="0,1">
                                 <Grid ColumnDefinitions="Auto, *, Auto">
                                     <ui:Button Appearance="Transparent" BorderBrush="Transparent" VerticalAlignment="Center" Padding="8" Margin="0,0,4,0"
                                        Command="{Binding ToggleMuteCommand}"
@@ -92,7 +173,7 @@
                                        ToolTipService.InitialShowDelay="0"
                                        ToolTipService.Placement="Right">
                                         <Grid>
-                                            <ui:SymbolIcon Symbol="DesktopSpeaker24" FontSize="16"
+                                            <ui:SymbolIcon Symbol="Speaker224" FontSize="16"
                                                    Opacity="{Binding IsMuted, Converter={StaticResource BoolToHalfFullOpacityConverter}}"
                                                    Visibility="{Binding Icon, Converter={StaticResource NullToVisibleConverter}}" />
                                             <Image Source="{Binding Icon}" Width="16" Height="16"
@@ -102,13 +183,13 @@
                                         </Grid>
                                     </ui:Button>
                                     <Slider Grid.Column="1" Value="{Binding Volume, Mode=TwoWay}" Minimum="0" Maximum="1" TickFrequency="0.01" SmallChange="0.01" LargeChange="0.01" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="2" Text="{Binding Volume, Converter={StaticResource DecimalPercentage}}" FontSize="12" VerticalAlignment="Center" Margin="8,0" Width="24" TextAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="{Binding Volume, Converter={StaticResource DecimalPercentage}}" FontSize="12" VerticalAlignment="Center" Margin="8,0" Width="28" TextAlignment="Center" />
                                 </Grid>
                             </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-            </StackPanel>
-        </ui:PassiveScrollViewer>
+            </ScrollViewer>
+        </StackPanel>
     </StackPanel>
 </controls:MicaWindow>

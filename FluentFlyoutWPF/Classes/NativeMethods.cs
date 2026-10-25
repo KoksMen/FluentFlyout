@@ -1,6 +1,7 @@
 // Copyright (c) 2024-2026 The FluentFlyout Authors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -35,6 +36,7 @@ public static partial class NativeMethods
     internal const uint SWP_FRAMECHANGED = 0x0020;
 
     // ShowWindow Commands
+    internal const int SW_HIDE = 0;
     internal const int SW_MINIMIZE = 6;
     internal const int SW_RESTORE = 9;
 
@@ -53,6 +55,8 @@ public static partial class NativeMethods
     internal const int WM_SYSKEYDOWN = 0x0104;
     internal const int WM_SYSKEYUP = 0x0105;
     internal const int WM_SETTINGCHANGE = 0x001A;
+    internal const uint WM_CANCELMODE = 0x001F;
+    internal const uint WM_MOUSELEAVE = 0x02A3;
 
     [StructLayout(LayoutKind.Sequential)]
     public struct KBDLLHOOKSTRUCT
@@ -62,6 +66,25 @@ public static partial class NativeMethods
         public uint flags;
         public uint time;
         public UIntPtr dwExtraInfo;
+    }
+
+    // Mouse Hook
+    internal const int WH_MOUSE_LL = 14;
+    internal const int WM_MOUSEWHEEL = 0x020A;
+    internal const int WM_MOUSEHWHEEL = 0x020E;
+
+    internal const uint GA_PARENT = 1;
+    internal const uint GA_ROOT = 2;
+    internal const uint GA_ROOTOWNER = 3;
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct MSLLHOOKSTRUCT
+    {
+        internal POINT pt;
+        internal uint mouseData;
+        internal uint flags;
+        internal uint time;
+        internal UIntPtr dwExtraInfo;
     }
 
     // Shell Hook Messages
@@ -229,6 +252,7 @@ public static partial class NativeMethods
     internal delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
     internal delegate bool MonitorEnumProc(IntPtr hMonitor, IntPtr hdcMonitor, ref RECT lprcMonitor, IntPtr dwData);
     internal delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
+    internal delegate IntPtr LowLevelMouseProc(int nCode, IntPtr wParam, IntPtr lParam);
 
     #endregion
 
@@ -263,6 +287,10 @@ public static partial class NativeMethods
     [LibraryImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool IsWindowVisible(IntPtr hWnd);
 
     [LibraryImport("user32.dll")]
     internal static partial int SetWindowRgn(IntPtr hWnd, IntPtr hRgn, [MarshalAs(UnmanagedType.Bool)] bool bRedraw);
@@ -336,6 +364,18 @@ public static partial class NativeMethods
     [LibraryImport("user32.dll", EntryPoint = "SetWindowsHookExW", SetLastError = true)]
     internal static partial IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
 
+    [LibraryImport("user32.dll", EntryPoint = "SetWindowsHookExW", SetLastError = true)]
+    internal static partial IntPtr SetWindowsHookEx(int idHook, LowLevelMouseProc lpfn, IntPtr hMod, uint dwThreadId);
+
+    [LibraryImport("user32.dll")]
+    internal static partial IntPtr WindowFromPoint(POINT point);
+
+    [LibraryImport("user32.dll")]
+    internal static partial IntPtr GetAncestor(IntPtr hwnd, uint gaFlags);
+
+    [LibraryImport("user32.dll", SetLastError = true)]
+    internal static partial uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
     [LibraryImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool UnhookWindowsHookEx(IntPtr hhk);
@@ -352,6 +392,10 @@ public static partial class NativeMethods
 
     [LibraryImport("user32.dll", SetLastError = true)]
     internal static partial IntPtr GetForegroundWindow();
+
+    [LibraryImport("user32.dll", EntryPoint = "PostMessageW", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
     #endregion
 
     #region gdi32.dll
@@ -396,6 +440,51 @@ public static partial class NativeMethods
 
     [LibraryImport("kernel32.dll", EntryPoint = "GetModuleHandleW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
     internal static partial IntPtr GetModuleHandle(string lpModuleName);
+
+    internal const uint PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
+
+    [LibraryImport("kernel32.dll", SetLastError = true)]
+    internal static partial IntPtr OpenProcess(uint dwDesiredAccess, [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle, int dwProcessId);
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    internal static extern bool QueryFullProcessImageName(IntPtr hProcess, int dwFlags, StringBuilder lpExeName, ref int lpdwSize);
+
+    [LibraryImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool CloseHandle(IntPtr hObject);
+
+    public static string? TryGetProcessPath(int pid)
+    {
+        try
+        {
+            using var proc = Process.GetProcessById(pid);
+            try
+            {
+                if (proc.MainModule?.FileName is { } fn && !string.IsNullOrWhiteSpace(fn))
+                    return fn;
+            }
+            catch { }
+        }
+        catch { }
+
+        IntPtr h = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid);
+        if (h == IntPtr.Zero) return null;
+        try
+        {
+            var sb = new StringBuilder(1024);
+            int size = sb.Capacity;
+            if (QueryFullProcessImageName(h, 0, sb, ref size))
+            {
+                return sb.ToString();
+            }
+        }
+        catch { }
+        finally
+        {
+            CloseHandle(h);
+        }
+        return null;
+    }
 
     #endregion
 

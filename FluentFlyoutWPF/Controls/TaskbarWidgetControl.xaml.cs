@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using Windows.Media.Control;
+using System.Windows.Threading;
 using Wpf.Ui.Controls;
 
 namespace FluentFlyout.Controls;
@@ -673,10 +674,85 @@ public partial class TaskbarWidgetControl : UserControl
         await focusedSession.ControlSession.TrySkipNextAsync();
     }
 
+    private System.Windows.Controls.ToolTip? _volumeToolTip;
+    private DispatcherTimer? _volumeToolTipTimer;
+
+    private void ShowVolumeTooltip(string text)
+    {
+        _volumeToolTip ??= new System.Windows.Controls.ToolTip
+        {
+            PlacementTarget = this,
+            Placement = System.Windows.Controls.Primitives.PlacementMode.Top,
+            VerticalOffset = -6
+        };
+
+        _volumeToolTip.Content = text;
+        _volumeToolTip.IsOpen = true;
+
+        _volumeToolTipTimer?.Stop();
+        _volumeToolTipTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1200) };
+        _volumeToolTipTimer.Tick += (_, _) =>
+        {
+            if (_volumeToolTip != null) _volumeToolTip.IsOpen = false;
+            _volumeToolTipTimer?.Stop();
+        };
+        _volumeToolTipTimer.Start();
+    }
+
+    private void SongImageBorder_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        e.Handled = true;
+        var mw = _mainWindow ?? (MainWindow)Application.Current.MainWindow;
+        if (mw == null) return;
+
+        if (SettingsManager.Current.TaskbarWidgetScrollVolumeMode == 1)
+        {
+            if (mw.AdjustActiveAppVolumeFromWheel(e.Delta, out string? feedbackText))
+            {
+                if (!string.IsNullOrEmpty(feedbackText))
+                {
+                    ShowVolumeTooltip(feedbackText);
+                }
+                return;
+            }
+        }
+        else if (SettingsManager.Current.TaskbarWidgetScrollVolumeMode == 2)
+        {
+            return;
+        }
+
+        mw.AdjustMasterVolumeFromWheel(e.Delta);
+        int masterPercent = (int)Math.Round(mw.GetMasterVolume() * 100);
+        string masterText = FindResource("MasterVolumeText")?.ToString() ?? "Master";
+        ShowVolumeTooltip($"{masterText}: {masterPercent}%");
+    }
+
     private void MainBorder_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
     {
         e.Handled = true;
-        (_mainWindow ?? (MainWindow)Application.Current.MainWindow)?.AdjustMasterVolumeFromWheel(e.Delta);
+        var mw = _mainWindow ?? (MainWindow)Application.Current.MainWindow;
+        if (mw == null) return;
+
+        if (SettingsManager.Current.TaskbarWidgetScrollVolumeMode == 1)
+        {
+            if (mw.AdjustActiveAppVolumeFromWheel(e.Delta, out string? result))
+            {
+                if (!string.IsNullOrEmpty(result))
+                {
+                    ShowVolumeTooltip(result);
+                }
+                return;
+            }
+        }
+        else if (SettingsManager.Current.TaskbarWidgetScrollVolumeMode == 2)
+        {
+            return;
+        }
+
+        mw.AdjustMasterVolumeFromWheel(e.Delta);
+        int masterPercent = (int)Math.Round(mw.GetMasterVolume() * 100);
+        string masterText = FindResource("MasterVolumeText")?.ToString() ?? "Master";
+        ShowVolumeTooltip($"{masterText}: {masterPercent}%");
     }
 
     private bool _isCompactMode;

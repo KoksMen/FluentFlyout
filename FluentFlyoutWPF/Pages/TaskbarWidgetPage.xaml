@@ -197,6 +197,22 @@
                     <ComboBoxItem Content="{DynamicResource PositionRight}" />
                 </ComboBox>
             </ui:CardControl>
+            <ui:CardControl x:Name="TaskbarWidgetScrollVolumeModeCard" Tag="Indexable" Icon="{ui:SymbolIcon Speaker224}" Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource TaskbarWidgetScrollVolumeModeTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
+                        </StackPanel>
+                        <TextBlock Text="{DynamicResource TaskbarWidgetScrollVolumeModeDescription}" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox SelectedIndex="{Binding TaskbarWidgetScrollVolumeMode}">
+                    <ComboBoxItem Content="{DynamicResource TaskbarWidgetScrollVolumeMode_Master}" />
+                    <ComboBoxItem Content="{DynamicResource TaskbarWidgetScrollVolumeMode_App}" />
+                    <ComboBoxItem Content="{DynamicResource TaskbarWidgetScrollVolumeMode_Disabled}" />
+                </ComboBox>
+            </ui:CardControl>
             <ui:CardControl x:Name="TaskbarWidgetContextMenuCard" Tag="Indexable" Grid.Row="13" Icon="{ui:SymbolIcon AppsListDetail24}" Margin="0,0,0,12">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">

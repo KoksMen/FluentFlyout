@@ -19,7 +19,7 @@ public static class UpdateCheckerService
 {
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public const string CurrentAppVersion = "2.15.0-f2.2.0";
+    public const string CurrentAppVersion = "2.15.0-f2.3.0";
     public const string GitHubRepoOwner = "KoksMen";
     public const string GitHubRepoName = "FluentFlyout";
     public static string ReleasesApiUrl => $"https://api.github.com/repos/{GitHubRepoOwner}/{GitHubRepoName}/releases/latest";

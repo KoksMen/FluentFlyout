@@ -21,6 +21,18 @@ public partial class App : Application
             NLog.LogManager.Flush(); // Ensure logs are written before application dies
         };
 
+        DispatcherUnhandledException += (sender, args) =>
+        {
+            NLog.LogManager.GetCurrentClassLogger().Error(args.Exception, "Unhandled dispatcher exception occurred");
+            NLog.LogManager.Flush();
+        };
+
+        TaskScheduler.UnobservedTaskException += (sender, args) =>
+        {
+            NLog.LogManager.GetCurrentClassLogger().Error(args.Exception, "Unobserved task exception occurred");
+            NLog.LogManager.Flush();
+        };
+
         // Register AUMID for toast notifications
         ToastNotificationManagerCompat.OnActivated += Notifications.HandleNotificationActivation;
 

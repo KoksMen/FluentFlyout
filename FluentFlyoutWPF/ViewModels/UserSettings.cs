@@ -479,6 +479,13 @@ public partial class UserSettings : ObservableObject
     public partial int TaskbarWidgetControlsPosition { get; set; }
 
     /// <summary>
+    /// Volume scroll behavior when scrolling the mouse wheel over the taskbar media widget.
+    /// 0: Master volume, 1: Active media application, 2: Disabled.
+    /// </summary>
+    [ObservableProperty]
+    public partial int TaskbarWidgetScrollVolumeMode { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether the taskbar widget should play animations.
     /// </summary>
     [ObservableProperty]
@@ -709,6 +716,42 @@ public partial class UserSettings : ObservableObject
     public partial bool VolumeMixerHighlightActiveApps { get; set; }
 
     /// <summary>
+    /// When true, audio device selectors (playback and recording endpoints) are displayed in the volume mixer.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool VolumeMixerDeviceSelectorEnabled { get; set; }
+
+    /// <summary>
+    /// When true, microphone volume slider and mute button are displayed in the volume mixer.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool VolumeMixerMicrophoneControlEnabled { get; set; }
+
+    /// <summary>
+    /// Global hotkey Ctrl+Shift+M toggles microphone mute.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool MicrophoneMuteHotkeyEnabled { get; set; }
+
+    /// <summary>
+    /// Global hotkey Ctrl+Shift+S toggles master sound mute.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool SoundMuteHotkeyEnabled { get; set; }
+
+    /// <summary>
+    /// Plays an audio confirmation tone when muting or unmuting microphone or master sound.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool MuteConfirmationSoundEnabled { get; set; }
+
+    /// <summary>
+    /// When true, scrolling the mouse wheel over an application icon on the taskbar adjusts that specific application's volume.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool TaskbarAppVolumeScrollEnabled { get; set; }
+
+    /// <summary>
     /// The audio peak level for the taskbar visualizer from 1 to 3.
     /// This is used to calibrate the visualizer bar height to the audio output.
     /// </summary>
@@ -898,6 +941,7 @@ public partial class UserSettings : ObservableObject
         TaskbarWidgetShowPauseOverlay = true;
         TaskbarWidgetControlsEnabled = false;
         TaskbarWidgetControlsPosition = 1;
+        TaskbarWidgetScrollVolumeMode = 0;
         TaskbarWidgetAnimated = true;
         TaskbarWidgetScrollingEnabled = false;
         TaskbarWidgetScrollingTextSpeed = 20;
@@ -919,8 +963,14 @@ public partial class UserSettings : ObservableObject
         VolumeScrollStep = 2;
         TaskbarWidgetContextMenuEnabled = true;
         ClipboardHistoryMaxItems = 30;
-        VolumeMixerEnabled = false;
+        VolumeMixerEnabled = true;
         VolumeMixerHighlightActiveApps = false;
+        VolumeMixerDeviceSelectorEnabled = true;
+        VolumeMixerMicrophoneControlEnabled = true;
+        MicrophoneMuteHotkeyEnabled = true;
+        SoundMuteHotkeyEnabled = true;
+        MuteConfirmationSoundEnabled = true;
+        TaskbarAppVolumeScrollEnabled = true;
         AcrylicBlurOpacity = 175;
         UseAlbumArtAsAccentColor = false;
         LastUpdateNotificationUnixSeconds = 0;

@@ -1,4 +1,4 @@
-// Copyright (c) 2024-2026 The FluentFlyout Authors
+﻿// Copyright (c) 2024-2026 The FluentFlyout Authors
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 using FluentFlyout.Classes;
@@ -36,12 +36,22 @@ public partial class LockWindow : MicaWindow
         cts = new CancellationTokenSource();
     }
 
+private void HideAllIcons()
+    {
+        LockSymbol.Visibility = Visibility.Collapsed;
+        LangSymbol.Visibility = Visibility.Collapsed;
+        MicSymbol.Visibility = Visibility.Collapsed;
+        MicOffSymbol.Visibility = Visibility.Collapsed;
+        SpeakerSymbol.Visibility = Visibility.Collapsed;
+        SpeakerMuteSymbol.Visibility = Visibility.Collapsed;
+    }
+
     private void setStatus(string key, bool isOn)
     {
         Dispatcher.Invoke(() =>
         {
+            HideAllIcons();
             LockSymbol.Visibility = Visibility.Visible;
-            LangSymbol.Visibility = Visibility.Collapsed;
             if (key == "Insert")
             {
                 // not sure how to properly check if overwrite or insert as every program has different behavior
@@ -190,7 +200,7 @@ public partial class LockWindow : MicaWindow
 
         Dispatcher.Invoke(() =>
         {
-            LockSymbol.Visibility = Visibility.Collapsed;
+            HideAllIcons();
             LangSymbol.Visibility = Visibility.Visible;
             LockTextBlock.Text = langText;
             LockTextBlock.FontWeight = SettingsManager.Current.LockKeysBoldUi ? FontWeights.Medium : FontWeights.Normal;
@@ -225,6 +235,131 @@ public partial class LockWindow : MicaWindow
         catch (TaskCanceledException)
         {
             // do nothing
+        }
+    }
+
+
+    public async void ShowMicrophoneFlyout(bool isMuted)
+    {
+        if (SettingsManager.Current.LockKeysAcrylicWindowEnabled)
+        {
+            WindowBlurHelper.EnableBlur(this);
+        }
+        else
+        {
+            WindowBlurHelper.DisableBlur(this);
+        }
+
+        Dispatcher.Invoke(() =>
+        {
+            HideAllIcons();
+            if (isMuted)
+                MicOffSymbol.Visibility = Visibility.Visible;
+            else
+                MicSymbol.Visibility = Visibility.Visible;
+
+            string text = isMuted
+                ? (FindResource("MicrophoneMutedText")?.ToString() ?? "Microphone Off")
+                : (FindResource("MicrophoneUnmutedText")?.ToString() ?? "Microphone On");
+            LockTextBlock.Text = text;
+            LockTextBlock.FontWeight = SettingsManager.Current.LockKeysBoldUi ? FontWeights.Medium : FontWeights.Normal;
+
+            double targetOpacity = isMuted ? 0.3 : 1.0;
+            double targetWidth = isMuted ? 36.0 : 60.0;
+            LockIndicatorRectangle.Opacity = targetOpacity;
+            LockIndicatorRectangle.Width = targetWidth;
+
+            Width = Math.Max(190, text.Length * 9 + 60);
+        });
+
+        if (_isHiding)
+        {
+            _isHiding = false;
+            _openedMonitor = GetPreferredTargetDisplay();
+            _mainWindow.OpenAnimation(window: this, alwaysBottom: true, selectedMonitor: _openedMonitor);
+        }
+        cts.Cancel();
+        cts = new CancellationTokenSource();
+        var token = cts.Token;
+
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                await Task.Delay(SettingsManager.Current.LockKeysDuration, token);
+                _mainWindow.CloseAnimation(window: this, selectedMonitor: _openedMonitor);
+                _isHiding = true;
+                await Task.Delay(MainWindow.getDuration());
+                if (_isHiding == false) return;
+
+                WindowHelper.SetVisibility(this, false);
+                break;
+            }
+        }
+        catch (TaskCanceledException)
+        {
+        }
+    }
+
+public async void ShowSoundMuteFlyout(bool isMuted)
+    {
+        if (SettingsManager.Current.LockKeysAcrylicWindowEnabled)
+        {
+            WindowBlurHelper.EnableBlur(this);
+        }
+        else
+        {
+            WindowBlurHelper.DisableBlur(this);
+        }
+
+        Dispatcher.Invoke(() =>
+        {
+            HideAllIcons();
+            if (isMuted)
+                SpeakerMuteSymbol.Visibility = Visibility.Visible;
+            else
+                SpeakerSymbol.Visibility = Visibility.Visible;
+
+            string text = isMuted
+                ? (FindResource("SoundMutedText")?.ToString() ?? "Sound Off")
+                : (FindResource("SoundUnmutedText")?.ToString() ?? "Sound On");
+            LockTextBlock.Text = text;
+            LockTextBlock.FontWeight = SettingsManager.Current.LockKeysBoldUi ? FontWeights.Medium : FontWeights.Normal;
+
+            double targetOpacity = isMuted ? 0.3 : 1.0;
+            double targetWidth = isMuted ? 36.0 : 60.0;
+            LockIndicatorRectangle.Opacity = targetOpacity;
+            LockIndicatorRectangle.Width = targetWidth;
+
+            Width = Math.Max(200, text.Length * 9 + 60);
+        });
+
+        if (_isHiding)
+        {
+            _isHiding = false;
+            _openedMonitor = GetPreferredTargetDisplay();
+            _mainWindow.OpenAnimation(window: this, alwaysBottom: true, selectedMonitor: _openedMonitor);
+        }
+        cts.Cancel();
+        cts = new CancellationTokenSource();
+        var token = cts.Token;
+
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                await Task.Delay(SettingsManager.Current.LockKeysDuration, token);
+                _mainWindow.CloseAnimation(window: this, selectedMonitor: _openedMonitor);
+                _isHiding = true;
+                await Task.Delay(MainWindow.getDuration());
+                if (_isHiding == false) return;
+
+                WindowHelper.SetVisibility(this, false);
+                break;
+            }
+        }
+        catch (TaskCanceledException)
+        {
         }
     }
 

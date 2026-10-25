@@ -7,7 +7,7 @@
 </p>
 
 <h1 align="center">✨ FluentFlyout (KoksMen Edition) ✨</h1>
-<h3 align="center">🚀 Версия форка: <em>v2.15.0-f2.2.0</em> 🪄</h3>
+<h3 align="center">🚀 Версия форка: <em>v2.15.0-f2.3.0</em> 🪄</h3>
 
 <p align="center">
   <b>Современные плавные оверлеи Windows 11 с оптимизацией для игр, бесшовным автообновлением в приложении, историей буфера обмена, регулировкой звука колесиком мыши и поддержкой любых GPU</b><br>
@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/KoksMen/FluentFlyout/releases"><img src="https://img.shields.io/badge/Version-v2.15.0--f2.2.0-7c4dff?style=for-the-badge&logo=github&logoColor=white" alt="FluentFlyout v2.15.0-f2.2.0" /></a>
+  <a href="https://github.com/KoksMen/FluentFlyout/releases"><img src="https://img.shields.io/badge/Version-v2.15.0--f2.3.0-7c4dff?style=for-the-badge&logo=github&logoColor=white" alt="FluentFlyout v2.15.0-f2.3.0" /></a>
   <img src="https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET 10.0" />
   <img src="https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20(x64)-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Windows 10/11" />
   <img src="https://img.shields.io/badge/Size-~84%20MB-success?style=for-the-badge&logo=files&logoColor=white" alt="Compressed Size" />
@@ -53,7 +53,7 @@
 ### 🔄 1. Бесшовное автообновление прямо в приложении (как в Portal-Windows)
 - **Прямая интеграция с GitHub Releases:** Приложение скачивает обновление напрямую из релизов репозитория `KoksMen/FluentFlyout` с наглядным отображением прогресса в процентах прямо в интерфейсе настроек.
 - **Автоматическая установка:** Скачанный дистрибутив распаковывается, скрипт завершает работу старого процесса по PID, перезаписывает файлы и автоматически перезапускает обновленный `FluentFlyout.exe`. Браузер открывать не требуется!
-- **Интеллектуальный SemVer:** Парсер `ForkVersion` корректно сопоставляет составные версии форка (`2.15.0-f2.2.0` > `2.15.0-f2.1.0` > `2.15.0-f2.0.0` > `2.13.1-f1.7.0`).
+- **Интеллектуальный SemVer:** Парсер `ForkVersion` корректно сопоставляет составные версии форка (`2.15.0-f2.3.0` > `2.15.0-f2.1.0` > `2.15.0-f2.0.0` > `2.13.1-f1.7.0`).
 
 ### 🔊 2. Надежный микшер громкости и подавление системного Windows OSD
 - **Реакция на любые источники звука:** Подписка на низкоуровневые события аудиоэндпоинта (`AudioEndpointVolume.OnVolumeNotification`). Флайаут мгновенно появляется при смене звука с любых устройств: клавиатурных Fn-клавиш ноутбуков, колесиков мультимедийных клавиатур, внешних звуковых карт (ЦАП), мыши и сторонних программ.
@@ -113,7 +113,7 @@
 | :--- | :--- | :--- |
 | **`FluentFlyout.exe`** | Автономный Single-File исполняемый файл (Self-Contained) | ~210 МБ |
 | **`Portable_x64_AMD.zip`** | Портативный zip-архив (используется встроенным автообновлением) | ~84 МБ |
-| **`FluentFlyout-v2.15.0-f2.2.0-Portable-x64.zip`** | Каталожная копия релиза | ~84 МБ |
+| **`FluentFlyout-v2.15.0-f2.3.0-Portable-x64.zip`** | Каталожная копия релиза | ~84 МБ |
 
 > [!TIP]
 > Установка .NET Runtime не требуется: среда выполнения уже встроена внутрь исполняемого файла!

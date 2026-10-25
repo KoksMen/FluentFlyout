@@ -59,6 +59,8 @@ public partial class TaskbarWindow : Window
     private int _lastContainerWidth = int.MinValue;
     private int _lastContainerHeight = int.MinValue;
     private IntPtr _lastTaskbarHandle = IntPtr.Zero;
+    private bool _isClosed;
+    private System.ComponentModel.PropertyChangedEventHandler? _settingsChangedHandler;
 
     public TaskbarWindow()
     {
@@ -122,14 +124,29 @@ public partial class TaskbarWindow : Window
         _mainWindow = (MainWindow)Application.Current.MainWindow;
         Widget.SetMainWindow(_mainWindow);
 
-        SettingsManager.Current.PropertyChanged += (s, args) =>
+        _settingsChangedHandler = (s, args) =>
         {
+            if (_isClosed) return;
             Dispatcher.Invoke(() =>
             {
+                if (_isClosed) return;
                 UpdatePosition();
                 _mainWindow?.UpdateTaskbar();
             });
         };
+        SettingsManager.Current.PropertyChanged += _settingsChangedHandler;
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        base.OnClosed(e);
+        _isClosed = true;
+        _timer?.Stop();
+        if (_settingsChangedHandler != null)
+        {
+            SettingsManager.Current.PropertyChanged -= _settingsChangedHandler;
+            _settingsChangedHandler = null;
+        }
     }
 
     private IntPtr GetSelectedTaskbarHandle(out bool isMainTaskbarSelected)
@@ -299,7 +316,7 @@ on_error:
 
     private void UpdatePosition()
     {
-        if (MainWindow.ExplorerRestarting)
+        if (_isClosed || MainWindow.ExplorerRestarting)
         {
             // Explorer is restarting -- do NOTHING
             return;
@@ -316,26 +333,7 @@ on_error:
 
             if (interop.Handle == IntPtr.Zero)
             {
-                if (MainWindow.ExplorerRestarting)
-                {
-                    Logger.Info("Skipping TaskbarWindow recovery during Explorer restart");
-                    return;
-                }
-
                 _timer.Stop();
-
-                Dispatcher.BeginInvoke(() =>
-                {
-                    try
-                    {
-                        _mainWindow?.RecreateTaskbarWindow();
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Error(ex, "Failed to signal MainWindow to recover Taskbar Widget window");
-                    }
-                }, DispatcherPriority.Background);
-
                 return;
             }
 

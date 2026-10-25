@@ -144,7 +144,7 @@ public static class MediaPlayerData
             }
 
             var process = Process.GetProcessById(processId);
-            var path = process.MainModule?.FileName;
+            var path = TryGetProcessPath(processId);
             if (path == null) return null;
 
             // store in cache for future lookups

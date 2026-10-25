@@ -4,6 +4,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:local="clr-namespace:FluentFlyoutWPF"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:controls="clr-namespace:MicaWPF.Controls;assembly=MicaWPF"
     xmlns:viewModels="clr-namespace:FluentFlyoutWPF.ViewModels"
     mc:Ignorable="d" 
@@ -62,6 +63,11 @@
                       Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
             </Canvas>
         </Viewbox>
+        <ui:SymbolIcon Name="MicSymbol" Symbol="Mic24" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,0,-2" Visibility="Collapsed" />
+        <ui:SymbolIcon Name="MicOffSymbol" Symbol="MicOff24" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,0,-2" Visibility="Collapsed" />
+        <ui:SymbolIcon Name="SpeakerSymbol" Symbol="Speaker224" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,0,-2" Visibility="Collapsed" />
+        <ui:SymbolIcon Name="SpeakerMuteSymbol" Symbol="SpeakerMute28" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,0,-2" Visibility="Collapsed" />
+
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20,0,0,4">
             <TextBlock Name="LockTextBlock" Text="Loading..." FontSize="14" FontWeight="Medium" TextTrimming="CharacterEllipsis"/>
         </StackPanel>

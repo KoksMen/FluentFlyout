@@ -139,7 +139,7 @@
                 <controls:ToggleSwitch IsChecked="{Binding VolumeMixerEnabled, Mode=TwoWay}" />
             </ui:CardControl>
             
-            <ui:CardControl x:Name="VolumeMixerHighlightTitleCard" Tag="Indexable" Icon="{ui:SymbolIcon Highlight24}" Margin="0,0,0,76" Opacity="{Binding IsPremiumUnlocked, Converter={StaticResource BoolToFullHalfOpacityConverter}}">
+            <ui:CardControl x:Name="VolumeMixerHighlightTitleCard" Tag="Indexable" Icon="{ui:SymbolIcon Highlight24}" Margin="0,0,0,3" Opacity="{Binding IsPremiumUnlocked, Converter={StaticResource BoolToFullHalfOpacityConverter}}">
                 <ui:CardControl.Header>
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal">
@@ -150,6 +150,85 @@
                     </StackPanel>
                 </ui:CardControl.Header>
                 <controls:ToggleSwitch IsChecked="{Binding VolumeMixerHighlightActiveApps, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <ui:CardControl x:Name="TaskbarAppVolumeScrollCard" Tag="Indexable" Icon="{ui:SymbolIcon WindowApps24}" Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource TaskbarAppVolumeScrollTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
+                        </StackPanel>
+                        <TextBlock Text="{DynamicResource TaskbarAppVolumeScrollDescription}" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <controls:ToggleSwitch IsChecked="{Binding TaskbarAppVolumeScrollEnabled, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <ui:CardControl x:Name="VolumeMixerDeviceSelectorCard" Tag="Indexable" Icon="{ui:SymbolIcon HeadphonesSoundWave24}" Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource VolumeMixerDeviceSelectorTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
+                        </StackPanel>
+                        <TextBlock Text="{DynamicResource VolumeMixerDeviceSelectorDescription}" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <controls:ToggleSwitch IsChecked="{Binding VolumeMixerDeviceSelectorEnabled, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <ui:CardControl x:Name="VolumeMixerMicrophoneControlCard" Tag="Indexable" Icon="{ui:SymbolIcon Mic24}" Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource VolumeMixerMicrophoneControlTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
+                        </StackPanel>
+                        <TextBlock Text="{DynamicResource VolumeMixerMicrophoneControlDescription}" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <controls:ToggleSwitch IsChecked="{Binding VolumeMixerMicrophoneControlEnabled, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <TextBlock Text="{DynamicResource HotkeysAndSoundsTitle}" FontSize="14" FontWeight="SemiBold" Margin="0,16,0,6" />
+            <ui:CardControl x:Name="MicrophoneMuteHotkeyCard" Tag="Indexable" Icon="{ui:SymbolIcon KeyboardLayoutResize24}" Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource MicrophoneMuteHotkeyTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
+                        </StackPanel>
+                        <TextBlock Text="{DynamicResource MicrophoneMuteHotkeyDescription}" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <controls:ToggleSwitch IsChecked="{Binding MicrophoneMuteHotkeyEnabled, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <ui:CardControl x:Name="SoundMuteHotkeyCard" Tag="Indexable" Icon="{ui:SymbolIcon KeyboardLayoutResize24}" Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource SoundMuteHotkeyTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
+                        </StackPanel>
+                        <TextBlock Text="{DynamicResource SoundMuteHotkeyDescription}" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <controls:ToggleSwitch IsChecked="{Binding SoundMuteHotkeyEnabled, Mode=TwoWay}" />
+            </ui:CardControl>
+
+            <ui:CardControl x:Name="MuteConfirmationSoundCard" Tag="Indexable" Icon="{ui:SymbolIcon Speaker224}" Margin="0,0,0,76">
+                <ui:CardControl.Header>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource MuteConfirmationSoundTitle}" FontSize="14" FontWeight="Regular" VerticalAlignment="Center" />
+                            <ui:InfoBadge Value=" FORK " FontWeight="Bold" FontSize="10" Margin="6,-2,0,-2" Severity="Attention" />
+                        </StackPanel>
+                        <TextBlock Text="{DynamicResource MuteConfirmationSoundDescription}" FontSize="12" Opacity="0.5" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <controls:ToggleSwitch IsChecked="{Binding MuteConfirmationSoundEnabled, Mode=TwoWay}" />
             </ui:CardControl>
         </StackPanel>
     </StackPanel>
